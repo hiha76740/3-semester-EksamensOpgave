@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/VidensVejen.Kiosk.Web/VidensVejen.Kiosk.Web.csproj" />
     <Project Path="src/VidensVejen.Web/VidensVejen.Web.csproj" />
   </Folder>
   <Folder Name="/src/AuthService/">
@@ -53,6 +54,7 @@
     <Project Path="src/UserService/UserService.InfrastructureLib/UserService.InfrastructureLib.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="Tests/VidensVejen.Kiosk.Web.Tests/VidensVejen.Kiosk.Web.Tests.csproj" />
     <Project Path="tests/VidensVejen.Web.Tests/VidensVejen.Web.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/AuthService/">
