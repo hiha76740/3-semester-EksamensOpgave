@@ -17,12 +17,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\src\Proxy\VidensVejen.Yarp\VidensVejen.Yarp.csproj" />
     <ProjectReference Include="..\src\StatisticsService\StatisticsService.Api\StatisticsService.Api.csproj" />
     <ProjectReference Include="..\src\AuthService\AuthService.Api\AuthService.Api.csproj" />
     <ProjectReference Include="..\src\UserService\UserService.Api\UserService.Api.csproj" />
     <ProjectReference Include="..\src\GameService\GameService.Api\GameService.Api.csproj" />
     <ProjectReference Include="..\src\ExhibitionService\ExhibitionService.Api\ExhibitionService.Api.csproj" />
     <ProjectReference Include="..\src\ImageService\ImageService.Api\ImageService.Api.csproj" />
+    <ProjectReference Include="..\src\VidensVejen.Kiosk.Web\VidensVejen.Kiosk.Web.csproj" />
+    <ProjectReference Include="..\src\VidensVejen.Web\VidensVejen.Web.csproj" />
   </ItemGroup>
 
 </Project>
