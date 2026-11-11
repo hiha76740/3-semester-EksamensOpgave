@@ -1,0 +1,74 @@
+name: UserService CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "VidensVejen/src/UserService/**"
+      - "VidensVejen/src/Shared/**"
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: "10.0.x"
+  SOLUTION_PATH: "Vidensvejen/VidensVejen.slnx"
+  DOMAIN_PROJECT_PATH: "VidensVejen/tests/UserService/UserService.DomainLib.Tests/UserService.DomainLib.Tests.csproj"
+  APPLICATION_PROJECT_PATH: "VidensVejen/tests/UserService/UserService.ApplicationLib.Tests/UserService.ApplicationLib.Tests.csproj"
+
+jobs:
+  Build-And-Test-Domain:
+    name: Build and Test Domain
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Restore
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION_PATH }}
+          --configuration Release
+          --no-restore
+
+      - name: Test Domain
+        run: dotnet test --project ${{ env.DOMAIN_PROJECT_PATH }}
+          --configuration Release
+          --no-restore
+          --no-build
+          --verbosity normal
+
+
+  Build-And-Test-Application:
+    name: Build and Test Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Restore
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION_PATH }}
+          --configuration Release
+          --no-restore
+
+      - name: Test Application
+        run: dotnet test --project ${{ env.APPLICATION_PROJECT_PATH }}
+          --configuration Release
+          --no-restore
+          --no-build
+          --verbosity normal
