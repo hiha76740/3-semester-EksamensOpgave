@@ -54,7 +54,7 @@
     <Project Path="src/UserService/UserService.InfrastructureLib/UserService.InfrastructureLib.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="Tests/VidensVejen.Kiosk.Web.Tests/VidensVejen.Kiosk.Web.Tests.csproj" />
+    <Project Path="tests/VidensVejen.Kiosk.Web.Tests/VidensVejen.Kiosk.Web.Tests.csproj" />
     <Project Path="tests/VidensVejen.Web.Tests/VidensVejen.Web.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/AuthService/">
