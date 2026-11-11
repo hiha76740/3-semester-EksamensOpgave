@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\UserService.DomainLib\UserService.DomainLib.csproj" />
+    <ProjectReference Include="..\UserService.FacadeLib\UserService.FacadeLib.csproj" />
+    <ProjectReference Include="..\UserService.ApplicationLib\UserService.ApplicationLib.csproj" />
+    <ProjectReference Include="..\..\Shared\VidensVejen.SharedKernelLib\VidensVejen.SharedKernelLib.csproj" />
+    <ProjectReference Include="..\..\Shared\VidensVejen.BuildingBlocksLib\VidensVejen.BuildingBlocksLib.csproj" />
+    <ProjectReference Include="..\..\Shared\VidensVejen.ContractsLib\VidensVejen.ContractsLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapr.AspNetCore" Version="1.19.1" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

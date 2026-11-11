@@ -1,0 +1,84 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/VidensVejen.Web/VidensVejen.Web.csproj" />
+  </Folder>
+  <Folder Name="/src/AuthService/">
+    <Project Path="src/AuthService/AuthService.Api/AuthService.Api.csproj" />
+    <Project Path="src/AuthService/AuthService.ApplicationLib/AuthService.ApplicationLib.csproj" />
+    <Project Path="src/AuthService/AuthService.DomainLib/AuthService.DomainLib.csproj" />
+    <Project Path="src/AuthService/AuthService.FacadeLib/AuthService.FacadeLib.csproj" />
+    <Project Path="src/AuthService/AuthService.InfrastructureLib/AuthService.InfrastructureLib.csproj" />
+  </Folder>
+  <Folder Name="/src/ExhibitionService/">
+    <Project Path="src/ExhibitionService/ExhibitionService.Api/ExhibitionService.Api.csproj" />
+    <Project Path="src/ExhibitionService/ExhibitionService.ApplicationLib/ExhibitionService.ApplicationLib.csproj" />
+    <Project Path="src/ExhibitionService/ExhibitionService.DomainLib/ExhibitionService.DomainLib.csproj" />
+    <Project Path="src/ExhibitionService/ExhibitionService.FacadeLib/ExhibitionService.FacadeLib.csproj" />
+    <Project Path="src/ExhibitionService/ExhibitionService.InfrastructureLib/ExhibitionService.InfrastructureLib.csproj" />
+  </Folder>
+  <Folder Name="/src/GameService/">
+    <Project Path="src/GameService/GameService.Api/GameService.Api.csproj" />
+    <Project Path="src/GameService/GameService.ApplicationLib/GameService.ApplicationLib.csproj" />
+    <Project Path="src/GameService/GameService.DomainLib/GameService.DomainLib.csproj" />
+    <Project Path="src/GameService/GameService.FacadeLib/GameService.FacadeLib.csproj" />
+    <Project Path="src/GameService/GameService.InfrastructureLib/GameService.InfrastructureLib.csproj" />
+  </Folder>
+  <Folder Name="/src/ImageService/">
+    <Project Path="src/ImageService/ImageService.Api/ImageService.Api.csproj" />
+    <Project Path="src/ImageService/ImageService.ApplicationLib/ImageService.ApplicationLib.csproj" />
+    <Project Path="src/ImageService/ImageService.DomainLib/ImageService.DomainLib.csproj" />
+    <Project Path="src/ImageService/ImageService.FacadeLib/ImageService.FacadeLib.csproj" />
+    <Project Path="src/ImageService/ImageService.InfrastructureLib/ImageService.InfrastructureLib.csproj" />
+  </Folder>
+  <Folder Name="/src/Proxy/">
+    <Project Path="src/Proxy/VidensVejen.Yarp/VidensVejen.Yarp.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/">
+    <Project Path="src/Shared/VidensVejen.BuildingBlocksLib/VidensVejen.BuildingBlocksLib.csproj" />
+    <Project Path="src/Shared/VidensVejen.ContractsLib/VidensVejen.ContractsLib.csproj" />
+    <Project Path="src/Shared/VidensVejen.SharedKernelLib/VidensVejen.SharedKernelLib.csproj" />
+  </Folder>
+  <Folder Name="/src/StatisticsService/">
+    <Project Path="src/StatisticsService/StatisticsService.Api/StatisticsService.Api.csproj" />
+    <Project Path="src/StatisticsService/StatisticsService.ApplicationLib/StatisticsService.ApplicationLib.csproj" />
+    <Project Path="src/StatisticsService/StatisticsService.DomainLib/StatisticsService.DomainLib.csproj" />
+    <Project Path="src/StatisticsService/StatisticsService.FacadeLib/StatisticsService.FacadeLib.csproj" />
+    <Project Path="src/StatisticsService/StatisticsService.InfrastructureLib/StatisticsService.InfrastructureLib.csproj" />
+  </Folder>
+  <Folder Name="/src/UserService/">
+    <Project Path="src/UserService/UserService.Api/UserService.Api.csproj" />
+    <Project Path="src/UserService/UserService.ApplicationLib/UserService.ApplicationLib.csproj" />
+    <Project Path="src/UserService/UserService.DomainLib/UserService.DomainLib.csproj" />
+    <Project Path="src/UserService/UserService.FacadeLib/UserService.FacadeLib.csproj" />
+    <Project Path="src/UserService/UserService.InfrastructureLib/UserService.InfrastructureLib.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/VidensVejen.Web.Tests/VidensVejen.Web.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/AuthService/">
+    <Project Path="tests/AuthService/AuthService.ApplicationLib.Tests/AuthService.ApplicationLib.Tests.csproj" />
+    <Project Path="tests/AuthService/AuthService.DomainLib.Tests/AuthService.DomainLib.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/ExhibitionService/">
+    <Project Path="tests/ExhibitionService/ExhibitionService.ApplicationLib.Tests/ExhibitionService.ApplicationLib.Tests.csproj" />
+    <Project Path="tests/ExhibitionService/ExhibitionService.DomainLib.Tests/ExhibitionService.DomainLib.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/GameService/">
+    <Project Path="tests/GameService/GameService.ApplicationLib.Tests/GameService.ApplicationLib.Tests.csproj" />
+    <Project Path="tests/GameService/GameService.DomainLib.Tests/GameService.DomainLib.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/ImageService/">
+    <Project Path="tests/ImageService/ImageService.ApplicationLib.Tests/ImageService.ApplicationLib.Tests.csproj" />
+    <Project Path="tests/ImageService/ImageService.DomainLib.Tests/ImageService.DomainLib.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/StatisticsService/">
+    <Project Path="tests/StatisticsService/StatisticsService.ApplicationLib.Tests/StatisticsService.ApplicationLib.Tests.csproj" />
+    <Project Path="tests/StatisticsService/StatisticsService.DomainLib.Tests/StatisticsService.DomainLib.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tests/UserService/">
+    <Project Path="tests/UserService/UserService.ApplicationLib.Tests/UserService.ApplicationLib.Tests.csproj" />
+    <Project Path="tests/UserService/UserService.DomainLib.Tests/UserService.DomainLib.Tests.csproj" />
+  </Folder>
+  <Project Path="VidensVejen.AppHost/VidensVejen.AppHost.csproj" />
+  <Project Path="VidensVejen.ServiceDefaults/VidensVejen.ServiceDefaults.csproj" />
+</Solution>

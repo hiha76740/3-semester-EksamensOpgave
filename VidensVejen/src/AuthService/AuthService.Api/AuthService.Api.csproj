@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapr.AspNetCore" Version="1.19.1" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
+    <PackageReference Include="Microsoft.OpenApi" Version="2.13.0" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.20.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AuthService.FacadeLib\AuthService.FacadeLib.csproj" />
+    <ProjectReference Include="..\AuthService.InfrastructureLib\AuthService.InfrastructureLib.csproj" />
+    <ProjectReference Include="..\AuthService.ApplicationLib\AuthService.ApplicationLib.csproj" />
+    <ProjectReference Include="..\..\Shared\VidensVejen.SharedKernelLib\VidensVejen.SharedKernelLib.csproj" />
+    <ProjectReference Include="..\..\Shared\VidensVejen.BuildingBlocksLib\VidensVejen.BuildingBlocksLib.csproj" />
+    <ProjectReference Include="..\..\Shared\VidensVejen.ContractsLib\VidensVejen.ContractsLib.csproj" />
+    <ProjectReference Include="..\..\..\VidensVejen.ServiceDefaults\VidensVejen.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>

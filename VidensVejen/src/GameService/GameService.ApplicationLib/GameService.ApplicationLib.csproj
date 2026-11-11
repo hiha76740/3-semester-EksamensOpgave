@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\GameService.DomainLib\GameService.DomainLib.csproj" />
+    <ProjectReference Include="..\GameService.FacadeLib\GameService.FacadeLib.csproj" />
+    <ProjectReference Include="..\..\Shared\VidensVejen.SharedKernelLib\VidensVejen.SharedKernelLib.csproj" />
+    <ProjectReference Include="..\..\Shared\VidensVejen.ContractsLib\VidensVejen.ContractsLib.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
