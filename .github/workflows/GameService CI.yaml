@@ -13,7 +13,7 @@ permissions:
 
 env:
   DOTNET_VERSION: "10.0.x"
-  SOLUTION_PATH: "Vidensvejen/VidensVejen.slnx"
+  SOLUTION_PATH: "VidensVejen/VidensVejen.slnx"
   DOMAIN_PROJECT_PATH: "VidensVejen/tests/GameService/GameService.DomainLib.Tests/GameService.DomainLib.Tests.csproj"
   APPLICATION_PROJECT_PATH: "VidensVejen/tests/GameService/GameService.ApplicationLib.Tests/GameService.ApplicationLib.Tests.csproj"
 

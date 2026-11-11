@@ -13,7 +13,7 @@ permissions:
 
 env:
   DOTNET_VERSION: "10.0.x"
-  SOLUTION_PATH: "Vidensvejen/VidensVejen.slnx"
+  SOLUTION_PATH: "VidensVejen/VidensVejen.slnx"
   TEST_PROJECT_PATH: "VidensVejen/tests/VidensVejen.Web.Tests/VidensVejen.Web.Tests.csproj"
 
 jobs:

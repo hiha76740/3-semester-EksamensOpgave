@@ -13,7 +13,7 @@ permissions:
 
 env:
   DOTNET_VERSION: "10.0.x"
-  SOLUTION_PATH: "Vidensvejen/VidensVejen.slnx"
+  SOLUTION_PATH: "VidensVejen/VidensVejen.slnx"
   DOMAIN_PROJECT_PATH: "VidensVejen/tests/ImageService/ImageService.DomainLib.Tests/ImageService.DomainLib.Tests.csproj"
   APPLICATION_PROJECT_PATH: "VidensVejen/tests/ImageService/ImageService.ApplicationLib.Tests/ImageService.ApplicationLib.Tests.csproj"
 
