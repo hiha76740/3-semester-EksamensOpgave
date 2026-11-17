@@ -25,8 +25,7 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 ///                     "body":"Eksempel: Tag en drikkedunk med i stedet for at købe en ny flaske",
 ///                     "calloutLabel":"Otto siger:",
 ///                     "calloutText":"Det bedste affald er det, vi slet ikke skaber",
-///                     "qoute":"Otto anbefaler: måske kan en andens gamle ting blive din nye favorit",
-
+///                     "qoute":"Otto anbefaler: måske kan en andens gamle ting blive din nye favorit"
 ///                 }
 ///             ]
 ///         }

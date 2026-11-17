@@ -40,7 +40,6 @@ internal static class QuestionMapper
         var output = new UpdateQuestionCommand(
             request.Id,
             request.Text,
-            request.ImageKey,
             request.Choices
             .Select(
                 q => q.AsUpdateCommand())

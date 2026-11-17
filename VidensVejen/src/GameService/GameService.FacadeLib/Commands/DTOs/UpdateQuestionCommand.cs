@@ -5,11 +5,9 @@ namespace GameService.FacadeLib.Commands.DTOs;
 /// </summary>
 /// <param name="Id"></param>
 /// <param name="Text"></param>
-/// <param name="ImageKey"></param>
 /// <param name="Choices"></param>
 public record UpdateQuestionCommand(
     Guid Id,
     string Text,
-    string ImageKey,
     List<UpdateChoiceCommand> Choices
     );

@@ -16,8 +16,7 @@ internal static class TopicMapper
             dto.Body,
             dto.CalloutLabel,
             dto.CalloutText,
-            dto.Quote,
-            dto.ImageUrl
+            dto.Quote
             );
 
         return output;

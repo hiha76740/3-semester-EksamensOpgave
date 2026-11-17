@@ -11,8 +11,7 @@ internal static class ChoiceMapper
     {
         var output = new CreateChoiceCommand(
             request.Text,
-            request.CorrectAnswer,
-            request.ImageKey
+            request.CorrectAnswer
             );
 
         return output;
@@ -23,9 +22,7 @@ internal static class ChoiceMapper
         var output = new ChoiceResponse(
             dto.Id,
             dto.Text,
-            dto.CorrectAnswer,
-            // TODO: Fix this
-            ""
+            dto.CorrectAnswer
             );
 
         return output;
@@ -36,8 +33,7 @@ internal static class ChoiceMapper
         var output = new UpdateChoiceCommand(
             request.Id,
             request.Text,
-            request.CorrectAnswer,
-            request.ImageKey
+            request.CorrectAnswer
             );
 
         return output;

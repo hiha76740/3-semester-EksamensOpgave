@@ -29,8 +29,6 @@ internal static class QuizMapper
             dto.Title,
             dto.ExhibitionId,
             dto.QuizLayout,
-            // TODO: Fix this
-            "",
             dto.Questions
             .Select(
                 q => q.AsResponse())
