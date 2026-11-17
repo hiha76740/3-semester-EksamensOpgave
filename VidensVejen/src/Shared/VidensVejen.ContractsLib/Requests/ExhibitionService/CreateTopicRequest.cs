@@ -9,15 +9,13 @@ namespace VidensVejen.ContractsLib.Requests.ExhibitionService;
 /// <param name="CalloutLabel"></param>
 /// <param name="CalloutText"></param>
 /// <param name="Qoute"></param>
-/// <param name="ImageKey"></param>
 public record CreateTopicRequest(
     string Title,
     string Description,
     string Body,
     string CalloutLabel,
     string CalloutText,
-    string Qoute,
-    string ImageKey
+    string Qoute
     )
 {
     /// <summary>
@@ -49,9 +47,4 @@ public record CreateTopicRequest(
     /// The qoute of the mascot
     /// </summary>
     public string Qoute { get; init; } = Qoute;
-
-    /// <summary>
-    /// Mathces the key of an image uploaded in the same request
-    /// </summary>
-    public string ImageKey { get; init; } = ImageKey;
 }

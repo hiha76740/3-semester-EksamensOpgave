@@ -6,12 +6,10 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 /// <param name="Id"></param>
 /// <param name="Text"></param>
 /// <param name="CorrectAnswer"></param>
-/// <param name="ImageKey"></param>
 public record UpdateChoiceRequest(
     Guid Id,
     string Text,
-    bool CorrectAnswer,
-    string ImageKey
+    bool CorrectAnswer
     )
 {
     /// <summary>
@@ -28,9 +26,4 @@ public record UpdateChoiceRequest(
     /// Marks the choice as correct
     /// </summary>
     public bool CorrectAnswer { get; init; } = CorrectAnswer;
-
-    /// <summary>
-    /// Mathces the key of an image uploaded in the same request
-    /// </summary>
-    public string ImageKey { get; init; } = ImageKey;
 }

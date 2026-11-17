@@ -7,7 +7,6 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 /// <param name="Title"></param>
 /// <param name="ExhibitionId"></param>
 /// <param name="QuizLayout"></param>
-/// <param name="ImageUrl"></param>
 /// <param name="Questions"></param>
 /// <example>
 /// {
@@ -15,7 +14,6 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 ///     "title": "Affaldshierakiet",
 ///     "exhibitionId": "123e4567-e89b-12d3-a456-426614174000",
 ///     "quizLayout": "Vertikalt",
-///     "imageUrl": "https://example.com/image1",
 ///     "questions": [
 ///         {
 ///             "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -24,8 +22,7 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 ///                 {
 ///                     "id": "123e4567-e89b-12d3-a456-426614174000",
 ///                     "text": "Plastik",
-///                     "correctAnswer": true,
-///                     "imageUrl": "https://example.com/image1",
+///                     "correctAnswer": true
 ///                 }
 ///             ]
 ///         }
@@ -37,7 +34,6 @@ public record QuizResponse(
     string Title,
     Guid ExhibitionId,
     string QuizLayout,
-    string ImageUrl,
     List<QuestionResponse> Questions
     )
 {

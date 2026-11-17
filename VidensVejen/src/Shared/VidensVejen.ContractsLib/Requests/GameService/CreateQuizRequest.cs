@@ -15,12 +15,10 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 ///     "questions": [
 ///         {
 ///             "text": "Hvad skal dette sorteres som?",
-///             "imageKey": "img-1",
 ///             "choices": [
 ///                 {
 ///                     "text": "Plastik",
 ///                     "correctAnswer": true,
-///                     "imageKey": "img-1"
 ///                 }
 ///             ]
 ///         }

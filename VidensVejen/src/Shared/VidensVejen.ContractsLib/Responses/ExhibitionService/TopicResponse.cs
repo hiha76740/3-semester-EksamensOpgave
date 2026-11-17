@@ -10,7 +10,6 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// <param name="CalloutLabel"></param>
 /// <param name="CalloutText"></param>
 /// <param name="Quote"></param>
-/// <param name="ImageUrl"></param>
 public record TopicResponse(
     Guid Id,
     string Title,
@@ -18,8 +17,7 @@ public record TopicResponse(
     string Body,
     string CalloutLabel,
     string CalloutText,
-    string Quote,
-    string ImageUrl
+    string Quote
     )
 {
     /// <summary>
@@ -56,9 +54,4 @@ public record TopicResponse(
     /// The quote of the mascot
     /// </summary>
     public string Quote { get; init; } = Quote;
-
-    /// <summary>
-    /// The url of the image assoicated to the topic
-    /// </summary>
-    public string ImageUrl { get; init; } = ImageUrl;
 }

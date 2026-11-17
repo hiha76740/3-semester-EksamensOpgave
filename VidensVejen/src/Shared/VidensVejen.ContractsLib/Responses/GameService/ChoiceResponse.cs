@@ -6,12 +6,10 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 /// <param name="Id"></param>
 /// <param name="Text"></param>
 /// <param name="CorrectAnswer"></param>
-/// <param name="ImageUrl"></param>
 public record ChoiceResponse(
     Guid Id,
     string Text,
-    bool CorrectAnswer,
-    string ImageUrl
+    bool CorrectAnswer
     )
 {
     /// <summary>
@@ -28,9 +26,4 @@ public record ChoiceResponse(
     /// Marks the choice as correct
     /// </summary>
     public bool CorrectAnswer { get; init; } = CorrectAnswer;
-
-    /// <summary>
-    /// The url of the image assoicated to the choice
-    /// </summary>
-    public string ImageUrl { get; init; } = ImageUrl;
 }

@@ -16,13 +16,11 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 ///         {
 ///             "id": "123e4567-e89b-12d3-a456-426614174000",
 ///             "text": "Hvad skal dette sorteres som?",
-///             "imageKey": "img-1",
 ///             "choices": [
 ///                 {
 ///                     "id": "123e4567-e89b-12d3-a456-426614174000",
 ///                     "text": "Plastik",
 ///                     "correctAnswer": true,
-///                     "imageKey": "img-1"
 ///                 }
 ///             ]
 ///         }
