@@ -1,3 +1,4 @@
+using AuthService.DomainLib.Entities;
 using AuthService.FacadeLib.Queries.DTOs;
 using AuthService.FacadeLib.Queries.Interfaces;
 using AuthService.InfrastructureLib.Persistence;
@@ -13,8 +14,11 @@ public class AuthUserQueryHandlerIMPL(AuthUserDbContext db) : IAuthUsersQueries
 {
     async Task<AuthUserDto?> IAuthUsersQueries.GetByIdAsync(Guid id)
     {
+        var authUserKey = new AuthUserId(id);
+
         return await db.AuthUsers
             .AsNoTracking()
+            .Where(u => u.Id == authUserKey)
             .Select(
             u => new AuthUserDto(
                 u.Id.Value,
