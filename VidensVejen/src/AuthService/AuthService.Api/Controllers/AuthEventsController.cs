@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Text.Json;
 using Dapr;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,12 @@ public class AuthEventsController(
 {
     [Topic("pubsub", "user-activate")]
     [HttpPost("events/user-activate")]
-    public async Task<ActionResult> RecieveAsync(UserActivateIntegrationEvent integrationEvent, CancellationToken cancellationToken)
+    [EndpointSummary("Activate a user")]
+    [EndpointDescription("Activates the requested user")]
+    [ProducesResponseType(StatusCodes.Status200OK, Description = "User was activated succesfully")]
+    public async Task<ActionResult> ActivateUserAsync(
+        [Description("The event object used to activate a user")] UserActivateIntegrationEvent integrationEvent,
+        CancellationToken cancellationToken)
     {
 
         var message = new InboxMessage
