@@ -7,6 +7,9 @@ RUN apt-get update \
     && apt-get install -y curl \
     && rm -rf /var/lib/apt/lists/*
 
+RUN mkdir -p /app/Storage/images \
+    && chown -R "$APP_UID" /app/Storage/images/themes
+
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080

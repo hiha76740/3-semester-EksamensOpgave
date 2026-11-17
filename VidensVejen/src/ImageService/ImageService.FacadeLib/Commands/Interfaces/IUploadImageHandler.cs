@@ -1,5 +1,4 @@
 using ImageService.FacadeLib.Commands.DTOs;
-using ImageService.FacadeLib.Queries.DTOs;
 
 namespace ImageService.FacadeLib.Commands.Interfaces;
 
@@ -12,6 +11,7 @@ public interface IUploadImageHandler
     /// 
     /// </summary>
     /// <param name="command"></param>
+    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<ImageFileNameDto> HandleAsync(UploadImageCommand command);
+    Task<Guid> HandleAsync(UploadImageCommand command, CancellationToken cancellationToken);
 }

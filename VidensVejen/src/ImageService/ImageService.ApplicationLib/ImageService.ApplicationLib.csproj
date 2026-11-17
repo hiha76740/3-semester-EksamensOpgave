@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.15" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ImageService.DomainLib\ImageService.DomainLib.csproj" />
     <ProjectReference Include="..\ImageService.FacadeLib\ImageService.FacadeLib.csproj" />
     <ProjectReference Include="..\..\Shared\VidensVejen.SharedKernelLib\VidensVejen.SharedKernelLib.csproj" />

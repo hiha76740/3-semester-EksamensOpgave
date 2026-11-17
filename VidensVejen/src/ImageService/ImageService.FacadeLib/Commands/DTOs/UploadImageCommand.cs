@@ -3,7 +3,10 @@ namespace ImageService.FacadeLib.Commands.DTOs;
 /// <summary>
 /// 
 /// </summary>
-/// <param name="FileName"></param>
+/// <param name="Content"></param>
+/// <param name="ContentType"></param>
+/// <param name="Extension"></param>
 public record UploadImageCommand(
-    string FileName
-    );
+    Stream Content,
+    string ContentType,
+    string Extension);

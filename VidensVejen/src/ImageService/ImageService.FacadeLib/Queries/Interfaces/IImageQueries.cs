@@ -10,7 +10,7 @@ public interface IImageQueries
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="fileName"></param>
+    /// <param name="id"></param>
     /// <returns></returns>
-    Task<ImageUrlDto?> GetImageUrlByFileName(string fileName);
+    Task<ImageUrlComponentsDto?> GetImageUrlComponentsById(Guid id);
 }
