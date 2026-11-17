@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using ExhibitionService.Api.Mappers;
 using ExhibitionService.FacadeLib.Commands.Interfaces;
 using ExhibitionService.FacadeLib.Queries.Interfaces;
@@ -94,16 +95,46 @@ public class ExhibitionsController(
     }
 
     [HttpPost]
+    [RequestSizeLimit(6 * 1024 * 1024)]
     [EndpointSummary("Create a exhibition")]
     [EndpointDescription("Creates a new instance of exhibition")]
     [ProducesResponseType(StatusCodes.Status201Created, Description = "Quiz created successfully")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to create exhibition")]
     public async Task<ActionResult> CreateExhibition(
-         [Required][Description("Object used to create a exhibition")] CreateExhibitionRequest request)
+         [Required][FromForm][Description("String of data used to create a exhibition")] string data,
+         [FromForm][Description("Image file for theme")] IFormFile themeFile)
     {
         try
         {
-            await create.HandleAsync(request.AsCreateCommand());
+            var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+            var options = jsonOptions;
+            var request = JsonSerializer.Deserialize<CreateExhibitionRequest>(data, options);
+
+            if (request == null)
+                return BadRequest("Could not deserialize data");
+
+            const long MaxFileSize = 5 * 1024 * 1024;
+
+            if (themeFile.Length == 0)
+                return BadRequest("Please choose a image file");
+
+            if (themeFile.Length > MaxFileSize)
+                return BadRequest($"Size limit of image is 5 MB.");
+
+            var extension = Path.GetExtension(themeFile.FileName)
+                .ToLowerInvariant();
+
+            if (extension != ".jpg" &&
+                extension != ".jpeg" &&
+                extension != ".png")
+            {
+                return BadRequest("Only jpg- and png-image files are allowed");
+            }
+
+            var imageStream = themeFile.OpenReadStream();
+
+
+            await create.HandleAsync(request.AsCreateCommand(imageStream, extension));
 
             return Created();
         }

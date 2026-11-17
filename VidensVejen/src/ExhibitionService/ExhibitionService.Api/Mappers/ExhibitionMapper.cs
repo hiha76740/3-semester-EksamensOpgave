@@ -37,10 +37,12 @@ internal static class ExhibitionMapper
         return output;
     }
 
-    internal static CreateExhibitionCommand AsCreateCommand(this CreateExhibitionRequest request)
+    internal static CreateExhibitionCommand AsCreateCommand(this CreateExhibitionRequest request, Stream imageStream, string extension)
     {
         var output = new CreateExhibitionCommand(
             request.ExhibitionName,
+            imageStream,
+            extension,
             request.Subjects
             .Select(
                 s => s.AsCreateCommand())
