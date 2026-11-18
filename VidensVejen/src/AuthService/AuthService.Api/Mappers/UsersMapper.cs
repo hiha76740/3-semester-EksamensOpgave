@@ -20,9 +20,9 @@ internal static class UsersMapper
         return output;
     }
 
-    internal static AuthUserReponse AsAuthUserResponse(this AuthUserDto dto)
+    internal static AuthUserResponse AsAuthUserResponse(this AuthUserDto dto)
     {
-        var output = new AuthUserReponse(
+        var output = new AuthUserResponse(
             dto.Id,
             dto.Email,
             dto.Permissions.Select(p => new PermissionResponse(p.Id, p.Name)).ToList()

@@ -22,7 +22,7 @@ namespace VidensVejen.ContractsLib.Responses.AuthService;
 ///     ]
 /// }
 /// </example>
-public record AuthUserReponse(
+public record AuthUserResponse(
     Guid Id,
     string Email,
     IReadOnlyList<PermissionResponse> Permissions

@@ -44,10 +44,10 @@ public class UsersController(
     [HttpGet("{id:guid}")]
     [EndpointSummary("Get a user")]
     [EndpointDescription("Gets the details of a single instance of a user")]
-    [ProducesResponseType<AuthUserReponse>(StatusCodes.Status200OK, "application/json", Description = "Returns a single user")]
+    [ProducesResponseType<AuthUserResponse>(StatusCodes.Status200OK, "application/json", Description = "Returns a single user")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to get the requested user")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "User was not found")]
-    public async Task<ActionResult<AuthUserReponse>> GetUser(
+    public async Task<ActionResult<AuthUserResponse>> GetUser(
         [Required][Description("A unique identifier for a user")] Guid id)
     {
         try
@@ -68,10 +68,10 @@ public class UsersController(
     [HttpPut("{id:guid}/permissions")]
     [EndpointSummary("Updates user permissions")]
     [EndpointDescription("Updates the permissions of a single instance of a user")]
-    [ProducesResponseType<AuthUserReponse>(StatusCodes.Status200OK, "application/json", Description = "Returns the updated user")]
+    [ProducesResponseType<AuthUserResponse>(StatusCodes.Status200OK, "application/json", Description = "Returns the updated user")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to update permissions")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "User was not found")]
-    public async Task<ActionResult<AuthUserReponse>> UpdateUserPermissions(
+    public async Task<ActionResult<AuthUserResponse>> UpdateUserPermissions(
         [Required][Description("A unique identifier for a user")] Guid id,
         [Description("The object needed to update user permissions")] UpdateAuthUserPermissionsRequest request)
     {
