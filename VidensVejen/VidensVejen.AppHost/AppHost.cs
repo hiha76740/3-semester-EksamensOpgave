@@ -18,7 +18,17 @@ var exhibitionService = builder.AddProject<Projects.ExhibitionService_Api>("exhi
 
 var gameService = builder.AddProject<Projects.GameService_Api>("gameservice-api");
 
-var imageService = builder.AddProject<Projects.ImageService_Api>("imageservice-api");
+var imageDatabaseSqlServier = builder.AddSqlServer("imageSqlServer")
+    .WithContainerName("vidensvejen-image-sqlserver-dev")
+    .WithDataVolume("vidensvejen-image-data-dev")
+    .WithLifetime(ContainerLifetime.Persistent);
+
+var imageDb = imageDatabaseSqlServier.AddDatabase("ImageDb");
+
+var imageService = builder.AddProject<Projects.ImageService_Api>("imageservice-api")
+    .WithDaprSidecar()
+    .WithReference(imageDb)
+    .WaitFor(imageDb);
 
 var statisticsService = builder.AddProject<Projects.StatisticsService_Api>("statisticsservice-api");
 
