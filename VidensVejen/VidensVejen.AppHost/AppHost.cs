@@ -1,7 +1,5 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var proxy = builder.AddProject<Projects.VidensVejen_Yarp>("vidensvejen-yarp");
-
 var authDatabaseSqlServer = builder.AddSqlServer("authSqlServer")
     .WithContainerName("vidensvejen-auth-sqlserver-dev")
     .WithDataVolume("vidensvejen-auth-data-dev")
@@ -44,8 +42,29 @@ var userService = builder.AddProject<Projects.UserService_Api>("userservice-api"
     .WithReference(userDb)
     .WaitFor(userDb);
 
-var kioskFrontend = builder.AddProject<Projects.VidensVejen_Kiosk_Web>("Kiosk-Frontend");
+var proxy = builder.AddProject<Projects.VidensVejen_Yarp>("vidensvejen-yarp")
+    .WithReference(authService)
+    .WithReference(imageService)
+    .WithReference(userService)
+    .WithReference(exhibitionService)
+    .WithReference(gameService)
+    .WithReference(statisticsService)
+    .WaitFor(authService)
+    .WaitFor(imageService)
+    .WaitFor(userService)
+    .WaitFor(exhibitionService)
+    .WaitFor(gameService)
+    .WaitFor(statisticsService);
 
-var adminFrontend = builder.AddProject<Projects.VidensVejen_Web>("Admin-Frontend");
+var kioskFrontend = builder.AddProject<Projects.VidensVejen_Kiosk_Web>("Kiosk-Frontend")
+    .WithHttpsEndpoint(port: 7296)
+    .WithReference(proxy)
+    .WaitFor(proxy);
+
+var adminFrontend = builder.AddProject<Projects.VidensVejen_Web>("Admin-Frontend")
+    .WithHttpsEndpoint(port: 7237)
+    .WithReference(proxy)
+    .WaitFor(proxy);
+
 
 builder.Build().Run();
