@@ -1,8 +1,10 @@
 using AuthService.ApplicationLib.Authentication;
 using AuthService.ApplicationLib.Repositories;
+using AuthService.DomainLib.Enums;
 using AuthService.DomainLib.ValueObjects;
 using AuthService.FacadeLib.Commands.DTOs;
 using AuthService.FacadeLib.Commands.Interfaces;
+using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace AuthService.ApplicationLib.Handlers.Authentication;
 
@@ -22,26 +24,41 @@ public class LoginUserHandler(
 {
     async Task<TokenDto?> ILoginUserHandler.HandleAsync(LoginUserCommand command)
     {
-        var email = new Email(command.Email);
+        try
+        {
+            var email = new Email(command.Email);
 
-        var authUser = await authUserRepo.GetAuthUserByEmailAsync(email);
+            var authUser = await authUserRepo.GetAuthUserByEmailAsync(email);
 
-        if (authUser == null)
-            return null;
+            if (authUser == null)
+                return null;
 
-        if (passwordHashService.Verify(command.Password, authUser.PasswordHash) == false)
-            return null;
+            if (passwordHashService.Verify(command.Password, authUser.PasswordHash) == false)
+                return null;
 
-        var token = tokenService.CreateToken(authUser);
+            if (authUser.Status != AuthUserStatus.Active)
+                throw new UserNotActivatedException("Unable to log in, user not activated");
 
-        var refreshToken = refreshTokenService.GenerateRefreshToken();
+            var token = tokenService.CreateToken(authUser);
 
-        authUser.SetRefreshToken(refreshToken, true);
+            var refreshToken = refreshTokenService.GenerateRefreshToken();
 
-        await authUserRepo.SaveAsync();
+            authUser.SetRefreshToken(refreshToken, true);
 
-        var dto = new TokenDto(token, refreshToken);
+            await authUserRepo.SaveAsync();
 
-        return dto;
+            var dto = new TokenDto(token, refreshToken);
+
+            return dto;
+        }
+        catch (UserNotActivatedException)
+        {
+            throw;
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
     }
 }
