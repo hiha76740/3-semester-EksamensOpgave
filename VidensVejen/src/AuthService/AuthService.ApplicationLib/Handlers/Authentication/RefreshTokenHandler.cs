@@ -33,6 +33,7 @@ public class RefreshTokenHandler(
             authUser == null
             || command.RefreshToken == null
             || authUser.RefreshToken == null
+            || authUser.RefreshTokenExpiryTime == null
             || authUser.RefreshToken != command.RefreshToken
             || authUser.RefreshTokenExpiryTime <= DateTime.UtcNow
             )
