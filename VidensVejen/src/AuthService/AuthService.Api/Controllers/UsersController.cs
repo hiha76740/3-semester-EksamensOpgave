@@ -4,6 +4,7 @@ using AuthService.Api.Mappers;
 using AuthService.FacadeLib.Commands.Interfaces;
 using AuthService.FacadeLib.Queries.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using VidensVejen.BuildingBlocksLib.Helpers;
 using VidensVejen.ContractsLib.Requests.AuthService;
 using VidensVejen.ContractsLib.Responses.AuthService;
 using VidensVejen.SharedKernelLib.Exceptions;
@@ -161,6 +162,34 @@ public class UsersController(
         catch (NotFoundException ex)
         {
             return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("Me")]
+    [EndpointSummary("This endpoint will get current user information")]
+    [EndpointDescription("Get current user information, like username, firstname and lastname")]
+    [ProducesResponseType<AuthUserResponse>(StatusCodes.Status200OK, "application/json", Description = "Returns info of current user")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while getting current user info")]
+    public async Task<ActionResult<AuthUserResponse>> GetCurrentUserInfo()
+    {
+        try
+        {
+            var userId = UserHelper.GetCurrentUserId(HttpContext.User);
+
+            if (userId == null)
+                return BadRequest("User id not valid");
+
+            var dto = await queries.GetCurrentUserInfo(userId.Value);
+
+            if (dto == null)
+                return NotFound("user not found");
+
+            return Ok(dto.AsAuthUserResponse());
+
         }
         catch (Exception ex)
         {

@@ -13,4 +13,10 @@ public interface IAuthUsersQueries
     /// <param name="id"></param>
     /// <returns></returns>
     Task<AuthUserDto?> GetByIdAsync(Guid id);
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    Task<AuthUserDto?> GetCurrentUserInfo(Guid id);
 }

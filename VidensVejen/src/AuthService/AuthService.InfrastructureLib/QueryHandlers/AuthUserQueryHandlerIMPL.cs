@@ -26,4 +26,9 @@ public class AuthUserQueryHandlerIMPL(AuthUserDbContext db) : IAuthUsersQueries
                 u.Permissions.Select(p => new AccessPermissionDto(p.Id.Value, p.Name)).ToList()))
             .FirstOrDefaultAsync();
     }
+
+    Task<AuthUserDto?> IAuthUsersQueries.GetCurrentUserInfo(Guid id)
+    {
+        throw new NotImplementedException();
+    }
 }
