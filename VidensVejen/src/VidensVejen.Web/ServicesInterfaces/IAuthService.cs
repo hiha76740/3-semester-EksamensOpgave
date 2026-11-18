@@ -1,5 +1,3 @@
-using VidensVejen.ContractsLib.Responses.AuthService;
-
 namespace VidensVejen.Web.ServicesInterfaces;
 
 /// <summary>
@@ -7,12 +5,6 @@ namespace VidensVejen.Web.ServicesInterfaces;
 /// </summary>
 public interface IAuthService
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    Task<AuthUserResponse> GetAuthUserAsync();
-
     /// <summary>
     /// 
     /// </summary>

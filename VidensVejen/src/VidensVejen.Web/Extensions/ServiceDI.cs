@@ -16,6 +16,7 @@ public static class ServiceDI
     public static IServiceCollection AddServiceDI(this IServiceCollection services)
     {
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IAuthUserService, AuthUserService>();
 
         return services;
     }
