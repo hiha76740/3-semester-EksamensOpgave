@@ -7,7 +7,7 @@ RUN apt-get update \
     && apt-get install -y curl \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /app/Storage/images \
+RUN mkdir -p /app/Storage/images/themes \
     && chown -R "$APP_UID" /app/Storage/images/themes
 
 USER $APP_UID
