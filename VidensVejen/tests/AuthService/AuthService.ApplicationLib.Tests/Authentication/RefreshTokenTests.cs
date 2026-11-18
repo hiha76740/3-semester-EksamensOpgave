@@ -248,4 +248,33 @@ public class RefreshTokenTests
         Assert.Null(user.RefreshToken);
         Assert.Null(user.RefreshTokenExpiryTime);
     }
+
+    [Fact]
+    public async Task Handle_GivenRefreshTokenWithoutExpiry_ReturnsNullWithoutIssuingTokens()
+    {
+        // Arrange
+        var user = AuthUser.Create(EmailAddress, "password-hash", []);
+        user.SetRefreshToken(CurrentRefreshToken, false);
+        var repository = new Mock<IAuthUserRepository>();
+        var tokenService = new Mock<ITokenService>();
+        var refreshTokenService = new Mock<IRefreshTokenService>();
+        repository.Setup(r => r.GetAuthUserByEmailAsync(new Email(EmailAddress)))
+            .ReturnsAsync(user);
+        tokenService.Setup(s => s.GetPrincipalFromExpiredToken(ExpiredAccessToken))
+            .Returns(CreatePrincipal());
+        IRefreshTokenHandler handler = new RefreshTokenHandler(
+            repository.Object, tokenService.Object, refreshTokenService.Object);
+        var command = new RefreshTokenCommand(ExpiredAccessToken, CurrentRefreshToken);
+
+        // Act
+        var result = await handler.HandleAsync(command);
+
+        // Assert
+        Assert.Null(result);
+        Assert.Equal(CurrentRefreshToken, user.RefreshToken);
+        Assert.Null(user.RefreshTokenExpiryTime);
+        tokenService.Verify(s => s.CreateToken(It.IsAny<AuthUser>()), Times.Never);
+        refreshTokenService.VerifyNoOtherCalls();
+        repository.Verify(r => r.SaveAsync(), Times.Never);
+    }
 }
