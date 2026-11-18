@@ -1,10 +1,13 @@
 using VidensVejen.BuildingBlocksLib.DependencyInjection;
+using GameService.InfrastructureLib.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
 // Add services to the container.
+
+builder.Services.AddDatabaseDI(builder.Configuration);
 
 builder.Services.AddControllers();
 

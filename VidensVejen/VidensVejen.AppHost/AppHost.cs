@@ -16,7 +16,16 @@ var authService = builder.AddProject<Projects.AuthService_Api>("authservice-api"
 
 var exhibitionService = builder.AddProject<Projects.ExhibitionService_Api>("exhibitionservice-api");
 
-var gameService = builder.AddProject<Projects.GameService_Api>("gameservice-api");
+var gameDatabaseSqlServer = builder.AddSqlServer("gameSqlServer")
+    .WithContainerName("vidensvejen-game-sqlserver-dev")
+    .WithDataVolume("vidensvejen-game-data-dev")
+    .WithLifetime(ContainerLifetime.Persistent);
+
+var gameDb = gameDatabaseSqlServer.AddDatabase("GameDb");
+
+var gameService = builder.AddProject<Projects.GameService_Api>("gameservice-api")
+    .WithReference(gameDb)
+    .WaitFor(gameDb);
 
 var imageDatabaseSqlServier = builder.AddSqlServer("imageSqlServer")
     .WithContainerName("vidensvejen-image-sqlserver-dev")
