@@ -1,0 +1,609 @@
+services:
+
+# -------- Frontend Admin --------
+
+  VidensVejen-Frontend-Admin:
+    image: ghcr.io/hiha76740/vidensvejen-frontend-admin:latest
+    restart: unless-stopped
+    ports:
+        - 8090:80
+        - 8091:443
+    networks:
+        - frontend-admin-net
+        
+        #SKAL LAVES!!!
+    volumes:
+        - ./certs:/etc/nginx/certs:ro
+        
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:443/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+
+# -------- Frontend Kiosk --------
+
+  VidensVejen-Frontend-Kiosk:
+    image: ghcr.io/hiha76740/vidensvejen-frontend-kiosk:latest
+    restart: unless-stopped
+    ports:
+        - 8190:80
+        - 8191:443
+    networks:
+        - frontend-kiosk-net
+        
+        #SKAL LAVES!!!
+    volumes:
+        - ./certs:/etc/nginx/certs:ro
+        
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:443/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+
+# -------- Proxy --------
+
+  VidensVejen-Proxy:
+    image: ghcr.io/hiha76740/vidensvejen-proxy:latest
+    restart: unless-stopped
+    networks:
+        - frontend-admin-net
+        - frontend-kiosk-net
+        - backend-net
+        
+    environment:
+        ASPNETCORE_URLS: "http://+:8080"
+        Jwt__Key: "${JWT_KEY}"
+        Jwt__Issuer: "${JWT_ISSUER}"
+        Jwt__Audience: "${JWT_AUDIENCE}"
+        
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+  
+ # -------- User DB --------
+ 
+  mssql-UserDb:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: "${USERDB_SA_PASSWORD}"
+      MSSQL_PID: Developer
+    volumes:
+      - mssql-UserDb-data:/var/opt/mssql
+    restart: unless-stopped
+    ports:
+        - 127.0.0.1:9001:1433
+    networks:
+        - user-db-net
+ 
+ # -------- User Service --------
+ 
+  VidensVejen-UserService:
+    depends_on:
+      - mssql-UserDb
+    image: ghcr.io/hiha76740/vidensvejen-userservice:latest
+      
+    restart: unless-stopped
+        
+    environment:
+        ASPNETCORE_URLS: "http://+:8080"
+        ConnectionStrings__UserDb: "${USER_DB_CONNECTION_STRING:?Connection string mangler}"
+        Jwt__Key: "${JWT_KEY}"
+        Jwt__Issuer: "${JWT_ISSUER}"
+        Jwt__Audience: "${JWT_AUDIENCE}"
+        
+    networks:
+        - backend-net
+        - user-db-net
+
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+  
+  VidensVejen-UserService-dapr:
+    image: daprio/daprd:1.18.0
+    command:
+      - "./daprd"
+      - "--app-id"
+      - "userservice"
+      - "--app-port"
+      - "8080"
+      - "--app-protocol"
+      - "http"
+      - "--placement-host-address"
+      - "placement:50006"
+      - "--scheduler-host-address"
+      - "scheduler:50007"
+      - "--resources-path"
+      - "/components"
+    depends_on:
+      - VidensVejen-UserService
+      - placement
+      - scheduler
+      - kafka-broker
+    volumes:
+      - "./components:/components:ro"
+    network_mode: "service:VidensVejen-UserService"
+    restart: unless-stopped  
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+  
+  # -------- AuthUser Db --------
+  
+  mssql-AuthUserDb:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: "${AUTHUSERDB_SA_PASSWORD}"
+      MSSQL_PID: Developer
+    volumes:
+      - mssql-AuthUserDb-data:/var/opt/mssql
+    restart: unless-stopped
+    ports:
+        - 127.0.0.1:9002:1433
+    networks:
+        - auth-db-net
+
+# -------- AuthService --------
+
+  VidensVejen-AuthService:
+    depends_on:
+      - mssql-AuthUserDb
+    image: ghcr.io/hiha76740/vidensvejen-authservice:latest
+    restart: unless-stopped
+        
+    environment:
+        ASPNETCORE_URLS: "http://+:8080"
+        ConnectionStrings__AuthUserDb: "${AUTHUSER_DB_CONNECTION_STRING:?Connection string mangler}"
+        Jwt__Key: "${JWT_KEY}"
+        Jwt__Issuer: "${JWT_ISSUER}"
+        Jwt__Audience: "${JWT_AUDIENCE}"
+        
+    networks:
+        - backend-net
+        - auth-db-net
+        
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+
+# -------- AuthService Dapr --------
+
+  VidensVejen-AuthService-dapr:
+    image: daprio/daprd:1.18.0
+    command:
+      - "./daprd"
+      - "--app-id"
+      - "authservice"
+      - "--app-port"
+      - "8080"
+      - "--app-protocol"
+      - "http"
+      - "--placement-host-address"
+      - "placement:50006"
+      - "--scheduler-host-address"
+      - "scheduler:50007"
+      - "--resources-path"
+      - "/components"
+    depends_on:
+      - VidensVejen-AuthService
+      - placement
+      - scheduler
+      - kafka-broker
+    volumes:
+      - "./components:/components:ro"
+    network_mode: "service:VidensVejen-AuthService"
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    
+# -------- Exhibition Db --------  
+  
+  mssql-ExhibitionDb:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: "${EXHIBITIONDB_SA_PASSWORD}"
+      MSSQL_PID: Developer
+    volumes:
+      - mssql-ExhibitionDb-data:/var/opt/mssql
+    restart: unless-stopped
+    ports:
+        - 127.0.0.1:9003:1433
+    networks:
+        - exhibition-db-net
+
+# -------- Exhibition Service --------   
+ 
+  VidensVejen-ExhibitionService:
+    depends_on:
+      - mssql-ExhibitionDb
+    image: ghcr.io/hiha76740/vidensvejen-exhibitionservice:latest
+    restart: unless-stopped
+        
+    environment:
+        ASPNETCORE_URLS: "http://+:8080"
+        ConnectionStrings__ExhibitionDb: "${EXHIBITION_DB_CONNECTION_STRING:?Connection string mangler}"
+        Jwt__Key: "${JWT_KEY}"
+        Jwt__Issuer: "${JWT_ISSUER}"
+        Jwt__Audience: "${JWT_AUDIENCE}"
+
+    networks:
+        - backend-net
+        - exhibition-db-net
+
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+  
+  VidensVejen-ExhibitionService-dapr:
+    image: daprio/daprd:1.18.0
+    command:
+      - "./daprd"
+      - "--app-id"
+      - "exhibitionservice"
+      - "--app-port"
+      - "8080"
+      - "--app-protocol"
+      - "http"
+      - "--placement-host-address"
+      - "placement:50006"
+      - "--scheduler-host-address"
+      - "scheduler:50007"
+      - "--resources-path"
+      - "/components"
+    depends_on:
+      - VidensVejen-ExhibitionService
+      - placement
+      - scheduler
+      - kafka-broker
+    volumes:
+      - "./components:/components:ro"
+    network_mode: "service:VidensVejen-ExhibitionService"
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+
+# -------- Game Db --------  
+  
+  mssql-GameDb:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: "${GAMEDB_SA_PASSWORD}"
+      MSSQL_PID: Developer
+    volumes:
+      - mssql-GameDb-data:/var/opt/mssql
+    restart: unless-stopped
+    ports:
+        - 127.0.0.1:9004:1433
+    networks:
+        - game-db-net
+      
+# -------- Game Service ---------
+
+  VidensVejen-GameService:
+    depends_on:
+      - mssql-GameDb
+    image: ghcr.io/hiha76740/vidensvejen-gameservice:latest
+    restart: unless-stopped
+        
+    environment:
+        ASPNETCORE_URLS: "http://+:8080"
+        ConnectionStrings__GameDb: "${GAME_DB_CONNECTION_STRING:?Connection string mangler}"
+        Jwt__Key: "${JWT_KEY}"
+        Jwt__Issuer: "${JWT_ISSUER}"
+        Jwt__Audience: "${JWT_AUDIENCE}"
+
+    networks:
+        - backend-net
+        - game-db-net
+
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+  
+  VidensVejen-GameService-dapr:
+    image: daprio/daprd:1.18.0
+    command:
+      - "./daprd"
+      - "--app-id"
+      - "gameservice"
+      - "--app-port"
+      - "8080"
+      - "--app-protocol"
+      - "http"
+      - "--placement-host-address"
+      - "placement:50006"
+      - "--scheduler-host-address"
+      - "scheduler:50007"
+      - "--resources-path"
+      - "/components"
+    depends_on:
+      - VidensVejen-GameService
+      - placement
+      - scheduler
+      - kafka-broker
+    volumes:
+      - "./components:/components:ro"
+    network_mode: "service:VidensVejen-GameService"
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+
+# -------- Statistics Db --------  
+  
+  mssql-StatisticsDb:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: "${STATISTICSDB_SA_PASSWORD}"
+      MSSQL_PID: Developer
+    volumes:
+      - mssql-StatisticsDb-data:/var/opt/mssql
+    restart: unless-stopped
+    ports:
+        - 127.0.0.1:9005:1433
+    networks:
+        - statistics-db-net
+
+# -------- Statistics Service ---------
+
+  VidensVejen-StatisticsService:
+    depends_on:
+      - mssql-StatisticsDb
+    image: ghcr.io/hiha76740/vidensvejen-statisticsservice:latest
+    restart: unless-stopped
+        
+    environment:
+        ASPNETCORE_URLS: "http://+:8080"
+        ConnectionStrings__StatisticsDb: "${STATISTICS_DB_CONNECTION_STRING:?Connection string mangler}"
+        Jwt__Key: "${JWT_KEY}"
+        Jwt__Issuer: "${JWT_ISSUER}"
+        Jwt__Audience: "${JWT_AUDIENCE}"
+
+    networks:
+        - backend-net
+        - statistics-db-net
+
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+  
+  VidensVejen-StatisticsService-dapr:
+    image: daprio/daprd:1.18.0
+    command:
+      - "./daprd"
+      - "--app-id"
+      - "statisticsservice"
+      - "--app-port"
+      - "8080"
+      - "--app-protocol"
+      - "http"
+      - "--placement-host-address"
+      - "placement:50006"
+      - "--scheduler-host-address"
+      - "scheduler:50007"
+      - "--resources-path"
+      - "/components"
+    depends_on:
+      - VidensVejen-StatisticsService
+      - placement
+      - scheduler
+      - kafka-broker
+    volumes:
+      - "./components:/components:ro"
+    network_mode: "service:VidensVejen-StatisticsService"
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+
+
+# -------- Image Db --------  
+  
+  mssql-ImageDb:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      ACCEPT_EULA: Y
+      MSSQL_SA_PASSWORD: "${IMAGEDB_SA_PASSWORD}"
+      MSSQL_PID: Developer
+    volumes:
+      - mssql-ImageDb-data:/var/opt/mssql
+    restart: unless-stopped
+    ports:
+        - 127.0.0.1:9006:1433
+    networks:
+        - image-db-net
+
+# -------- Image Service ---------
+
+  VidensVejen-ImageService:
+    depends_on:
+      - mssql-ImageDb
+    image: ghcr.io/hiha76740/vidensvejen-imageservice:latest
+    restart: unless-stopped
+        
+    environment:
+        ASPNETCORE_URLS: "http://+:8080"
+        ConnectionStrings__ImageDb: "${IMAGE_DB_CONNECTION_STRING:?Connection string mangler}"
+        Jwt__Key: "${JWT_KEY}"
+        Jwt__Issuer: "${JWT_ISSUER}"
+        Jwt__Audience: "${JWT_AUDIENCE}"
+
+    volumes:
+        - VidensVejen-Images-Themes:/app/Storage/images/themes
+    
+    networks:
+        - backend-net
+        - image-db-net
+
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+  
+  VidensVejen-ImageService-dapr:
+    image: daprio/daprd:1.18.0
+    command:
+      - "./daprd"
+      - "--app-id"
+      - "imageservice"
+      - "--app-port"
+      - "8080"
+      - "--app-protocol"
+      - "http"
+      - "--placement-host-address"
+      - "placement:50006"
+      - "--scheduler-host-address"
+      - "scheduler:50007"
+      - "--resources-path"
+      - "/components"
+    depends_on:
+      - VidensVejen-ImageService
+      - placement
+      - scheduler
+      - kafka-broker
+    volumes:
+      - "./components:/components:ro"
+    network_mode: "service:VidensVejen-ImageService"
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
+
+# -------- Dapr Services --------    
+
+  placement:
+    image: daprio/placement:1.18.0
+    command: ["./placement", "--port", "50006"]
+    restart: unless-stopped
+    networks:
+        - backend-net
+
+  scheduler:
+    image: daprio/scheduler:1.18.0
+    command: ["./scheduler", "--port", "50007", "--etcd-data-dir", "/data"]
+    user: root
+    volumes:
+      - dapr-scheduler-data:/data
+    restart: unless-stopped
+    networks:
+        - backend-net
+
+# -------- watchtower --------    
+
+  watchtower:
+    image: nickfedor/watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_POLL_INTERVAL: 30
+      WATCHTOWER_CLEANUP: "true"
+    command: --label-enable
+    networks:
+        - updates-net
+
+# -------- kafka --------            
+
+  kafka-broker:
+    image: apache/kafka:latest
+    container_name: kafka-broker
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://localhost:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-broker:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_NUM_PARTITIONS: 3
+    restart: unless-stopped
+    networks:
+        - backend-net
+
+volumes:
+    mssql-UserDb-data:
+    mssql-AuthUserDb-data:
+    mssql-ExhibitionDb-data:
+    mssql-GameDb-data:
+    mssql-ImageDb-data:
+    mssql-StatisticsDb-data:
+    VidensVejen-Images-Themes:
+    dapr-scheduler-data:
+    
+networks:
+    frontend-admin-net:
+        driver: bridge
+    
+    frontend-kiosk-net:
+        driver: bridge
+    
+    backend-net:
+        driver: bridge
+    
+    user-db-net:
+        driver: bridge
+    
+    auth-db-net:
+        driver: bridge
+    
+    exhibition-db-net:
+        driver: bridge
+        
+    game-db-net:
+        driver: bridge
+    
+    image-db-net:
+        driver: bridge
+    
+    statistics-db-net:
+        driver: bridge
+    
+    updates-net:
+        driver: bridge
