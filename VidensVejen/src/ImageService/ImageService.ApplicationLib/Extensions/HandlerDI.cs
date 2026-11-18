@@ -17,6 +17,7 @@ public static class HandlerDI
     public static IServiceCollection AddHandlerDI(this IServiceCollection services)
     {
         services.AddScoped<IUploadImageHandler, UploadImageHandler>();
+        services.AddScoped<IDeleteImageHandler, DeleteImageHandler>();
 
         return services;
     }
