@@ -31,6 +31,7 @@ public class RefreshTokenHandler(
 
         if (
             authUser == null
+            || command.RefreshToken == null
             || authUser.RefreshToken != command.RefreshToken
             || authUser.RefreshTokenExpiryTime <= DateTime.UtcNow
             )
