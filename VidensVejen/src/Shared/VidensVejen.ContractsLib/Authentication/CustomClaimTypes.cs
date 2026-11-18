@@ -1,4 +1,4 @@
-namespace VidensVejen.BuildingBlocksLib.Authorization;
+namespace VidensVejen.ContractsLib.Authentication;
 
 /// <summary>
 /// 

@@ -5,7 +5,7 @@ using AuthService.ApplicationLib.Authentication;
 using AuthService.DomainLib.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using VidensVejen.BuildingBlocksLib.Authorization;
+using VidensVejen.ContractsLib.Authentication;
 
 namespace AuthService.InfrastructureLib.Authentication;
 
