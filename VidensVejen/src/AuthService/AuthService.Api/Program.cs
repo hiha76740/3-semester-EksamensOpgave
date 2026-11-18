@@ -1,3 +1,4 @@
+using AuthService.Api.Extensions;
 using AuthService.ApplicationLib.Extensions;
 using AuthService.InfrastructureLib.Extensions;
 using VidensVejen.BuildingBlocksLib.DependencyInjection;
@@ -16,6 +17,8 @@ builder.Services.AddServiceDI();
 builder.Services.AddBackgroundWorkersDI();
 builder.Services.AddInboxStrategiesDI();
 builder.Services.AddEventPublisherDI();
+builder.Services.AddAuthenticationDI();
+builder.Services.AddInternalServicesDI();
 
 builder.Services.AddControllers();
 

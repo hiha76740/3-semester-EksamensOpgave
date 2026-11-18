@@ -24,7 +24,9 @@ public class AuthUserRepository(AuthUserDbContext db) : IAuthUserRepository
 
     async Task<AuthUser?> IAuthUserRepository.GetAuthUserByEmailAsync(Email email)
     {
-        return await db.AuthUsers.FirstOrDefaultAsync(e => e.Email == email);
+        return await db.AuthUsers
+            .Include(u => u.Permissions)
+            .FirstOrDefaultAsync(e => e.Email == email);
     }
 
     async Task<AuthUser?> IAuthUserRepository.GetAuthUserByIdAsync(AuthUserId id)
@@ -37,8 +39,8 @@ public class AuthUserRepository(AuthUserDbContext db) : IAuthUserRepository
         await db.AuthUsers.AddAsync(authUser);
     }
 
-    Task IAuthUserRepository.SaveAsync()
+    async Task IAuthUserRepository.SaveAsync()
     {
-        throw new NotImplementedException();
+        await db.SaveChangesAsync();
     }
 }

@@ -1,3 +1,4 @@
+using AuthService.ApplicationLib.Handlers.Authentication;
 using AuthService.ApplicationLib.Handlers.Users;
 using AuthService.ApplicationLib.Messaging.Inbox.Handlers;
 using AuthService.ApplicationLib.Messaging.Outbox;
@@ -23,6 +24,9 @@ public static class HandlerDI
         services.AddScoped<IUpdateUserEmailHandler, UpdateUserEmailHandler>();
         services.AddScoped<IUpdateUserPasswordHandler, UpdateUserPasswordHandler>();
         services.AddScoped<IUpdateUserPermissionsHandler, UpdateUserPermissionsHandler>();
+
+        services.AddScoped<ILoginUserHandler, LoginUserHandler>();
+        services.AddScoped<IRefreshTokenHandler, RefreshTokenHandler>();
 
         services.AddScoped<PublishOutboxMessageHandler>();
         services.AddScoped<ProcessInboxMessageHandler>();
