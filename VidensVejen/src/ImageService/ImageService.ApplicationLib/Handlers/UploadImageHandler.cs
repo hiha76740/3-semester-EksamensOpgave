@@ -35,6 +35,8 @@ public class UploadImageHandler(
             cancellationToken
             );
 
+        await imageRepo.SaveAsync();
+
         return image.Id.Value;
     }
 }

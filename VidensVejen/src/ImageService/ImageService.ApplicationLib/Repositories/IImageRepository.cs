@@ -14,4 +14,10 @@ public interface IImageRepository
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task AddAsync(Image image, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    Task SaveAsync();
 }
