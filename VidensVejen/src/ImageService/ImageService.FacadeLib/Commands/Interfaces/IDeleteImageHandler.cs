@@ -8,7 +8,7 @@ public interface IDeleteImageHandler
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="fileName"></param>
+    /// <param name="id"></param>
     /// <returns></returns>
-    Task HandleAsync(string fileName);
+    Task HandleAsync(Guid id);
 }

@@ -49,21 +49,18 @@ public class ImagesController(
         }
     }
 
-    [HttpDelete("{fileName}")]
+    [HttpDelete("{id:guid}")]
     [EndpointSummary("Delete a image")]
     [EndpointDescription("Deletes the requested image")]
     [ProducesResponseType(StatusCodes.Status204NoContent, Description = "Deletion of requested image completed successfully")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to delete the requested image")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Image was not found")]
     public async Task<ActionResult> DeleteImage(
-        [Required][Description("The file name you want to get url for")] string fileName)
+        [Required][Description("The id of the image you want to get url for")] Guid id)
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(fileName) == true)
-                return BadRequest("File name must have a value");
-
-            await delete.HandleAsync(fileName);
+            await delete.HandleAsync(id);
 
             return NoContent();
 
