@@ -10,6 +10,7 @@
 *.userosscache
 *.sln.docstates
 *.env
+VidensVejen/src/ImageService/ImageService.Api/Storage
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
