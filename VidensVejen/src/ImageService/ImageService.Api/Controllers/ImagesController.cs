@@ -38,7 +38,9 @@ public class ImagesController(
 
             var url = baseUrl == null ? $"/images/themes/{dto.StorageKey}{dto.Extension}" : $"{baseUrl}/images/themes/{dto.StorageKey}{dto.Extension}";
 
-            return Ok();
+            var response = new ImageUrlResponse(url);
+
+            return Ok(response);
 
         }
         catch (Exception ex)
