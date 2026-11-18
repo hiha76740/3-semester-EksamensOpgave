@@ -73,7 +73,33 @@ public class PublishOutboxMessageHandlerTests
 
         // Assert
         outbox.Verify(repository => repository.FindAsync(eventId, token), Times.Once);
-        publisher.Verify(service => service.PublishAsync<object>(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
+        publisher.Verify(service => service.PublishAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Never);
+        unitOfWork.Verify(work => work.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_GivenPublisherFailure_LeavesMessagePendingAndRethrows()
+    {
+        // Arrange
+        var token = TestContext.Current.CancellationToken;
+        var integrationEvent = new UserRegisteredIntegrationEvent(Guid.NewGuid(), Topic, Guid.NewGuid(), "Sue", "Storm", "sue@example.com");
+        var message = CreateMessage(integrationEvent);
+        var outbox = new Mock<IOutboxRepository>();
+        var unitOfWork = new Mock<IUnitOfWork>();
+        var publisher = new Mock<IOutboxEventPublisher>();
+        var expectedException = new InvalidOperationException("Publisher failed");
+        outbox.Setup(repository => repository.FindAsync(message.Id, token)).ReturnsAsync(message);
+        publisher.Setup(service => service.PublishAsync(Topic, It.IsAny<object>()))
+            .ThrowsAsync(expectedException);
+        var handler = new PublishOutboxMessageHandler(outbox.Object, unitOfWork.Object, publisher.Object);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.HandleAsync(message.Id, token));
+
+        Assert.Same(expectedException, exception);
+        Assert.Null(message.PublishedAtUtc);
+        publisher.Verify(service => service.PublishAsync<object>(Topic, integrationEvent), Times.Once);
         unitOfWork.Verify(work => work.SaveChangesAsync(), Times.Never);
     }
 }

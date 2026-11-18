@@ -46,6 +46,7 @@ public class UploadImageTests
         Assert.Equal(extension, registeredImage.Extension);
         storage.Verify(s => s.SaveAsync(registeredImage.StorageKey, content, extension, token), Times.Once);
         repository.Verify(r => r.AddAsync(registeredImage, token), Times.Once);
+        repository.Verify(r => r.SaveAsync(), Times.Once);
     }
 
     [Theory]
@@ -109,5 +110,29 @@ public class UploadImageTests
         Assert.Same(expected, exception);
         storage.Verify(s => s.SaveAsync(It.IsAny<string>(), content, ".png", token), Times.Once);
         repository.Verify(r => r.AddAsync(It.IsAny<Image>(), token), Times.Once);
+        repository.Verify(r => r.SaveAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_GivenSaveFailure_RethrowsOriginalException()
+    {
+        // Arrange
+        using var content = new MemoryStream([1, 2, 3]);
+        var token = TestContext.Current.CancellationToken;
+        var storage = new Mock<IImageStorage>();
+        var repository = new Mock<IImageRepository>();
+        var expected = new InvalidOperationException("Save failed");
+        repository.Setup(r => r.SaveAsync()).ThrowsAsync(expected);
+        IUploadImageHandler handler = new UploadImageHandler(storage.Object, repository.Object);
+        var command = new UploadImageCommand(content, "image/png", ".png");
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => handler.HandleAsync(command, token));
+
+        Assert.Same(expected, exception);
+        storage.Verify(s => s.SaveAsync(It.IsAny<string>(), content, ".png", token), Times.Once);
+        repository.Verify(r => r.AddAsync(It.IsAny<Image>(), token), Times.Once);
+        repository.Verify(r => r.SaveAsync(), Times.Once);
     }
 }

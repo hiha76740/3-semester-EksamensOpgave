@@ -20,6 +20,9 @@ builder.Services.AddEventPublisherDI();
 builder.Services.AddAuthenticationDI();
 builder.Services.AddInternalServicesDI();
 
+builder.Services.AddVidensVejenAuthentication(builder);
+
+
 builder.Services.AddControllers();
 
 var serviceName = builder.Environment.ApplicationName[..^4];

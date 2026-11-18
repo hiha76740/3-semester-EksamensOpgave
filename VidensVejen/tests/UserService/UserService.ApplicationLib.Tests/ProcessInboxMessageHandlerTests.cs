@@ -1,3 +1,4 @@
+using VidensVejen.SharedKernelLib.Exceptions;
 using System.Data;
 using System.Text.Json;
 using Moq;
@@ -260,5 +261,42 @@ public class ProcessInboxMessageHandlerTests
         unitOfWork.Verify(u => u.SaveChangesAsync(), Times.Once);
         unitOfWork.Verify(u => u.Commit(), Times.Once);
         unitOfWork.Verify(u => u.Rollback(), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_GivenUnknownDeletionUser_RollsBackAndThrows()
+    {
+        // Arrange
+        var token = TestContext.Current.CancellationToken;
+        var integrationEvent = new UserDeletionIntegrationEvent(
+            Guid.NewGuid(), "user-deletion", Guid.NewGuid());
+        var message = new InboxMessage
+        {
+            Id = integrationEvent.EventId,
+            Type = typeof(UserDeletionIntegrationEvent).FullName!,
+            Topic = integrationEvent.EventTopic,
+            Content = JsonSerializer.Serialize(integrationEvent),
+            RecievedOnUtc = DateTime.UtcNow
+        };
+        var inbox = new Mock<IInboxRepository>();
+        var userRepo = new Mock<IUserRepository>();
+        var outbox = new Mock<IOutboxRepository>();
+        var unitOfWork = new Mock<IUnitOfWork>();
+        inbox.Setup(repository => repository.FindAsync(message.Id, token)).ReturnsAsync(message);
+        userRepo.Setup(repository => repository.GetUserByIdAsync(new UserId(integrationEvent.UserId)))
+            .ReturnsAsync((User?)null);
+        var handler = new ProcessInboxMessageHandler(
+            inbox.Object, outbox.Object, unitOfWork.Object,
+            [new DeleteUserInboxStrategy(userRepo.Object)]);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(message.Id, token));
+
+        Assert.Null(message.ProccessedOnUtc);
+        userRepo.Verify(repository => repository.Delete(It.IsAny<User>()), Times.Never);
+        outbox.VerifyNoOtherCalls();
+        unitOfWork.Verify(work => work.SaveChangesAsync(), Times.Never);
+        unitOfWork.Verify(work => work.Commit(), Times.Never);
+        unitOfWork.Verify(work => work.Rollback(), Times.Once);
     }
 }

@@ -9,8 +9,8 @@ namespace VidensVejen.Web.Authentication;
 /// <summary>
 /// 
 /// </summary>
-/// <param name="authService"></param>
-public class CustomAuthenticationStateProvider(IAuthService authService) : AuthenticationStateProvider
+/// <param name="authUserService"></param>
+public class CustomAuthenticationStateProvider(IAuthUserService authUserService) : AuthenticationStateProvider
 {
     /// <summary>
     /// 
@@ -20,7 +20,7 @@ public class CustomAuthenticationStateProvider(IAuthService authService) : Authe
     {
         try
         {
-            var authUser = await authService.GetAuthUserAsync();
+            var authUser = await authUserService.GetAuthUserAsync();
 
             var claims = new List<Claim>
             {
