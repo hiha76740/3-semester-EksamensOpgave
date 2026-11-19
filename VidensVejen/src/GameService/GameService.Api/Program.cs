@@ -1,5 +1,6 @@
 using VidensVejen.BuildingBlocksLib.DependencyInjection;
 using GameService.InfrastructureLib.Extensions;
+using GameService.ApplicationLib.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,10 @@ builder.AddServiceDefaults();
 // Add services to the container.
 
 builder.Services.AddDatabaseDI(builder.Configuration);
+
+builder.Services.AddHandlerDI();
+builder.Services.AddRepositoryDI();
+builder.Services.AddQueryDI();
 
 builder.Services.AddControllers();
 
