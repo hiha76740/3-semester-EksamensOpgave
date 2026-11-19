@@ -12,5 +12,5 @@ public interface ICreateQuizHandler
     /// </summary>
     /// <param name="command"></param>
     /// <returns></returns>
-    Task HandleAsync(CreateQuizCommand command);
+    Task<Guid> HandleAsync(CreateQuizCommand command);
 }

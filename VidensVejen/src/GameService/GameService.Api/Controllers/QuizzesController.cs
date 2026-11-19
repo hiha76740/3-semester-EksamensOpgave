@@ -22,16 +22,18 @@ public class QuizzesController(
     [HttpPost]
     [EndpointSummary("Create a quiz")]
     [EndpointDescription("Creates a new instance of quiz")]
-    [ProducesResponseType(StatusCodes.Status201Created, Description = "Quiz created successfully")]
+    [ProducesResponseType<QuizIdResponse>(StatusCodes.Status201Created, "Application/json", Description = "Returns the id of the created quiz")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to create quiz")]
-    public async Task<ActionResult> CreateQuiz(
-        [Required][Description("Object used to create a quiz")] CreateQuizRequest request)
+    public async Task<ActionResult<QuizIdResponse>> CreateQuiz(
+    [Required][Description("Object used to create a quiz")] CreateQuizRequest request)
     {
         try
         {
-            await create.HandleAsync(request.AsCreateCommand());
+            var id = await create.HandleAsync(request.AsCreateCommand());
 
-            return Created();
+            var response = new QuizIdResponse(id);
+
+            return CreatedAtAction(nameof(GetQuiz), new { id }, response);
         }
         catch (Exception ex)
         {

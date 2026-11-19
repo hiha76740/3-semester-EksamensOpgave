@@ -27,8 +27,23 @@ public class AuthUserQueryHandlerIMPL(AuthUserDbContext db) : IAuthUsersQueries
             .FirstOrDefaultAsync();
     }
 
-    Task<AuthUserDto?> IAuthUsersQueries.GetCurrentUserInfo(Guid id)
+    async Task<AuthUserDto?> IAuthUsersQueries.GetCurrentUserInfo(Guid id)
     {
-        throw new NotImplementedException();
+        var authUserId = new AuthUserId(id);
+
+        return await db.AuthUsers
+            .AsNoTracking()
+            .Where(u => u.Id == authUserId)
+            .Select(u => new AuthUserDto(
+                u.Id.Value,
+                u.Email.Value,
+                u.Permissions
+                .Select(
+                    p => new AccessPermissionDto(
+                        p.Id.Value,
+                        p.Name))
+                .ToList()))
+            .FirstOrDefaultAsync();
+
     }
 }

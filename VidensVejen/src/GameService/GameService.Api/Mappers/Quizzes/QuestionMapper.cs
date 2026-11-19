@@ -14,7 +14,9 @@ internal static class QuestionMapper
             request.Choices
             .Select(
                 q => q.AsCreateCommand())
-            .ToList()
+            .ToList(),
+            request.CorrectFeedback,
+            request.IncorrectFeedback
         );
 
         return output;

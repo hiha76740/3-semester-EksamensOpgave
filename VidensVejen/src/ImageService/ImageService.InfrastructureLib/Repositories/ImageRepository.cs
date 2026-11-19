@@ -14,4 +14,9 @@ public class ImageRepository(ImageDbContext db) : IImageRepository
     {
         await db.AddAsync(image, cancellationToken);
     }
+
+    async Task IImageRepository.SaveAsync()
+    {
+        await db.SaveChangesAsync();
+    }
 }

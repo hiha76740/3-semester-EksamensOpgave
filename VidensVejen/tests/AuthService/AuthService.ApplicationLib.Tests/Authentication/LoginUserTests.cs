@@ -6,6 +6,7 @@ using AuthService.DomainLib.ValueObjects;
 using AuthService.FacadeLib.Commands.DTOs;
 using AuthService.FacadeLib.Commands.Interfaces;
 using Moq;
+using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace AuthService.ApplicationLib.Tests.Authentication;
 
@@ -28,6 +29,7 @@ public class LoginUserTests
         var command = new LoginUserCommand(Email: EmailAddress, Password: Password);
         var email = new Email(EmailAddress);
         var authUser = AuthUser.Create(EmailAddress, PasswordHash, []);
+        authUser.SetStatusActive();
 
         mockAuthUserRepo
             .Setup(r => r.GetAuthUserByEmailAsync(email))
@@ -141,5 +143,30 @@ public class LoginUserTests
         mockTokenService.Verify(s => s.CreateToken(It.IsAny<AuthUser>()), Times.Never);
         mockRefreshTokenService.Verify(s => s.GenerateRefreshToken(), Times.Never);
         mockAuthUserRepo.Verify(r => r.SaveAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_GivenPendingUserWithCorrectPassword_ThrowsWithoutIssuingTokens()
+    {
+        // Arrange
+        var user = AuthUser.Create(EmailAddress, PasswordHash, []);
+        var repository = new Mock<IAuthUserRepository>();
+        var passwordService = new Mock<IPasswordHashService>();
+        var tokenService = new Mock<ITokenService>();
+        var refreshTokenService = new Mock<IRefreshTokenService>();
+        repository.Setup(r => r.GetAuthUserByEmailAsync(new Email(EmailAddress))).ReturnsAsync(user);
+        passwordService.Setup(s => s.Verify(Password, PasswordHash)).Returns(true);
+        ILoginUserHandler handler = new LoginUserHandler(
+            repository.Object, passwordService.Object, tokenService.Object, refreshTokenService.Object);
+        var command = new LoginUserCommand(EmailAddress, Password);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<UserNotActivatedException>(() => handler.HandleAsync(command));
+
+        Assert.Null(user.RefreshToken);
+        Assert.Null(user.RefreshTokenExpiryTime);
+        tokenService.VerifyNoOtherCalls();
+        refreshTokenService.VerifyNoOtherCalls();
+        repository.Verify(r => r.SaveAsync(), Times.Never);
     }
 }

@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using VidensVejen.ContractsLib.Requests.AuthService;
-using VidensVejen.ContractsLib.Responses.AuthService;
 using VidensVejen.Web.ServicesInterfaces;
 
 namespace VidensVejen.Web.Services;
@@ -13,22 +12,6 @@ namespace VidensVejen.Web.Services;
 public class AuthService(HttpClient httpClient) : IAuthService
 {
     private readonly string _baseUrl = "/auth-api";
-
-    async Task<AuthUserResponse> IAuthService.GetAuthUserAsync()
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/Me");
-
-        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-
-        using var response = await httpClient.SendAsync(request);
-
-        response.EnsureSuccessStatusCode();
-
-        var authUser = await response.Content.ReadFromJsonAsync<AuthUserResponse>()
-            ?? throw new InvalidOperationException("Could not deserialize authenticated user");
-
-        return authUser;
-    }
 
     async Task<int> IAuthService.Login(string username, string password)
     {

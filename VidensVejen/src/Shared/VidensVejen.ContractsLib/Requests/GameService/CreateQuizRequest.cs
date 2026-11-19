@@ -7,6 +7,7 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 /// <param name="ExhibitionId"></param>
 /// <param name="QuizLayout"></param>
 /// <param name="Questions"></param>
+/// <param name="EndMessage"></param>
 /// <example>
 /// {
 ///     "title": "Affaldshierakiet",
@@ -29,7 +30,8 @@ public record CreateQuizRequest(
     string Title,
     Guid ExhibitionId,
     string QuizLayout,
-    List<CreateQuestionRequest> Questions
+    List<CreateQuestionRequest> Questions,
+    string? EndMessage
     )
 {
     /// <summary>
@@ -51,4 +53,9 @@ public record CreateQuizRequest(
     /// A list of the questions you want the quiz to have.
     /// </summary>
     public List<CreateQuestionRequest> Questions { get; init; } = Questions;
+
+    /// <summary>
+    /// Message from Otto shown when the quiz is finished. Optional.
+    /// </summary>
+    public string? EndMessage { get; init; } = EndMessage;
 }

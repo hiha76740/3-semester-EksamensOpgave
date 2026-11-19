@@ -18,7 +18,7 @@ services:
     labels:
       com.centurylinklabs.watchtower.enable: "true"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:443/"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
       interval: 30s
       timeout: 3s
       retries: 3
@@ -42,7 +42,7 @@ services:
     labels:
       com.centurylinklabs.watchtower.enable: "true"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:443/"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
       interval: 30s
       timeout: 3s
       retries: 3

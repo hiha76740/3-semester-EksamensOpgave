@@ -16,7 +16,8 @@ internal static class QuizMapper
             request.Questions
             .Select(
                 q => q.AsCreateCommand())
-            .ToList()
+            .ToList(),
+             request.EndMessage
         );
 
         return output;
