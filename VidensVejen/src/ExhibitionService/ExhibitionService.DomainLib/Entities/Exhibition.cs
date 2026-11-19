@@ -87,12 +87,9 @@ public class Exhibition
 
         var exhibition = new Exhibition(exhibitionName, themeImage);
 
-        if (subjects.Count > 0)
+        foreach (var (title, description, topics) in subjects)
         {
-            foreach (var (title, description, topics) in subjects)
-            {
-                exhibition.AddSubject(title, description, topics);
-            }
+            exhibition.AddSubject(title, description, topics);
         }
 
         return exhibition;

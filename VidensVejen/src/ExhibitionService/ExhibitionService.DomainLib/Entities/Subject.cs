@@ -91,18 +91,15 @@ public class Subject
 
         var subject = new Subject(exhibition, title, description);
 
-        if (topics.Count > 0)
+        foreach (var topic in topics)
         {
-            foreach (var topic in topics)
-            {
-                subject.AddTopic(
-                    topic.Title,
-                    topic.Description,
-                    topic.Body,
-                    topic.CalloutLabel,
-                    topic.CalloutText,
-                    topic.Quote);
-            }
+            subject.AddTopic(
+                topic.Title,
+                topic.Description,
+                topic.Body,
+                topic.CalloutLabel,
+                topic.CalloutText,
+                topic.Quote);
         }
         return subject;
     }
