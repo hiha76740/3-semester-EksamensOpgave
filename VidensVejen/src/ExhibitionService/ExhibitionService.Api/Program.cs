@@ -1,3 +1,4 @@
+using ExhibitionService.InfrastructureLib.Extensions;
 using VidensVejen.BuildingBlocksLib.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -5,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 // Add services to the container.
+
+builder.Services.AddDatabaseDI(builder.Configuration);
 
 builder.Services.AddControllers();
 
