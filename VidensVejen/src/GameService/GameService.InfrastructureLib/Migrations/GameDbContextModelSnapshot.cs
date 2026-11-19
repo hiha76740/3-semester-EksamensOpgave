@@ -89,26 +89,23 @@ namespace GameService.InfrastructureLib.Migrations
 
                     b.OwnsMany("GameService.DomainLib.ValueObjects.Choice", "Choices", b1 =>
                         {
-                            b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("uniqueidentifier");
+                            b1.Property<Guid>("QuestionId");
 
-                            b1.Property<bool>("IsCorrect")
-                                .HasColumnType("bit");
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
 
-                            b1.Property<Guid>("QuestionId")
-                                .HasColumnType("uniqueidentifier");
+                            b1.Property<bool>("IsCorrect");
 
                             b1.Property<string>("Text")
-                                .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("nvarchar(500)");
+                                .IsRequired();
 
-                            b1.HasKey("Id");
+                            b1.HasKey("QuestionId", "__synthesizedOrdinal");
 
-                            b1.HasIndex("QuestionId");
+                            b1.ToTable("Questions");
 
-                            b1.ToTable("Choices", (string)null);
+                            b1
+                                .ToJson("Choices")
+                                .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("QuestionId");

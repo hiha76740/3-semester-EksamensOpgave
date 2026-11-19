@@ -30,13 +30,6 @@ internal sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
         builder.Property(x => x.IncorrectFeedback)
             .HasMaxLength(500);
 
-        builder.OwnsMany(x => x.Choices, choices =>
-        {
-            choices.ToTable("Choices");
-            choices.WithOwner().HasForeignKey("QuestionId");
-            choices.Property<Guid>("Id");
-            choices.HasKey("Id");
-            choices.Property(x => x.Text).HasMaxLength(500);
-        });
+        builder.OwnsMany(x => x.Choices, choices => choices.ToJson());
     }
 }
