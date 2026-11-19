@@ -81,9 +81,7 @@ public class Exhibition
             throw new DomainException("Exhibition must have a theme.");
 
         if (subjects.Count == 0)
-        {
             throw new DomainException("An exhibition must have at least one subject");
-        }
 
         var exhibition = new Exhibition(exhibitionName, themeImage);
 
@@ -104,5 +102,4 @@ public class Exhibition
 
     // EF constructor
     private Exhibition() { }
-
 }

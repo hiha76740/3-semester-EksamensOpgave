@@ -85,9 +85,7 @@ public class Subject
             throw new DomainException("Subject must have a description.");
 
         if (topics.Count == 0)
-        {
             throw new DomainException("A subject must have at least one topic");
-        }
 
         var subject = new Subject(exhibition, title, description);
 
