@@ -1,4 +1,5 @@
 using GameService.DomainLib.Entities;
+using GameService.DomainLib.ValueObjects;
 using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.DomainLib.Tests;
@@ -7,11 +8,11 @@ public class QuizTests
 {
     private static readonly Guid s_exhibitionId = Guid.NewGuid();
 
-    private static Question CreateValidQuestion()
+    private static NewQuestion CreateValidQuestion()
     {
-        return Question.Create(
+        return new NewQuestion(
             "🪑 En stol har fået et løst ben. Hvad er bedst?",
-            [Choice.Create("🔧 Reparér stolen", true), Choice.Create("🔥 Storskrald", false)],
+            [new Choice("🔧 Reparér stolen", true), new Choice("🔥 Storskrald", false)],
             null,
             null);
     }
@@ -80,5 +81,32 @@ public class QuizTests
 
         // Assert
         Assert.Null(quiz.EndMessage);
+    }
+
+    [Fact]
+    public void Create_GivenQuestionWithoutCorrectChoice_ThrowsDomainException()
+    {
+        // Arrange
+        var invalidQuestion = new NewQuestion(
+            "Hvad er bedst?",
+            [new Choice("Svar", false), new Choice("Svar", false)],
+            null,
+            null);
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Quiz.Create("Hjælp Otto", s_exhibitionId, "Vertikalt", null, [invalidQuestion]));
+    }
+
+    [Fact]
+    public void AddQuestion_GivenValidQuestion_AddsQuestionToQuiz()
+    {
+        // Arrange
+        var quiz = Quiz.Create("Hjælp Otto", s_exhibitionId, "Vertikalt", null, [CreateValidQuestion()]);
+
+        // Act
+        quiz.AddQuestion(CreateValidQuestion());
+
+        // Assert
+        Assert.Equal(2, quiz.Questions.Count);
     }
 }

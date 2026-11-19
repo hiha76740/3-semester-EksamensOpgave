@@ -22,29 +22,6 @@ namespace GameService.InfrastructureLib.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("GameService.DomainLib.Entities.Choice", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("QuestionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("QuestionId");
-
-                    b.ToTable("Choices");
-                });
-
             modelBuilder.Entity("GameService.DomainLib.Entities.Question", b =>
                 {
                     b.Property<Guid>("Id")
@@ -102,15 +79,6 @@ namespace GameService.InfrastructureLib.Migrations
                     b.ToTable("Quizzes");
                 });
 
-            modelBuilder.Entity("GameService.DomainLib.Entities.Choice", b =>
-                {
-                    b.HasOne("GameService.DomainLib.Entities.Question", null)
-                        .WithMany("Choices")
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("GameService.DomainLib.Entities.Question", b =>
                 {
                     b.HasOne("GameService.DomainLib.Entities.Quiz", null)
@@ -118,10 +86,34 @@ namespace GameService.InfrastructureLib.Migrations
                         .HasForeignKey("QuizId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
 
-            modelBuilder.Entity("GameService.DomainLib.Entities.Question", b =>
-                {
+                    b.OwnsMany("GameService.DomainLib.ValueObjects.Choice", "Choices", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<bool>("IsCorrect")
+                                .HasColumnType("bit");
+
+                            b1.Property<Guid>("QuestionId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Text")
+                                .IsRequired()
+                                .HasMaxLength(500)
+                                .HasColumnType("nvarchar(500)");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("QuestionId");
+
+                            b1.ToTable("Choices", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("QuestionId");
+                        });
+
                     b.Navigation("Choices");
                 });
 

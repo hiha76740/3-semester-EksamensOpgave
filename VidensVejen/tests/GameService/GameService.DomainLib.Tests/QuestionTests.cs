@@ -1,4 +1,5 @@
 using GameService.DomainLib.Entities;
+using GameService.DomainLib.ValueObjects;
 using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.DomainLib.Tests;
@@ -11,7 +12,7 @@ public class QuestionTests
 
         for (var i = 0; i < total; i++)
         {
-            choices.Add(Choice.Create("Svar", i < correct));
+            choices.Add(new Choice("Svar", i < correct));
         }
 
         return choices;

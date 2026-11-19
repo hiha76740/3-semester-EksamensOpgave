@@ -1,4 +1,4 @@
-using GameService.DomainLib.Entities;
+using GameService.DomainLib.ValueObjects;
 using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.DomainLib.Tests;
@@ -8,13 +8,12 @@ public class ChoiceTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void Create_GivenValidText_InitializesChoice(bool isCorrect)
+    public void Constructor_GivenValidText_InitializesChoice(bool isCorrect)
     {
         // Act
-        var choice = Choice.Create("🔧 Reparér stolen", isCorrect);
+        var choice = new Choice("🔧 Reparér stolen", isCorrect);
 
         // Assert
-        Assert.NotEqual(Guid.Empty, choice.Id.Value);
         Assert.Equal("🔧 Reparér stolen", choice.Text);
         Assert.Equal(isCorrect, choice.IsCorrect);
     }
@@ -23,9 +22,16 @@ public class ChoiceTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Create_GivenBlankText_ThrowsDomainException(string? text)
+    public void Constructor_GivenBlankText_ThrowsDomainException(string? text)
     {
         // Act & Assert
-        Assert.Throws<DomainException>(() => Choice.Create(text!, true));
+        Assert.Throws<DomainException>(() => new Choice(text!, true));
+    }
+
+    [Fact]
+    public void Equals_GivenSameValues_ChoicesAreEqual()
+    {
+        // Act & Assert
+        Assert.Equal(new Choice("Plastik", true), new Choice("Plastik", true));
     }
 }
