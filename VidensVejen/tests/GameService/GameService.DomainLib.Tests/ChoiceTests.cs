@@ -8,14 +8,18 @@ public class ChoiceTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public void Constructor_GivenValidText_InitializesChoice(bool isCorrect)
+    public void Constructor_GivenValidText_SetsValues(bool isCorrect)
     {
+        // Arrange
+        const string Text = "Answer";
+
         // Act
-        var choice = new Choice("🔧 Reparér stolen", isCorrect);
+        var choice = new Choice(Text, isCorrect);
 
         // Assert
-        Assert.Equal("🔧 Reparér stolen", choice.Text);
+        Assert.Equal(Text, choice.Text);
         Assert.Equal(isCorrect, choice.IsCorrect);
+        Assert.Equal(new Choice(Text, isCorrect), choice);
     }
 
     [Theory]
@@ -25,13 +29,6 @@ public class ChoiceTests
     public void Constructor_GivenBlankText_ThrowsDomainException(string? text)
     {
         // Act & Assert
-        Assert.Throws<DomainException>(() => new Choice(text!, true));
-    }
-
-    [Fact]
-    public void Equals_GivenSameValues_ChoicesAreEqual()
-    {
-        // Act & Assert
-        Assert.Equal(new Choice("Plastik", true), new Choice("Plastik", true));
+        Assert.Throws<DomainException>(() => new Choice(text!, false));
     }
 }

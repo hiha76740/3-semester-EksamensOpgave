@@ -1,107 +1,139 @@
-//using GameService.DomainLib.Entities;
-//using GameService.DomainLib.ValueObjects;
-//using VidensVejen.SharedKernelLib.Exceptions;
+using GameService.DomainLib.Entities;
+using GameService.DomainLib.ValueObjects;
+using VidensVejen.SharedKernelLib.Exceptions;
 
-//namespace GameService.DomainLib.Tests;
+namespace GameService.DomainLib.Tests;
 
-//public class QuestionTests
-//{
-//    private static List<Choice> CreateChoices(int total, int correct)
-//    {
-//        var choices = new List<Choice>();
+public class QuestionTests
+{
+    private static List<Choice> CreateChoices()
+    {
+        return [new Choice("Yes", true), new Choice("No", false)];
+    }
 
-//        for (var i = 0; i < total; i++)
-//        {
-//            choices.Add(new Choice("Svar", i < correct));
-//        }
+    [Fact]
+    public void Constructor_GivenValidInput_InitializesQuestion()
+    {
+        // Arrange
+        var choices = CreateChoices();
 
-//        return choices;
-//    }
+        // Act
+        var question = new Question("Question", choices, "Correct", "Incorrect");
 
-//    [Theory]
-//    [InlineData(2)]
-//    [InlineData(4)]
-//    [InlineData(6)]
-//    public void Create_GivenOneCorrectChoice_InitializesQuestion(int totalChoices)
-//    {
-//        // Arrange
-//        var choices = CreateChoices(totalChoices, 1);
+        // Assert
+        Assert.NotEqual(Guid.Empty, question.Id.Value);
+        Assert.Equal("Question", question.Text);
+        Assert.Equal("Correct", question.CorrectFeedback);
+        Assert.Equal("Incorrect", question.IncorrectFeedback);
+        Assert.Equal<Choice>(choices, question.Choices);
+    }
 
-//        // Act
-//        var question = Question.Create("Hvad er bedst?", choices, "Godt set!", "Næsten!");
+    [Fact]
+    public void Constructor_GivenNullFeedback_PreservesNullValues()
+    {
+        // Arrange
+        var choices = CreateChoices();
 
-//        // Assert
-//        Assert.NotEqual(Guid.Empty, question.Id.Value);
-//        Assert.Equal("Hvad er bedst?", question.Text);
-//        Assert.Equal(totalChoices, question.Choices.Count);
-//        Assert.Equal("Godt set!", question.CorrectFeedback);
-//        Assert.Equal("Næsten!", question.IncorrectFeedback);
-//    }
+        // Act
+        var question = new Question("Question", choices, null, null);
 
-//    [Theory]
-//    [InlineData(0, 0)]
-//    [InlineData(1, 1)]
-//    public void Create_GivenFewerThanTwoChoices_ThrowsDomainException(int totalChoices, int correctChoices)
-//    {
-//        // Arrange
-//        var choices = CreateChoices(totalChoices, correctChoices);
+        // Assert
+        Assert.Null(question.CorrectFeedback);
+        Assert.Null(question.IncorrectFeedback);
+    }
 
-//        // Act & Assert
-//        Assert.Throws<DomainException>(() => Question.Create("Hvad er bedst?", choices, null, null));
-//    }
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Constructor_GivenBlankText_ThrowsDomainException(string? text)
+    {
+        // Arrange
+        var choices = CreateChoices();
 
-//    [Fact]
-//    public void Create_GivenNullChoices_ThrowsDomainException()
-//    {
-//        // Act & Assert
-//        Assert.Throws<DomainException>(() => Question.Create("Hvad er bedst?", null!, null, null));
-//    }
+        // Act & Assert
+        Assert.Throws<DomainException>(() => new Question(text!, choices, null, null));
+    }
 
-//    [Theory]
-//    [InlineData(2, 0)]
-//    [InlineData(2, 2)]
-//    [InlineData(4, 0)]
-//    [InlineData(4, 3)]
-//    public void Create_GivenNotExactlyOneCorrectChoice_ThrowsDomainException(int totalChoices, int correctChoices)
-//    {
-//        // Arrange
-//        var choices = CreateChoices(totalChoices, correctChoices);
+    [Fact]
+    public void Constructor_GivenNullChoices_ThrowsDomainException()
+    {
+        // Arrange
+        List<Choice> choices = null!;
 
-//        // Act & Assert
-//        Assert.Throws<DomainException>(() => Question.Create("Hvad er bedst?", choices, null, null));
-//    }
+        // Act & Assert
+        Assert.Throws<DomainException>(() => new Question("Question", choices, null, null));
+    }
 
-//    [Theory]
-//    [InlineData(null)]
-//    [InlineData("")]
-//    [InlineData("   ")]
-//    public void Create_GivenBlankText_ThrowsDomainException(string? text)
-//    {
-//        // Arrange
-//        var choices = CreateChoices(2, 1);
+    [Fact]
+    public void Constructor_GivenNoChoices_ThrowsDomainException()
+    {
+        // Arrange
+        List<Choice> choices = [];
 
-//        // Act & Assert
-//        Assert.Throws<DomainException>(() => Question.Create(text!, choices, null, null));
-//    }
+        // Act & Assert
+        Assert.Throws<DomainException>(() => new Question("Question", choices, null, null));
+    }
 
-//    [Fact]
-//    public void Create_GivenNoFeedback_AllowsNull()
-//    {
-//        // Act
-//        var question = Question.Create("Hvad er bedst?", CreateChoices(2, 1), null, null);
+    [Fact]
+    public void Constructor_GivenOneChoice_ThrowsDomainException()
+    {
+        // Arrange
+        List<Choice> choices = [new Choice("Only", true)];
 
-//        // Assert
-//        Assert.Null(question.CorrectFeedback);
-//        Assert.Null(question.IncorrectFeedback);
-//    }
+        // Act & Assert
+        Assert.Throws<DomainException>(() => new Question("Question", choices, null, null));
+    }
 
-//    [Fact]
-//    public void Create_GivenTextWithEmoji_KeepsEmoji()
-//    {
-//        // Act
-//        var question = Question.Create("🪑 Stol med løst ben 🦦", CreateChoices(2, 1), null, null);
+    [Fact]
+    public void Constructor_GivenNoCorrectChoice_ThrowsDomainException()
+    {
+        // Arrange
+        List<Choice> choices = [new Choice("A", false), new Choice("B", false)];
 
-//        // Assert
-//        Assert.Equal("🪑 Stol med løst ben 🦦", question.Text);
-//    }
-//}
+        // Act & Assert
+        Assert.Throws<DomainException>(() => new Question("Question", choices, null, null));
+    }
+
+    [Fact]
+    public void Constructor_GivenMultipleCorrectChoices_ThrowsDomainException()
+    {
+        // Arrange
+        List<Choice> choices = [new Choice("A", true), new Choice("B", true)];
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => new Question("Question", choices, null, null));
+    }
+
+    [Fact]
+    public void Constructor_GivenThreeChoicesWithOneCorrect_AcceptsChoicesInOrder()
+    {
+        // Arrange
+        List<Choice> choices =
+        [
+            new Choice("A", false),
+            new Choice("B", true),
+            new Choice("C", false)
+        ];
+
+        // Act
+        var question = new Question("Question", choices, null, null);
+
+        // Assert
+        Assert.Equal<Choice>(choices, question.Choices);
+    }
+
+    [Fact]
+    public void Constructor_GivenChoices_CopiesCollection()
+    {
+        // Arrange
+        var choices = CreateChoices();
+        var question = new Question("Question", choices, null, null);
+
+        // Act
+        choices.Clear();
+
+        // Assert
+        Assert.Equal(2, question.Choices.Count);
+    }
+}
