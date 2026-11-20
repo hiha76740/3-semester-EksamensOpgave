@@ -1,0 +1,37 @@
+@inject DialogService Dialog
+
+<RadzenTemplateForm TItem="NameInput" Data="@model" Submit="Continue">
+    <RadzenStack Gap="1rem">
+        <RadzenFormField Text="Udstillingsnavn *">
+            <RadzenTextBox Name="ExhibitionName" @bind-Value="model.Name" />
+        </RadzenFormField>
+        <RadzenRequiredValidator Component="ExhibitionName" Text="Skriv et navn til udstillingen." />
+        @if (showError)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">Skriv et navn til udstillingen.</RadzenAlert>
+        }
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+            <RadzenButton Text="Annullér" Variant="Variant.Outlined" Click="@(() => Dialog.Close())" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Fortsæt" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    private readonly NameInput model = new();
+    private bool showError;
+
+    private void Continue(NameInput input)
+    {
+        showError = string.IsNullOrWhiteSpace(input.Name);
+        if (!showError)
+        {
+            Dialog.Close(input.Name.Trim());
+        }
+    }
+
+    private sealed class NameInput
+    {
+        public string Name { get; set; } = string.Empty;
+    }
+}

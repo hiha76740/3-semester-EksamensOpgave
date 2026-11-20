@@ -1,0 +1,93 @@
+@using VidensVejen.Web.Models
+@using VidensVejen.Web.Models.Exhibitions
+
+<RadzenCard class="rz-my-4 rz-mx-auto rz-p-4" Style="max-width: 900px;">
+    <RadzenTemplateForm TItem="ExhibitionInputModel" Data="@Model" Submit="HandleSubmit">
+        <RadzenStack Gap="1rem">
+            <RadzenText TextStyle="TextStyle.H2" Text="@Model.ExhibitionName" />
+            @if (Error != null)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@Error</RadzenAlert>
+            }
+            <RadzenFieldset Text="Temabillede *">
+                <RadzenStack Gap="0.5rem">
+                    <InputFile OnChange="SelectTheme" accept=".png,.jpg,.jpeg"
+                               aria-label="Vælg temabillede" />
+                    <RadzenText Text="PNG eller JPG, maks. 5 MB." />
+                    @if (themeError != null)
+                    {
+                        <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">@themeError</RadzenAlert>
+                    }
+                </RadzenStack>
+            </RadzenFieldset>
+
+            <RadzenAccordion>
+                <Items>
+                    @for (var index = 0; index < Model.Subjects.Count; index++)
+                    {
+                        var number = index + 1;
+                        var subject = Model.Subjects[index];
+                        <RadzenAccordionItem @key="subject" Text="@($"Subject {number}")" @bind-Selected="expandedSubjects[number - 1]">
+                            <ExhibitionSubjectComponent Model="subject" />
+                        </RadzenAccordionItem>
+                    }
+                </Items>
+            </RadzenAccordion>
+
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+                <RadzenButton ButtonType="ButtonType.Submit" Text="Opret udstilling" IsBusy="@IsSaving"
+                              BusyText="Opretter udstilling" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenCard>
+
+@code {
+    [Parameter, EditorRequired]
+    public ExhibitionInputModel Model { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public EventCallback<ExhibitionInputModel> SubmitCallback { get; set; }
+
+    [Parameter]
+    public bool IsSaving { get; set; }
+
+    [Parameter]
+    public string? Error { get; set; }
+
+    private bool[] expandedSubjects = [];
+    private string? themeError;
+
+    protected override void OnInitialized()
+    {
+        expandedSubjects = new bool[Model.Subjects.Count];
+        if (expandedSubjects.Length > 0)
+        {
+            expandedSubjects[0] = true;
+        }
+    }
+
+    private Task HandleSubmit(ExhibitionInputModel input) => SubmitCallback.InvokeAsync(input);
+
+    private void SelectTheme(InputFileChangeEventArgs args)
+    {
+        var file = args.File;
+        var extension = Path.GetExtension(file.Name).ToLowerInvariant();
+        Model.ThemeFile = null;
+        themeError = null;
+
+        if (file.Size == 0 || file.Size > ExhibitionInputModel.MaxThemeFileSize)
+        {
+            themeError = "Vælg et billede på højst 5 MB.";
+            return;
+        }
+
+        if (extension != ".png" && extension != ".jpg" && extension != ".jpeg")
+        {
+            themeError = "Vælg en PNG- eller JPG-fil.";
+            return;
+        }
+
+        Model.ThemeFile = file;
+    }
+}

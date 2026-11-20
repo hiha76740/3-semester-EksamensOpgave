@@ -1,0 +1,62 @@
+@using VidensVejen.Web.Models
+@using VidensVejen.Web.Models.Exhibitions
+@inject DialogService Dialog
+
+<RadzenTemplateForm TItem="ExhibitionTopicInputModel" Data="@Model" Submit="Save">
+    <RadzenStack Gap="0.75rem">
+        @if (!string.IsNullOrWhiteSpace(SubjectTitle))
+        {
+            <RadzenText TextStyle="TextStyle.Subtitle1" Text="@SubjectTitle" />
+        }
+        @if (showError)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">Udfyld alle felter markeret med *.</RadzenAlert>
+        }
+        <RadzenFormField Text="Titel *">
+            <RadzenTextBox @bind-Value="Model.Title" />
+        </RadzenFormField>
+        <RadzenFormField Text="Beskrivelse *">
+            <RadzenTextArea @bind-Value="Model.Description" Rows="2" />
+        </RadzenFormField>
+        <RadzenFormField Text="Brødtekst *">
+            <RadzenTextArea @bind-Value="Model.Body" Rows="4" />
+        </RadzenFormField>
+        <RadzenFormField Text="Label til fremhævet boks *">
+            <RadzenTextBox @bind-Value="Model.CalloutLabel" Placeholder="Fx Otto siger" />
+        </RadzenFormField>
+        <RadzenFormField Text="Tekst i fremhævet boks *">
+            <RadzenTextArea @bind-Value="Model.CalloutText" Rows="3" />
+        </RadzenFormField>
+        <RadzenFormField Text="Citat">
+            <RadzenTextArea @bind-Value="Model.Quote" Rows="2" />
+        </RadzenFormField>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Wrap="FlexWrap.Wrap">
+            <RadzenButton Text="Annullér" Variant="Variant.Outlined" Click="@(() => Dialog.Close())" />
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Gem emne" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter, EditorRequired]
+    public ExhibitionTopicInputModel Model { get; set; } = default!;
+
+    [Parameter]
+    public string SubjectTitle { get; set; } = string.Empty;
+
+    private bool showError;
+
+    private void Save(ExhibitionTopicInputModel topic)
+    {
+        showError = string.IsNullOrWhiteSpace(topic.Title)
+            || string.IsNullOrWhiteSpace(topic.Description)
+            || string.IsNullOrWhiteSpace(topic.Body)
+            || string.IsNullOrWhiteSpace(topic.CalloutLabel)
+            || string.IsNullOrWhiteSpace(topic.CalloutText);
+
+        if (!showError)
+        {
+            Dialog.Close(topic);
+        }
+    }
+}
