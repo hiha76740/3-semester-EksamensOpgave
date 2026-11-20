@@ -1,0 +1,55 @@
+@using VidensVejen.Web.Models
+@using VidensVejen.Web.Models.Games
+
+<RadzenCard Variant="Variant.Outlined">
+    <RadzenStack Gap="0.75rem">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+            <RadzenCheckBox TValue="bool" Name="@CorrectCheckboxName" Value="@Answer.IsCorrect"
+                            Disabled="@Answer.IsCorrect" Change="@(_ => MarkCorrect.InvokeAsync())" />
+            <RadzenLabel Text="Korrekt svar" Component="@CorrectCheckboxName" />
+        </RadzenStack>
+
+        <RadzenRow AlignItems="AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="@($"Svar {Number} *")" Style="width: 100%;">
+                    <RadzenTextBox @bind-Value="Answer.Text" @bind-Value:after="NotifyChanged" />
+                </RadzenFormField>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenFormField Text="Feedback (valgfrit)" Style="width: 100%;">
+                    <RadzenTextBox @bind-Value="Answer.Feedback" @bind-Value:after="NotifyChanged" />
+                </RadzenFormField>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
+            <RadzenButton ButtonType="ButtonType.Button" Text="@($"Fjern svar {Number}")" ButtonStyle="ButtonStyle.Danger"
+                          Variant="Variant.Outlined" Disabled="@(!CanRemove)"
+                          Click="@(() => Remove.InvokeAsync())" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter, EditorRequired]
+    public QuizAnswerInputModel Answer { get; set; } = default!;
+
+    [Parameter]
+    public int Number { get; set; }
+
+    [Parameter]
+    public bool CanRemove { get; set; }
+
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    [Parameter]
+    public EventCallback Remove { get; set; }
+
+
+    [Parameter, EditorRequired]
+    public EventCallback MarkCorrect { get; set; }
+
+    private string CorrectCheckboxName => $"correct-{Answer.Id}";
+
+    private Task NotifyChanged() => Changed.InvokeAsync();
+}

@@ -55,6 +55,7 @@ internal static class ExhibitionMapper
     internal static ExhibitionNameResponse AsNameResponse(this ExhibitionNameDto dto)
     {
         var output = new ExhibitionNameResponse(
+            dto.Id,
             dto.Name
             );
 
