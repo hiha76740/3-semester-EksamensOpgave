@@ -14,18 +14,5 @@ internal sealed class ExhibitionConfiguration : IEntityTypeConfiguration<Exhibit
             .HasConversion(
             id => id.Value,
             value => new ExhibitionId(value));
-
-        builder.Property(e => e.ExhibitionName)
-            .HasMaxLength(200)
-            .IsRequired();
-
-        builder.Property(e => e.ThemeImage)
-            .IsRequired();
-
-        builder.HasMany(e => e.Subjects)
-            .WithOne(s => s.Exhibition)
-            .HasForeignKey("ExhibitionId")
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }
