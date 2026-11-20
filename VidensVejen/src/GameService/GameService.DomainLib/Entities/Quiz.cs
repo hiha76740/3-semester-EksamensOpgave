@@ -15,7 +15,7 @@ public class Quiz
     /// <summary>
     /// 
     /// </summary>
-    public Guid ExhibitionId { get; private set; }
+    public ExhibitionId ExhibitionId { get; init; } = null!;
     /// <summary>
     /// 
     /// </summary>
@@ -60,37 +60,31 @@ public class Quiz
         if (questions == null || questions.Count == 0)
             throw new DomainException("A quiz must have at least one question");
 
-        var quiz = new Quiz(title, exhibitionId, quizLayout, endMessage);
+        var exhibitionKey = new ExhibitionId(exhibitionId);
 
-        foreach (var question in questions)
-        {
-            quiz.AddQuestion(question);
-        }
+        var quiz = new Quiz(title, exhibitionKey, quizLayout, endMessage, questions);
 
         return quiz;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="newQuestion"></param>
-    /// <returns></returns>
-    /// <exception cref="DomainException"></exception>
-    public Question AddQuestion(NewQuestion newQuestion)
+    private void AddQuestion(NewQuestion newQuestion)
     {
-        var question = Question.Create(newQuestion.Text, newQuestion.Choices, newQuestion.CorrectFeedback, newQuestion.IncorrectFeedback);
+        var question = new Question(newQuestion.Text, newQuestion.Choices, newQuestion.CorrectFeedback, newQuestion.IncorrectFeedback);
         _questions.Add(question);
-
-        return question;
     }
 
-    private Quiz(string title, Guid exhibitionId, string quizLayout, string? endMessage)
+    private Quiz(string title, ExhibitionId exhibitionId, string quizLayout, string? endMessage, List<NewQuestion> questions)
     {
         Id = new QuizId(Guid.NewGuid());
         Title = title;
         ExhibitionId = exhibitionId;
         QuizLayout = quizLayout;
         EndMessage = endMessage;
+
+        foreach (var question in questions)
+        {
+            AddQuestion(question);
+        }
     }
 
     // EF Core constructor

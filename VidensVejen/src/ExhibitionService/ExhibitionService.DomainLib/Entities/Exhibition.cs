@@ -1,3 +1,4 @@
+using ExhibitionService.DomainLib.ValueObjects;
 using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace ExhibitionService.DomainLib.Entities;
@@ -15,12 +16,12 @@ public class Exhibition
     /// <summary>
     /// 
     /// </summary>
-    public string ExhibitionName { get; private set; } = string.Empty;
+    public string Name { get; private set; } = string.Empty;
 
     /// <summary>
     /// 
     /// </summary>
-    public string ThemeImage { get; private set; } = string.Empty;
+    public ImageId? Theme { get; private set; }
 
     private readonly List<Subject> _subjects = [];
     /// <summary>
@@ -29,75 +30,54 @@ public class Exhibition
     public IReadOnlyList<Subject> Subjects => _subjects.AsReadOnly();
 
 
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="title"></param>
-    /// <param name="description"></param>
-    /// <param name="topics"></param>
-    public void AddSubject(
-    string title,
-    string description,
-    List<(
-        string Title,
-        string Description,
-        string Body,
-        string CalloutLabel,
-        string CalloutText,
-        string? Quote)> topics)
-    {
-        var subject = Subject.Create(this, title, description, topics);
-
-        _subjects.Add(subject);
-    }
-
     /// <summary>
     /// 
     /// </summary>
     /// <param name="exhibitionName"></param>
-    /// <param name="themeImage"></param>
+    /// <param name="theme"></param>
     /// <param name="subjects"></param>
     /// <returns></returns>
     /// <exception cref="DomainException"></exception>
     public static Exhibition Create(
     string exhibitionName,
-    string themeImage,
-    List<(
-        string Title,
-        string Description,
-        List<(
-            string Title,
-            string Description,
-            string Body,
-            string CalloutLabel,
-            string CalloutText,
-            string? Quote)> Topics)> subjects)
+    Guid? theme,
+    List<NewSubject> subjects)
     {
         if (string.IsNullOrWhiteSpace(exhibitionName))
             throw new DomainException("Exhibition must have a name.");
 
-        if (string.IsNullOrWhiteSpace(themeImage))
-            throw new DomainException("Exhibition must have a theme.");
-
         if (subjects.Count == 0)
             throw new DomainException("An exhibition must have at least one subject");
 
-        var exhibition = new Exhibition(exhibitionName, themeImage);
+        ImageId? imageId = null;
 
-        foreach (var (title, description, topics) in subjects)
-        {
-            exhibition.AddSubject(title, description, topics);
-        }
+        if (theme != null)
+            imageId = new ImageId(theme.Value);
+
+        var exhibition = new Exhibition(exhibitionName, imageId, subjects);
 
         return exhibition;
     }
 
-    private Exhibition(string exhibitionName, string themeImage)
+
+    private void AddSubject(NewSubject newSubject)
+    {
+        var subject = new Subject(newSubject.Title, newSubject.Description, newSubject.Topics);
+
+        _subjects.Add(subject);
+    }
+
+
+    private Exhibition(string exhibitionName, ImageId? theme, List<NewSubject> subjects)
     {
         Id = new ExhibitionId(Guid.NewGuid());
-        ExhibitionName = exhibitionName;
-        ThemeImage = themeImage;
+        Name = exhibitionName;
+        Theme = theme;
+
+        foreach (var subject in subjects)
+        {
+            AddSubject(subject);
+        }
     }
 
     // EF constructor

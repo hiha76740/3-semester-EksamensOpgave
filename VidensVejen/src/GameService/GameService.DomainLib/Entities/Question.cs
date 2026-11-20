@@ -32,16 +32,8 @@ public class Question
 
     private readonly List<Choice> _choices = [];
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="text"></param>
-    /// <param name="choices"></param>
-    /// <param name="correctFeedback"></param>
-    /// <param name="incorrectFeedback"></param>
-    /// <returns></returns>
-    /// <exception cref="DomainException"></exception>
-    internal static Question Create(string text, List<Choice> choices, string? correctFeedback, string? incorrectFeedback)
+
+    internal Question(string text, List<Choice> choices, string? correctFeedback, string? incorrectFeedback)
     {
         if (string.IsNullOrWhiteSpace(text))
             throw new DomainException("Question text could not be set, no value");
@@ -52,11 +44,6 @@ public class Question
         if (choices.Count(c => c.IsCorrect) != 1)
             throw new DomainException("A question must have exactly one correct choice");
 
-        return new Question(text, choices, correctFeedback, incorrectFeedback);
-    }
-
-    private Question(string text, List<Choice> choices, string? correctFeedback, string? incorrectFeedback)
-    {
         Id = new QuestionId(Guid.NewGuid());
         Text = text;
         CorrectFeedback = correctFeedback;
