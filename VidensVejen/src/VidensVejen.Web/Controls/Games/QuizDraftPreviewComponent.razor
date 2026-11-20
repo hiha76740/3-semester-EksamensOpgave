@@ -1,0 +1,29 @@
+@using VidensVejen.Web.Models
+@using VidensVejen.Web.Models.Games
+
+<RadzenCard>
+    <RadzenStack Gap="0.5rem">
+        <RadzenText TextStyle="TextStyle.H4" Text="Kort forhåndsvisning" />
+        <RadzenText TextStyle="TextStyle.Subtitle1" Text="@(string.IsNullOrWhiteSpace(Title) ? "Ny quiz" : Title)" />
+        <RadzenText Text="@(string.IsNullOrWhiteSpace(Instruction) ? "Quizinstruktionen vises her." : Instruction)" />
+        <RadzenText TextStyle="TextStyle.H5" Text="@(string.IsNullOrWhiteSpace(Question.Text) ? "Dit første spørgsmål vises her." : Question.Text)" />
+        @foreach (var answer in Question.Answers)
+        {
+            <RadzenCard @key="answer.Id" Variant="Variant.Outlined">
+                <RadzenText Text="@(string.IsNullOrWhiteSpace(answer.Text) ? "Svarmulighed" : answer.Text)" />
+            </RadzenCard>
+        }
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public string Instruction { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public QuizQuestionInputModel Question { get; set; } = default!;
+
+}

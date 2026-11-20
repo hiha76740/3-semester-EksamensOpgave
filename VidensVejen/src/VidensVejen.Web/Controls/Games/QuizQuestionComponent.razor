@@ -1,0 +1,68 @@
+@using VidensVejen.Web.Models
+@using VidensVejen.Web.Models.Games
+@inject DialogService Dialog
+
+<RadzenCard Variant="Variant.Outlined">
+    <RadzenStack Gap="0.75rem">
+        <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
+                     AlignItems="AlignItems.Center" Wrap="FlexWrap.Wrap">
+            <RadzenText TextStyle="TextStyle.H5" Text="@($"Spørgsmål {Number}")" />
+            <RadzenButton ButtonType="ButtonType.Button" Text="Slet spørgsmål" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Outlined"
+                          Disabled="@(!CanRemove)" Click="@(() => Remove.InvokeAsync())" />
+        </RadzenStack>
+
+        <RadzenFormField Text="Spørgsmålstekst *">
+            <RadzenTextArea @bind-Value="Question.Text" @bind-Value:after="NotifyChanged" Rows="2" />
+        </RadzenFormField>
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.Wrap">
+            <RadzenButton ButtonType="ButtonType.Button" Text="Svarmuligheder" Variant="Variant.Outlined"
+                          Click="OpenAnswers" />
+            <RadzenText Text="@($"{Question.Answers.Count} svar")" />
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [Parameter, EditorRequired]
+    public QuizQuestionInputModel Question { get; set; } = default!;
+
+    [Parameter]
+    public int Number { get; set; }
+
+    [Parameter]
+    public bool CanRemove { get; set; }
+
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    [Parameter]
+    public EventCallback Remove { get; set; }
+
+
+    private Task NotifyChanged() => Changed.InvokeAsync();
+
+    private async Task OpenAnswers()
+    {
+        var draft = Question.Answers.Select(answer => new QuizAnswerInputModel
+        {
+            Text = answer.Text,
+            Feedback = answer.Feedback,
+            IsCorrect = answer.IsCorrect
+        }).ToList();
+
+        object? result = await Dialog.OpenAsync<QuizAnswersDialogComponent>(
+            $"Svarmuligheder – spørgsmål {Number}",
+            new Dictionary<string, object?>
+            {
+                [nameof(QuizAnswersDialogComponent.Answers)] = draft
+            },
+            new DialogOptions { Width = "min(90vw, 760px)", CloseDialogOnOverlayClick = false });
+
+        if (result is List<QuizAnswerInputModel> answers)
+        {
+            Question.Answers.Clear();
+            Question.Answers.AddRange(answers);
+            await NotifyChanged();
+        }
+    }
+}

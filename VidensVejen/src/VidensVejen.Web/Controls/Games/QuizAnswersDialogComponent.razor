@@ -1,0 +1,53 @@
+@using VidensVejen.Web.Models
+@using VidensVejen.Web.Models.Games
+@inject DialogService Dialog
+
+<RadzenStack Gap="1rem">
+    @for (var index = 0; index < Answers.Count; index++)
+    {
+        var answer = Answers[index];
+        <QuizAnswerComponent @key="answer.Id" Answer="answer" Number="@(index + 1)"
+                             CanRemove="@(Answers.Count > 2)"
+                             MarkCorrect="@(() => SetCorrectAnswer(answer))"
+                             Remove="@(() => RemoveAnswer(answer))" />
+    }
+
+    <RadzenButton Text="Tilføj svar" Icon="add" Variant="Variant.Outlined" Click="AddAnswer" />
+
+    <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Wrap="FlexWrap.Wrap">
+        <RadzenButton Text="Annullér" Variant="Variant.Outlined" Click="@(() => Dialog.Close())" />
+        <RadzenButton Text="Gem svarmuligheder" Click="@(() => Dialog.Close(Answers))" />
+    </RadzenStack>
+</RadzenStack>
+
+@code {
+    [Parameter, EditorRequired]
+    public List<QuizAnswerInputModel> Answers { get; set; } = default!;
+
+    private void AddAnswer()
+    {
+        Answers.Add(new QuizAnswerInputModel());
+    }
+
+    private void RemoveAnswer(QuizAnswerInputModel answer)
+    {
+        if (Answers.Count <= 2)
+        {
+            return;
+        }
+
+        Answers.Remove(answer);
+        if (answer.IsCorrect)
+        {
+            Answers[0].IsCorrect = true;
+        }
+    }
+
+    private void SetCorrectAnswer(QuizAnswerInputModel selectedAnswer)
+    {
+        foreach (var answer in Answers)
+        {
+            answer.IsCorrect = answer == selectedAnswer;
+        }
+    }
+}
