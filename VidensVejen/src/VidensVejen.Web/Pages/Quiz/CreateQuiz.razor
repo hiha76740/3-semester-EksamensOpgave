@@ -1,0 +1,303 @@
+@page "/createquiz"
+@using VidensVejen.Web.Authentication
+
+
+@inject IAuthService Service
+@inject NavigationManager NavigationManager
+@inject DialogService Dialog
+@inject CustomAuthenticationStateProvider AuthStateProvider
+
+
+
+<PageTitle>Opret quiz</PageTitle>
+
+<div class="container mt-4" style="max-width: 1000px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 style="color: #547737;">Opret quiz</h2>
+            <p class="text-muted mb-0">Opret en quiz med spørgsmål og svar til en udstilling.</p>
+        </div>
+        <span class="badge rounded-pill p-2" style="background-color: #edf4e7; color: #547737;">
+            Status: Kladde
+        </span>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <div class="alert alert-success">@message</div>
+    }
+
+    @if (errors.Count > 0)
+    {
+        <div class="alert alert-danger">
+            <strong>Kontrollér følgende:</strong>
+            <ul class="mb-0">
+                @foreach (var error in errors)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="card p-3 mb-3">
+        <h4 style="color: #547737;">Quizinformation</h4>
+
+        <div class="mb-3">
+            <label class="form-label">Titel *</label>
+            <input class="form-control" @bind="quizTitle" placeholder="Fx Affald og genbrug" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Instruktion *</label>
+            <textarea class="form-control" rows="3" @bind="instruction"
+                      placeholder="Skriv en kort instruktion til gæsten."></textarea>
+        </div>
+
+        <div class="mb-2">
+            <label class="form-label">Udstillings-ID *</label>
+            <input class="form-control" @bind="exhibitionId" placeholder="Indtast ID på udstillingen" />
+        </div>
+    </div>
+
+    <div class="card p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 style="color: #547737; margin: 0;">Spørgsmål</h4>
+            <button type="button" class="btn btn-success" style="background-color: #547737; border-color: #547737;"
+                    @onclick="AddQuestion">
+                + Tilføj spørgsmål
+            </button>
+        </div>
+
+        @for (var questionIndex = 0; questionIndex < questions.Count; questionIndex++)
+        {
+            var question = questions[questionIndex];
+
+            <div class="border rounded p-3 mb-3" @key="question.Id">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Spørgsmål @(questionIndex + 1)</h5>
+                    <button type="button" class="btn btn-outline-danger btn-sm"
+                            @onclick="() => RemoveQuestion(question)"
+                            disabled="@(questions.Count == 1)">
+                        Slet spørgsmål
+                    </button>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Spørgsmålstekst *</label>
+                    <textarea class="form-control" rows="2" @bind="question.Text"
+                              placeholder="Skriv spørgsmålet her."></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Billede – ImageId</label>
+                    <input class="form-control" @bind="question.ImageId"
+                           placeholder="Indtast ImageId (valgfrit)" />
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>Svarmuligheder</strong>
+                    <button type="button" class="btn btn-outline-success btn-sm"
+                            @onclick="() => AddAnswer(question)">
+                        + Tilføj svar
+                    </button>
+                </div>
+                <small class="text-muted">Vælg præcis ét korrekt svar med radioknappen.</small>
+
+                @foreach (var answer in question.Answers)
+                {
+                    <div class="row align-items-end g-2 border rounded p-2 mt-2" @key="answer.Id">
+                        <div class="col-auto">
+                            <label class="form-label">Korrekt</label>
+                            <input class="form-check-input d-block" type="radio"
+                                   name="correct-@question.Id"
+                                   checked="@answer.IsCorrect"
+                                   @onchange="() => SetCorrectAnswer(question, answer)" />
+                        </div>
+
+                        <div class="col-md">
+                            <label class="form-label">Svar *</label>
+                            <input class="form-control" @bind="answer.Text" placeholder="Svartekst" />
+                        </div>
+
+                        <div class="col-md">
+                            <label class="form-label">Feedback</label>
+                            <input class="form-control" @bind="answer.Feedback" placeholder="Valgfri feedback" />
+                        </div>
+
+                        <div class="col-md">
+                            <label class="form-label">ImageId</label>
+                            <input class="form-control" @bind="answer.ImageId" placeholder="Valgfrit ID" />
+                        </div>
+
+                        <div class="col-auto">
+                            <button type="button" class="btn btn-outline-danger"
+                                    @onclick="() => RemoveAnswer(question, answer)"
+                                    disabled="@(question.Answers.Count <= 2)">
+                                Fjern
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-outline-secondary" @onclick="ResetForm">
+                Nulstil
+            </button>
+            <button type="button" class="btn btn-success"
+                    style="background-color: #547737; border-color: #547737;"
+                    @onclick="CheckDraft">
+                Kontrollér kladde
+            </button>
+        </div>
+    </div>
+
+    <div class="card p-3">
+        <h4 style="color: #547737;">Kort forhåndsvisning</h4>
+        <p><strong>@(string.IsNullOrWhiteSpace(quizTitle) ? "Ny quiz" : quizTitle)</strong></p>
+        <p>@(string.IsNullOrWhiteSpace(instruction) ? "Quizinstruktionen vises her." : instruction)</p>
+
+        @if (questions.Count > 0)
+        {
+            <h5>@(string.IsNullOrWhiteSpace(questions[0].Text) ? "Dit første spørgsmål vises her." : questions[0].Text)</h5>
+            @foreach (var answer in questions[0].Answers)
+            {
+                <div class="border rounded p-2 mb-2">
+                    ○ @(string.IsNullOrWhiteSpace(answer.Text) ? "Svarmulighed" : answer.Text)
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private string quizTitle = string.Empty;
+    private string instruction = string.Empty;
+    private string exhibitionId = string.Empty;
+    private string? message;
+    private readonly List<string> errors = new();
+
+    private readonly List<QuizQuestion> questions = new()
+    {
+        new QuizQuestion()
+    };
+
+    private void AddQuestion()
+    {
+        questions.Add(new QuizQuestion());
+        ClearMessages();
+    }
+
+    private void RemoveQuestion(QuizQuestion question)
+    {
+        if (questions.Count > 1)
+            questions.Remove(question);
+
+        ClearMessages();
+    }
+
+    private void AddAnswer(QuizQuestion question)
+    {
+        question.Answers.Add(new QuizAnswer());
+        ClearMessages();
+    }
+
+    private void RemoveAnswer(QuizQuestion question, QuizAnswer answer)
+    {
+        if (question.Answers.Count <= 2)
+            return;
+
+        var wasCorrect = answer.IsCorrect;
+        question.Answers.Remove(answer);
+
+        if (wasCorrect)
+            question.Answers[0].IsCorrect = true;
+
+        ClearMessages();
+    }
+
+    private void SetCorrectAnswer(QuizQuestion question, QuizAnswer selectedAnswer)
+    {
+        foreach (var answer in question.Answers)
+            answer.IsCorrect = answer.Id == selectedAnswer.Id;
+
+        ClearMessages();
+    }
+
+    private void CheckDraft()
+    {
+        ClearMessages();
+
+        if (string.IsNullOrWhiteSpace(quizTitle))
+            errors.Add("Quizzen skal have en titel.");
+
+        if (string.IsNullOrWhiteSpace(instruction))
+            errors.Add("Quizzen skal have en instruktion.");
+
+        if (string.IsNullOrWhiteSpace(exhibitionId))
+            errors.Add("Quizzen skal knyttes til en udstilling via et Udstillings-ID.");
+
+        for (var i = 0; i < questions.Count; i++)
+        {
+            var question = questions[i];
+
+            if (string.IsNullOrWhiteSpace(question.Text))
+                errors.Add($"Spørgsmål {i + 1} mangler en tekst.");
+
+            if (question.Answers.Count < 2)
+                errors.Add($"Spørgsmål {i + 1} skal have mindst to svar.");
+
+            if (question.Answers.Count(answer => answer.IsCorrect) != 1)
+                errors.Add($"Spørgsmål {i + 1} skal have præcis ét korrekt svar.");
+
+            for (var j = 0; j < question.Answers.Count; j++)
+            {
+                if (string.IsNullOrWhiteSpace(question.Answers[j].Text))
+                    errors.Add($"Spørgsmål {i + 1}, svar {j + 1} mangler svartekst.");
+            }
+        }
+
+        if (errors.Count == 0)
+            message = "Quizzen er udfyldt korrekt og har status Kladde. Den er endnu ikke gemt i en database.";
+    }
+
+    private void ResetForm()
+    {
+        quizTitle = string.Empty;
+        instruction = string.Empty;
+        exhibitionId = string.Empty;
+        questions.Clear();
+        questions.Add(new QuizQuestion());
+        ClearMessages();
+    }
+
+    private void ClearMessages()
+    {
+        message = null;
+        errors.Clear();
+    }
+
+    private sealed class QuizQuestion
+    {
+        public Guid Id { get; } = Guid.NewGuid();
+        public string Text { get; set; } = string.Empty;
+        public string ImageId { get; set; } = string.Empty;
+        public List<QuizAnswer> Answers { get; } = new()
+        {
+            new QuizAnswer { IsCorrect = true },
+            new QuizAnswer()
+        };
+    }
+
+    private sealed class QuizAnswer
+    {
+        public Guid Id { get; } = Guid.NewGuid();
+        public string Text { get; set; } = string.Empty;
+        public string Feedback { get; set; } = string.Empty;
+        public string ImageId { get; set; } = string.Empty;
+        public bool IsCorrect { get; set; }
+    }
+}
+
