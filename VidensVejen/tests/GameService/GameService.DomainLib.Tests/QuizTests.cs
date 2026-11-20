@@ -1,112 +1,109 @@
-//using GameService.DomainLib.Entities;
-//using GameService.DomainLib.ValueObjects;
-//using VidensVejen.SharedKernelLib.Exceptions;
+using GameService.DomainLib.Entities;
+using GameService.DomainLib.ValueObjects;
+using VidensVejen.SharedKernelLib.Exceptions;
 
-//namespace GameService.DomainLib.Tests;
+namespace GameService.DomainLib.Tests;
 
-//public class QuizTests
-//{
-//    private static readonly Guid s_exhibitionId = Guid.NewGuid();
+public class QuizTests
+{
+    private static List<NewQuestion> CreateQuestions()
+    {
+        return [new NewQuestion("Question", [new Choice("Yes", true), new Choice("No", false)], "Correct", "Incorrect")];
+    }
 
-//    private static NewQuestion CreateValidQuestion()
-//    {
-//        return new NewQuestion(
-//            "🪑 En stol har fået et løst ben. Hvad er bedst?",
-//            [new Choice("🔧 Reparér stolen", true), new Choice("🔥 Storskrald", false)],
-//            null,
-//            null);
-//    }
+    [Fact]
+    public void Create_GivenValidData_InitializesQuizAndQuestion()
+    {
+        // Arrange
+        var exhibitionId = Guid.NewGuid();
+        var questions = CreateQuestions();
 
-//    [Fact]
-//    public void Create_GivenValidInput_InitializesQuiz()
-//    {
-//        // Act
-//        var quiz = Quiz.Create("Hjælp Otto", s_exhibitionId, "Vertikalt", "Godt hjulpet! 🦦", [CreateValidQuestion()]);
+        // Act
+        var quiz = Quiz.Create("Quiz", exhibitionId, "vertical", "Done", questions);
 
-//        // Assert
-//        Assert.NotEqual(Guid.Empty, quiz.Id.Value);
-//        Assert.Equal("Hjælp Otto", quiz.Title);
-//        Assert.Equal(s_exhibitionId, quiz.ExhibitionId);
-//        Assert.Equal("Vertikalt", quiz.QuizLayout);
-//        Assert.Equal("Godt hjulpet! 🦦", quiz.EndMessage);
-//        Assert.Single(quiz.Questions);
-//    }
+        // Assert
+        Assert.NotEqual(Guid.Empty, quiz.Id.Value);
+        Assert.Equal(exhibitionId, quiz.ExhibitionId.Value);
+        Assert.Equal("Quiz", quiz.Title);
+        Assert.Equal("vertical", quiz.QuizLayout);
+        Assert.Equal("Done", quiz.EndMessage);
+        var question = Assert.Single(quiz.Questions);
+        Assert.NotEqual(Guid.Empty, question.Id.Value);
+        Assert.Equal("Question", question.Text);
+        Assert.Equal("Correct", question.CorrectFeedback);
+        Assert.Equal("Incorrect", question.IncorrectFeedback);
+        Assert.Equal(questions[0].Choices, question.Choices);
+    }
 
-//    [Theory]
-//    [InlineData(null)]
-//    [InlineData("")]
-//    [InlineData("   ")]
-//    public void Create_GivenBlankTitle_ThrowsDomainException(string? title)
-//    {
-//        // Act & Assert
-//        Assert.Throws<DomainException>(() => Quiz.Create(title!, s_exhibitionId, "Vertikalt", null, [CreateValidQuestion()]));
-//    }
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_GivenBlankTitle_ThrowsDomainException(string? title)
+    {
+        // Arrange
+        var questions = CreateQuestions();
 
-//    [Fact]
-//    public void Create_GivenEmptyExhibitionId_ThrowsDomainException()
-//    {
-//        // Act & Assert
-//        Assert.Throws<DomainException>(() => Quiz.Create("Hjælp Otto", Guid.Empty, "Vertikalt", null, [CreateValidQuestion()]));
-//    }
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Quiz.Create(title!, Guid.NewGuid(), "vertical", null, questions));
+    }
 
-//    [Theory]
-//    [InlineData(null)]
-//    [InlineData("")]
-//    [InlineData("   ")]
-//    public void Create_GivenBlankLayout_ThrowsDomainException(string? layout)
-//    {
-//        // Act & Assert
-//        Assert.Throws<DomainException>(() => Quiz.Create("Hjælp Otto", s_exhibitionId, layout!, null, [CreateValidQuestion()]));
-//    }
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_GivenBlankLayout_ThrowsDomainException(string? layout)
+    {
+        // Arrange
+        var questions = CreateQuestions();
 
-//    [Fact]
-//    public void Create_GivenNoQuestions_ThrowsDomainException()
-//    {
-//        // Act & Assert
-//        Assert.Throws<DomainException>(() => Quiz.Create("Hjælp Otto", s_exhibitionId, "Vertikalt", null, []));
-//    }
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Quiz.Create("Quiz", Guid.NewGuid(), layout!, null, questions));
+    }
 
-//    [Fact]
-//    public void Create_GivenNullQuestions_ThrowsDomainException()
-//    {
-//        // Act & Assert
-//        Assert.Throws<DomainException>(() => Quiz.Create("Hjælp Otto", s_exhibitionId, "Vertikalt", null, null!));
-//    }
+    [Fact]
+    public void Create_GivenEmptyExhibitionId_ThrowsDomainException()
+    {
+        // Arrange
+        var questions = CreateQuestions();
 
-//    [Fact]
-//    public void Create_GivenNoEndMessage_AllowsNull()
-//    {
-//        // Act
-//        var quiz = Quiz.Create("Hjælp Otto", s_exhibitionId, "Vertikalt", null, [CreateValidQuestion()]);
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Quiz.Create("Quiz", Guid.Empty, "vertical", null, questions));
+    }
 
-//        // Assert
-//        Assert.Null(quiz.EndMessage);
-//    }
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Create_GivenMissingQuestions_ThrowsDomainException(bool useNull)
+    {
+        // Arrange
+        List<NewQuestion> questions = [];
+        if (useNull)
+        {
+            questions = null!;
+        }
 
-//    [Fact]
-//    public void Create_GivenQuestionWithoutCorrectChoice_ThrowsDomainException()
-//    {
-//        // Arrange
-//        var invalidQuestion = new NewQuestion(
-//            "Hvad er bedst?",
-//            [new Choice("Svar", false), new Choice("Svar", false)],
-//            null,
-//            null);
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Quiz.Create("Quiz", Guid.NewGuid(), "vertical", null, questions));
+    }
 
-//        // Act & Assert
-//        Assert.Throws<DomainException>(() => Quiz.Create("Hjælp Otto", s_exhibitionId, "Vertikalt", null, [invalidQuestion]));
-//    }
+    [Fact]
+    public void Create_GivenMultipleQuestions_PreservesOrderAndOptionalNullValues()
+    {
+        // Arrange
+        var questions = CreateQuestions();
+        questions.Add(new NewQuestion("Second", [new Choice("A", false), new Choice("B", true)], null, null));
 
-//    [Fact]
-//    public void AddQuestion_GivenValidQuestion_AddsQuestionToQuiz()
-//    {
-//        // Arrange
-//        var quiz = Quiz.Create("Hjælp Otto", s_exhibitionId, "Vertikalt", null, [CreateValidQuestion()]);
+        // Act
+        var quiz = Quiz.Create("Quiz", Guid.NewGuid(), "vertical", null, questions);
 
-//        // Act
-//        quiz.AddQuestion(CreateValidQuestion());
-
-//        // Assert
-//        Assert.Equal(2, quiz.Questions.Count);
-//    }
-//}
+        // Assert
+        Assert.Null(quiz.EndMessage);
+        Assert.Equal(2, quiz.Questions.Count);
+        Assert.Equal("Question", quiz.Questions[0].Text);
+        Assert.Equal("Second", quiz.Questions[1].Text);
+        Assert.Null(quiz.Questions[1].CorrectFeedback);
+        Assert.Null(quiz.Questions[1].IncorrectFeedback);
+        Assert.NotEqual(quiz.Questions[0].Id, quiz.Questions[1].Id);
+    }
+}
