@@ -14,7 +14,7 @@ namespace ExhibitionService.Api.Controllers;
 [Route("api/exhibitions")]
 [ApiController]
 public class ExhibitionsController(
-    ICreateExhibition create,
+    ICreateExhibitionHandler create,
     IUpdateExhibitionHandler update,
     IDeleteExbitionHandler delete,
     IExhibitionQueries queries
