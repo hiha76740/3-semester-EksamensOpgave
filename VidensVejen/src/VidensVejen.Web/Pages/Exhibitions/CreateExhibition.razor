@@ -1,0 +1,131 @@
+@page "/exhibition/create"
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using VidensVejen.ContractsLib.Requests.ExhibitionService
+@using VidensVejen.Web.Controls.Exhibitions
+@using VidensVejen.Web.Models
+@using VidensVejen.Web.Models.Exhibitions
+@inject DialogService Dialog
+@inject HttpClient Http
+
+<PageTitle>Opret udstilling</PageTitle>
+
+@if (model != null)
+{
+    <ExhibitionFormComponent Model="model" SubmitCallback="CreateAsync"
+                             IsSaving="isSaving" Error="@error" />
+}
+else
+{
+    <RadzenCard class="rz-my-4 rz-mx-auto rz-p-4" Style="max-width: 900px;">
+        <RadzenStack Gap="1rem" AlignItems="AlignItems.Start">
+            @if (createdName != null)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">
+                    Udstillingen «@createdName» er oprettet.
+                </RadzenAlert>
+            }
+            <RadzenButton Text="Opret udstilling" Icon="add" Click="NameExhibitionAsync" />
+        </RadzenStack>
+    </RadzenCard>
+}
+
+@code {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private ExhibitionInputModel? model;
+    private string? error;
+    private string? createdName;
+    private bool isSaving;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await NameExhibitionAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task NameExhibitionAsync()
+    {
+        object? result = await Dialog.OpenAsync<ExhibitionNameDialogComponent>(
+            "Opret udstilling",
+            options: new DialogOptions { Width = "min(92vw, 420px)", CloseDialogOnOverlayClick = false });
+
+        if (result is string name)
+        {
+            model = new ExhibitionInputModel { ExhibitionName = name };
+            createdName = null;
+            error = null;
+        }
+    }
+
+    private async Task CreateAsync(ExhibitionInputModel input)
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+        error = null;
+        var themeFile = input.ThemeFile;
+        if (themeFile == null)
+        {
+            error = "Vælg et gyldigt temabillede.";
+            return;
+        }
+
+        for (var index = 0; index < input.Subjects.Count; index++)
+        {
+            var subject = input.Subjects[index];
+            if (string.IsNullOrWhiteSpace(subject.Title) || string.IsNullOrWhiteSpace(subject.Description)
+                || subject.Topics.Count == 0)
+            {
+                error = $"Subject {index + 1} skal have en titel, beskrivelse og mindst ét emne.";
+                return;
+            }
+        }
+
+        isSaving = true;
+        try
+        {
+            var createRequest = new CreateExhibitionRequest(
+                input.ExhibitionName,
+                input.Subjects.Select(subject => new CreateSubjectRequest(
+                    subject.Title.Trim(),
+                    subject.Description.Trim(),
+                    subject.Topics.Select(topic => new CreateTopicRequest(
+                        topic.Title.Trim(), topic.Description.Trim(), topic.Body.Trim(),
+                        topic.CalloutLabel.Trim(), topic.CalloutText.Trim(), topic.Quote.Trim())).ToList())).ToList());
+
+            using var payload = new MultipartFormDataContent();
+            payload.Add(new StringContent(JsonSerializer.Serialize(createRequest, JsonOptions)), "data");
+            payload.Add(new StreamContent(themeFile.OpenReadStream(ExhibitionInputModel.MaxThemeFileSize)),
+                "themeFile", themeFile.Name);
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, "exhibitions-api/api/exhibitions")
+            {
+                Content = payload
+            };
+            request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+            using var response = await Http.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                error = $"Udstillingen kunne ikke oprettes (HTTP {(int)response.StatusCode}).";
+                return;
+            }
+
+            createdName = input.ExhibitionName;
+            model = null;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or IOException or OperationCanceledException)
+        {
+            error = "Oprettelsen kunne ikke bekræftes. Kontrollér forbindelsen og udstillingslisten.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+}
