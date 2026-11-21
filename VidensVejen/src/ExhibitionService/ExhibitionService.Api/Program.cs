@@ -11,6 +11,7 @@ builder.AddServiceDefaults();
 builder.Services.AddDatabaseDI(builder.Configuration);
 
 builder.Services.AddHandlerDI();
+builder.Services.AddRepositoryDI();
 
 builder.Services.AddControllers();
 
