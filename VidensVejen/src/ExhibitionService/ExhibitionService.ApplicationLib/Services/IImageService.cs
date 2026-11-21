@@ -3,7 +3,7 @@ namespace ExhibitionService.ApplicationLib.Services;
 /// <summary>
 /// 
 /// </summary>
-public interface IImageStorageService
+public interface IImageService
 {
     /// <summary>
     /// 

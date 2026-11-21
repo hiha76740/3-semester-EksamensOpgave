@@ -12,7 +12,7 @@ namespace ExhibitionService.ApplicationLib.Handlers;
 /// </summary>
 public class CreateExhibitionHandler(
     IExhibitionRepository exhibitionRepo,
-    IImageStorageService imageStorageService) : ICreateExhibitionHandler
+    IImageService imageService) : ICreateExhibitionHandler
 {
     async Task ICreateExhibitionHandler.HandleAsync(CreateExhibitionCommand command)
     {
@@ -43,7 +43,7 @@ public class CreateExhibitionHandler(
         Guid? theme = null;
 
         if (command.ImageStream != null && command.Extension != null)
-            theme = await imageStorageService.SaveAsync(command.ImageStream, command.Extension);
+            theme = await imageService.SaveAsync(command.ImageStream, command.Extension);
 
         var exhibition = Exhibition.Create(
             command.ExhibtionName,
