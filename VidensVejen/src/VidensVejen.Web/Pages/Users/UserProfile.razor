@@ -1,0 +1,22 @@
+@page "/user/profile"
+@using Microsoft.AspNetCore.Components.Authorization
+
+<PageTitle>Min profil</PageTitle>
+
+<RadzenCard Style="max-width: 36rem;">
+    <RadzenStack Gap="0.75rem">
+        <RadzenText TextStyle="TextStyle.H2" Text="Min profil" />
+        <AuthorizeView>
+            <Authorized Context="auth">
+                <RadzenLabel Text="E-mail" />
+                <RadzenText Text="@auth.User.Identity?.Name" />
+            </Authorized>
+            <NotAuthorized>
+                <RadzenLink Path="login" Text="Log ind for at se din profil" />
+            </NotAuthorized>
+            <Authorizing>
+                <RadzenText Text="Henter profil…" />
+            </Authorizing>
+        </AuthorizeView>
+    </RadzenStack>
+</RadzenCard>

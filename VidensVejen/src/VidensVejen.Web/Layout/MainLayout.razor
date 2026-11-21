@@ -1,24 +1,171 @@
 @inherits LayoutComponentBase
-
+@implements IDisposable
+@using Microsoft.AspNetCore.Components.Authorization
+@using VidensVejen.Web.Authentication
+@inject IAuthService AuthService
+@inject CustomAuthenticationStateProvider AuthStateProvider
+@inject DialogService Dialog
+@inject NavigationManager Navigation
 
 <HeadContent>
     <RadzenTheme Theme="material" />
 </HeadContent>
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<div class="vidensvejen-layout">
+    <header class="vidensvejen-header">
+        <div class="vidensvejen-menu-toggle">
+            <RadzenButton Icon="menu" Variant="Variant.Text" ButtonStyle="ButtonStyle.Dark"
+                          Click="ToggleMenu" aria-label="Vis eller skjul navigation"
+                          aria-expanded="@(menuOpen ? "true" : "false")" aria-controls="vidensvejen-navigation" />
         </div>
+        <a class="vidensvejen-brand" href="">
+            <span class="vidensvejen-logo" aria-hidden="true"></span>
+            @* <span>VidensVejen</span> *@
+        </a>
+        @if (sectionTitle != null)
+        {
+            <span class="vidensvejen-section">@sectionTitle</span>
+        }
+        <div class="vidensvejen-account">
+            <RadzenButton Icon="account_circle" Variant="Variant.Text" ButtonStyle="ButtonStyle.Dark"
+                          Click="ToggleProfileMenu" aria-label="Profilmenu"
+                          aria-expanded="@(profileMenuOpen ? "true" : "false")"
+                          aria-controls="vidensvejen-profile-menu" />
+            @if (profileMenuOpen)
+            {
+                <div id="vidensvejen-profile-menu" class="vidensvejen-profile-menu">
+                    <RadzenStack Gap="0.25rem">
+                        @if (isAuthenticated)
+                        {
+                            <RadzenButton Text="Min profil" Icon="person" Variant="Variant.Text"
+                                          Click="@(() => NavigateFromProfileMenu("user/profile"))" />
+                            <RadzenButton Text="Log ud" Icon="logout" Variant="Variant.Text"
+                                          Click="LogOutAsync" Disabled="@isLoggingOut" />
+                        }
+                        else
+                        {
+                            <RadzenButton Text="Log ind" Icon="login" Variant="Variant.Text"
+                                          Click="@(() => NavigateFromProfileMenu("login"))" />
+                        }
+                    </RadzenStack>
+                </div>
+            }
+        </div>
+    </header>
 
-        <article class="content px-4">
-            @Body
-        </article>
+    <aside id="vidensvejen-navigation" class="vidensvejen-sidebar @(menuOpen ? "is-open" : string.Empty)">
+        <NavMenu />
+    </aside>
+
+    <main class="vidensvejen-content">
+        @Body
     </main>
 </div>
 
 <RadzenComponents />
+
+@code {
+    private bool menuOpen;
+    private bool profileMenuOpen;
+    private bool isAuthenticated;
+    private Task<AuthenticationState>? pendingAuthenticationState;
+    private bool isLoggingOut;
+
+    private string? sectionTitle;
+
+    protected override Task OnInitializedAsync()
+    {
+        sectionTitle = AdminNavigation.GetSectionTitle(Navigation.ToBaseRelativePath(Navigation.Uri));
+        Navigation.LocationChanged += OnLocationChanged;
+        AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        return UpdateAuthenticationStateAsync(AuthStateProvider.GetAuthenticationStateAsync());
+    }
+
+    private void ToggleMenu()
+    {
+        menuOpen = !menuOpen;
+    }
+
+    private void ToggleProfileMenu()
+    {
+        profileMenuOpen = !profileMenuOpen;
+    }
+
+    private void NavigateFromProfileMenu(string path)
+    {
+        profileMenuOpen = false;
+        Navigation.NavigateTo(path);
+    }
+
+    private void OnAuthenticationStateChanged(Task<AuthenticationState> state)
+    {
+        _ = InvokeAsync(async () =>
+        {
+            await UpdateAuthenticationStateAsync(state);
+            StateHasChanged();
+        });
+    }
+
+    private async Task UpdateAuthenticationStateAsync(Task<AuthenticationState> state)
+    {
+        pendingAuthenticationState = state;
+        var authenticated = false;
+        try
+        {
+            authenticated = (await state).User.Identity?.IsAuthenticated == true;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or System.Text.Json.JsonException
+            or InvalidOperationException or OperationCanceledException)
+        {
+            // Keep the login action available when the current session cannot be loaded.
+        }
+
+        if (pendingAuthenticationState == state)
+        {
+            isAuthenticated = authenticated;
+        }
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args)
+    {
+        _ = InvokeAsync(() =>
+        {
+            sectionTitle = AdminNavigation.GetSectionTitle(Navigation.ToBaseRelativePath(args.Location));
+            menuOpen = false;
+            profileMenuOpen = false;
+            StateHasChanged();
+        });
+    }
+
+    private async Task LogOutAsync()
+    {
+        if (isLoggingOut)
+        {
+            return;
+        }
+
+        isLoggingOut = true;
+        try
+        {
+            await AuthService.LogOut();
+            isAuthenticated = false;
+            pendingAuthenticationState = null;
+            profileMenuOpen = false;
+            Navigation.NavigateTo("login", forceLoad: true);
+        }
+        catch (HttpRequestException)
+        {
+            await Dialog.Alert("Log ud kunne ikke bekræftes. Prøv igen.", "Log ud");
+        }
+        finally
+        {
+            isLoggingOut = false;
+        }
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+        AuthStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+    }
+}
