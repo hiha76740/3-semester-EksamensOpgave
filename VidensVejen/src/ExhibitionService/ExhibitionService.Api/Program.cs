@@ -1,3 +1,4 @@
+using ExhibitionService.ApplicationLib.Extensions;
 using ExhibitionService.InfrastructureLib.Extensions;
 using VidensVejen.BuildingBlocksLib.DependencyInjection;
 
@@ -8,6 +9,8 @@ builder.AddServiceDefaults();
 // Add services to the container.
 
 builder.Services.AddDatabaseDI(builder.Configuration);
+
+builder.Services.AddHandlerDI();
 
 builder.Services.AddControllers();
 
