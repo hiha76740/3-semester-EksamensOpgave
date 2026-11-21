@@ -1,4 +1,5 @@
 using ExhibitionService.DomainLib.Entities;
+using ExhibitionService.DomainLib.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -14,5 +15,21 @@ internal sealed class ExhibitionConfiguration : IEntityTypeConfiguration<Exhibit
             .HasConversion(
             id => id.Value,
             value => new ExhibitionId(value));
+
+        builder.Property(e => e.Name)
+            .HasMaxLength(200)
+            .IsRequired();
+
+        builder.Property(e => e.Theme)
+            .HasConversion(
+            id => id!.Value,
+            value => new ImageId(value))
+            .IsRequired(false);
+
+        builder.HasMany(e => e.Subjects)
+            .WithOne()
+            .HasForeignKey("ExhibitionId")
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
