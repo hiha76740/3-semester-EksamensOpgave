@@ -20,8 +20,9 @@ internal sealed class SubjectConfiguration : IEntityTypeConfiguration<Subject>
             .IsRequired();
 
         builder.Property(s => s.Description)
-            .HasMaxLength(700);
+            .HasMaxLength(700)
+            .IsRequired();
 
-        builder.ComplexCollection(s => s.Topics, t => t.ToJson());
+        builder.OwnsMany(s => s.Topics, t => t.ToJson());
     }
 }
