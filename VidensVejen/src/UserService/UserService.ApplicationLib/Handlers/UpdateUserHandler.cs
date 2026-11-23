@@ -50,14 +50,18 @@ public class UpdateUserHandler(
             }
 
             if (changeMade == true)
-                await userRepo.SaveAsync();
+            {
+                userRepo.SetOriginalRowVersion(user, command.RowVersion);
 
+                await userRepo.SaveAsync();
+            }
 
             return new UserDto(
                 user.Id.Value,
                 user.Firstname,
                 user.Surname,
-                user.EmailAddress.Value
+                user.EmailAddress.Value,
+                user.RowVersion
                 );
 
         }

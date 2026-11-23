@@ -25,7 +25,8 @@ internal static class UsersMapper
         var output = new AuthUserResponse(
             dto.Id,
             dto.Email,
-            dto.Permissions.Select(p => new PermissionResponse(p.Id, p.Name)).ToList()
+            dto.Permissions.Select(p => new PermissionResponse(p.Id, p.Name)).ToList(),
+            dto.RowVersion
             );
 
         return output;
@@ -35,7 +36,8 @@ internal static class UsersMapper
     {
         var output = new UpdateAuthUserPermissionsCommand(
             id,
-            request.PermissionsIds
+            request.PermissionsIds,
+            request.RowVersion
             );
 
         return output;
@@ -45,7 +47,8 @@ internal static class UsersMapper
     {
         var output = new UpdateAuthUserEmailCommand(
             id,
-            request.Email
+            request.Email,
+            request.RowVersion
             );
 
         return output;
@@ -54,7 +57,8 @@ internal static class UsersMapper
     internal static UserEmailResponse AsEmailResponse(this AuthUserEmailDto dto)
     {
         var output = new UserEmailResponse(
-            dto.Email
+            dto.Email,
+            dto.RowVersion
             );
 
         return output;
@@ -65,7 +69,18 @@ internal static class UsersMapper
         var output = new UpdateAuthUserPasswordCommand(
             id,
             request.Password,
-            request.OldPassword
+            request.OldPassword,
+            request.RowVersion
+            );
+
+        return output;
+    }
+
+    internal static DeleteAuthUserCommand AsDeleteCommand(this DeleteUserRequest request, Guid id)
+    {
+        var output = new DeleteAuthUserCommand(
+            id,
+            request.RowVersion
             );
 
         return output;

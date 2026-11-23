@@ -45,4 +45,12 @@ public interface IAuthUserRepository
     /// </summary>
     /// <param name="authUser"></param>
     void Delete(AuthUser authUser);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="authUser"></param>
+    /// <param name="originalRowVersion"></param>
+    /// <returns></returns>
+    void SetOriginalRowVersion(AuthUser authUser, byte[] originalRowVersion);
 }

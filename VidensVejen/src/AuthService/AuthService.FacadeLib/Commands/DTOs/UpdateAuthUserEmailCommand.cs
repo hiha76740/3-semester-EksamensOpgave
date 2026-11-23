@@ -5,4 +5,8 @@ namespace AuthService.FacadeLib.Commands.DTOs;
 /// </summary>
 /// <param name="Id"></param>
 /// <param name="Email"></param>
-public record UpdateAuthUserEmailCommand(Guid Id, string Email);
+/// <param name="RowVersion"></param>
+public record UpdateAuthUserEmailCommand(
+    Guid Id,
+    string Email,
+    byte[] RowVersion);

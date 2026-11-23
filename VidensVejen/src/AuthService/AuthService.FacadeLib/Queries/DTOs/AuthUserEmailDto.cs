@@ -4,4 +4,5 @@ namespace AuthService.FacadeLib.Queries.DTOs;
 /// 
 /// </summary>
 /// <param name="Email"></param>
-public record AuthUserEmailDto(string Email);
+/// <param name="RowVersion"></param>
+public record AuthUserEmailDto(string Email, byte[] RowVersion);

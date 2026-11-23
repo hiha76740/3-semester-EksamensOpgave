@@ -6,8 +6,10 @@ namespace UserService.FacadeLib.Commands.DTOs;
 /// <param name="Id"></param>
 /// <param name="Firstname"></param>
 /// <param name="Surname"></param>
+/// <param name="RowVersion"></param>
 public record UpdateUserCommand(
     Guid Id,
     string Firstname,
-    string Surname
+    string Surname,
+    byte[] RowVersion
     );

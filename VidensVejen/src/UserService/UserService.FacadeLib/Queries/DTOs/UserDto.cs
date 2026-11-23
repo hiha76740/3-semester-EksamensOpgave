@@ -7,9 +7,11 @@ namespace UserService.FacadeLib.Queries.DTOs;
 /// <param name="Firstname"></param>
 /// <param name="Surname"></param>
 /// <param name="Email"></param>
+/// <param name="RowVersion"></param>
 public record UserDto(
     Guid Id,
     string Firstname,
     string Surname,
-    string Email
+    string Email,
+    byte[] RowVersion
     );

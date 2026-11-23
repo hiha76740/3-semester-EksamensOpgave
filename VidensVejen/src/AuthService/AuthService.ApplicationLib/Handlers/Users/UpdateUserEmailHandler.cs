@@ -63,13 +63,17 @@ public class UpdateUserEmailHandler(
 
             await outbox.AddAsync(outboxMessage);
 
+            authUserRepo.SetOriginalRowVersion(authUser, command.RowVersion);
+
             await unitOfWork.SaveChangesAsync();
             unitOfWork.Commit();
 
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("User {Id} was updated successfully", authUser.Id.Value);
 
-            return new AuthUserEmailDto(authUser.Email.Value);
+            return new AuthUserEmailDto(
+                authUser.Email.Value,
+                authUser.RowVersion);
         }
         catch (Exception ex)
         {

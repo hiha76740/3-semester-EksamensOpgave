@@ -45,6 +45,12 @@ public class AuthUser
     /// <summary>
     /// 
     /// </summary>
+    public byte[] RowVersion { get; private set; } = [];
+
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="emailAddress"></param>
     /// <param name="passwordHash"></param>
     /// <param name="permissions"></param>

@@ -7,19 +7,22 @@ namespace VidensVejen.ContractsLib.Responses.UserService;
 /// <param name="Firstname"></param>
 /// <param name="Surname"></param>
 /// <param name="Email"></param>
+/// <param name="RowVersion"></param>
 /// <example>
 /// {
 ///     "id": "123e4567-e89b-12d3-a456-426614174000",
 ///     "firstname": "Sue",
 ///     "surname": "Storm",
-///     "email": "SueStorm@FantasticFour.test"
+///     "email": "SueStorm@FantasticFour.test",
+///     "rowVersion": "AAAAAAAAB9E="
 /// }
 /// </example>
 public record UserResponse(
     Guid Id,
     string Firstname,
     string Surname,
-    string Email
+    string Email,
+    byte[] RowVersion
     )
 {
     /// <summary>
@@ -41,4 +44,9 @@ public record UserResponse(
     /// The email of the user.
     /// </summary>
     public string Email { get; init; } = Email;
+
+    /// <summary>
+    /// The row version returned when the user was last retrieved.
+    /// </summary>
+    public byte[] RowVersion { get; init; } = RowVersion;
 }

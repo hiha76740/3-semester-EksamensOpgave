@@ -20,7 +20,8 @@ public class UserQueryHandlerIMPL(UserDbContext db) : IUserQueries
                 u.Id.Value,
                 u.Firstname,
                 u.Surname,
-                u.EmailAddress.Value))
+                u.EmailAddress.Value,
+                u.RowVersion))
             .ToListAsync();
     }
 
@@ -35,7 +36,8 @@ public class UserQueryHandlerIMPL(UserDbContext db) : IUserQueries
                 u.Id.Value,
                 u.Firstname,
                 u.Surname,
-                u.EmailAddress.Value))
+                u.EmailAddress.Value,
+                u.RowVersion))
             .FirstOrDefaultAsync();
     }
 }
