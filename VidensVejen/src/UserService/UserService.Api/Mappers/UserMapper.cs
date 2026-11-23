@@ -42,14 +42,4 @@ internal static class UserMapper
 
         return output;
     }
-
-    internal static UpdateUserEmailCommand AsUpdateEmailCommand(this UpdateUserEmailRequest request, Guid id)
-    {
-        var output = new UpdateUserEmailCommand(
-            id,
-            request.Email
-            );
-
-        return output;
-    }
 }

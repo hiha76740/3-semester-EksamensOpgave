@@ -14,7 +14,6 @@ namespace UserService.Api.Controllers;
 [ApiController]
 public class UsersController(
     IUpdateUserHandler updateUser,
-    IUpdateEmailHandler updateEmail,
     IUserQueries queries
 
     ) : ControllerBase
@@ -85,32 +84,6 @@ public class UsersController(
             var dto = await updateUser.HandleAsync(request.AsUpdateCommand(id));
 
             return Ok(dto.AsResponse());
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpPut("{id:guid}/email")]
-    [EndpointSummary("Update a user email")]
-    [EndpointDescription("Updates the email of a single instance of a user")]
-    [ProducesResponseType(StatusCodes.Status200OK, Description = "Email was updated successfully")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to update email for the requested user")]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Description = "User was not found")]
-    public async Task<ActionResult<UserResponse>> UpdateUserEmail(
-        [Required][Description("A unique identifier for a user")] Guid id,
-        [Required][Description("Object used to update a user email")] UpdateUserEmailRequest request)
-    {
-        try
-        {
-            await updateEmail.HandleAsync(request.AsUpdateEmailCommand(id));
-
-            return Ok();
         }
         catch (NotFoundException ex)
         {
