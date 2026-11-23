@@ -99,11 +99,12 @@ public class UsersController(
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to delete the requested user")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "User was not found")]
     public async Task<ActionResult> DeleteUser(
-        [Required][Description("A unique identifier for a user")] Guid id)
+        [Required][Description("A unique identifier for a user")] Guid id,
+        [Required][Description("The object used to delete a user")] DeleteUserRequest request)
     {
         try
         {
-            await delete.HandleAsync(id);
+            await delete.HandleAsync(request.AsDeleteCommand(id));
 
             return NoContent();
         }

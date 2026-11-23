@@ -1,9 +1,11 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using ImageService.Api.Mappers;
 using ImageService.FacadeLib.Commands.DTOs;
 using ImageService.FacadeLib.Commands.Interfaces;
 using ImageService.FacadeLib.Queries.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using VidensVejen.ContractsLib.Requests.ImageService;
 using VidensVejen.ContractsLib.Responses.ImageService;
 using VidensVejen.SharedKernelLib.Exceptions;
 
@@ -56,11 +58,12 @@ public class ImagesController(
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to delete the requested image")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Image was not found")]
     public async Task<ActionResult> DeleteImage(
-        [Required][Description("The id of the image you want to get url for")] Guid id)
+        [Required][Description("The id of the image you want to get url for")] Guid id,
+        [Required][Description("The object used to delete a image")] DeleteImageRequest request)
     {
         try
         {
-            await delete.HandleAsync(id);
+            await delete.HandleAsync(request.AsDeleteCommand(id));
 
             return NoContent();
 

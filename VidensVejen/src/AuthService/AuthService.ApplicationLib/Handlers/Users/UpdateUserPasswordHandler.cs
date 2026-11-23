@@ -39,6 +39,8 @@ public class UpdateUserPasswordHandler(
 
             authUser.ChangePassword(hashedPassword);
 
+            authUserRepo.SetOriginalRowVersion(authUser, command.RowVersion);
+
             await authUserRepo.SaveAsync();
 
             if (logger.IsEnabled(LogLevel.Information))

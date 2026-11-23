@@ -23,7 +23,8 @@ public class AuthUserQueryHandlerIMPL(AuthUserDbContext db) : IAuthUsersQueries
             u => new AuthUserDto(
                 u.Id.Value,
                 u.Email.Value,
-                u.Permissions.Select(p => new AccessPermissionDto(p.Id.Value, p.Name)).ToList()))
+                u.Permissions.Select(p => new AccessPermissionDto(p.Id.Value, p.Name)).ToList(),
+                u.RowVersion))
             .FirstOrDefaultAsync();
     }
 
@@ -42,7 +43,8 @@ public class AuthUserQueryHandlerIMPL(AuthUserDbContext db) : IAuthUsersQueries
                     p => new AccessPermissionDto(
                         p.Id.Value,
                         p.Name))
-                .ToList()))
+                .ToList(),
+                u.RowVersion))
             .FirstOrDefaultAsync();
 
     }

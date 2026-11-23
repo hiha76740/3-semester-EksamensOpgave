@@ -2,6 +2,7 @@ using System.Data;
 using System.Text.Json;
 using AuthService.ApplicationLib.Repositories;
 using AuthService.DomainLib.Entities;
+using AuthService.FacadeLib.Commands.DTOs;
 using AuthService.FacadeLib.Commands.Interfaces;
 using Microsoft.Extensions.Logging;
 using VidensVejen.BuildingBlocksLib.Messaging.Outbox;
@@ -25,16 +26,16 @@ public class DeleteUserHandler(
     ILogger<DeleteUserHandler> logger
     ) : IDeleteUserHandler
 {
-    async Task IDeleteUserHandler.HandleAsync(Guid id)
+    async Task IDeleteUserHandler.HandleAsync(DeleteAuthUserCommand command)
     {
         try
         {
             if (logger.IsEnabled(LogLevel.Information))
-                logger.LogInformation("Beginning deletion of user {UserId}", id);
+                logger.LogInformation("Beginning deletion of user {UserId}", command.Id);
 
             unitOfWork.BeginTransaction(IsolationLevel.Serializable);
 
-            var authUserId = new AuthUserId(id);
+            var authUserId = new AuthUserId(command.Id);
 
             var authUser = await authUserRepo.GetAuthUserByIdAsync(authUserId)
                 ?? throw new NotFoundException("User was not found");
@@ -43,6 +44,8 @@ public class DeleteUserHandler(
                 logger.LogInformation("Deleting auth user from auth database");
 
             authUserRepo.Delete(authUser);
+
+            authUserRepo.SetOriginalRowVersion(authUser, command.RowVersion);
 
             var integrationEvent = new UserDeletionIntegrationEvent(
                 Guid.NewGuid(),

@@ -27,6 +27,12 @@ public class User
     /// </summary>
     public Email EmailAddress { get; private set; } = null!;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public byte[] RowVersion { get; private set; } = [];
+
+
 
     /// <summary>
     /// 

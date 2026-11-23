@@ -14,5 +14,8 @@ internal sealed class ImageConfiguration : IEntityTypeConfiguration<Image>
             .HasConversion(
             id => id.Value,
             value => new ImageId(value));
+
+        builder.Property(x => x.RowVersion)
+            .IsRowVersion();
     }
 }

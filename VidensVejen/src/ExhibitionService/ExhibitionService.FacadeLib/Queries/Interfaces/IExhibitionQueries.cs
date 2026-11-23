@@ -19,4 +19,11 @@ public interface IExhibitionQueries
     /// </summary>
     /// <returns></returns>
     Task<IReadOnlyList<ExhibitionNameDto>> GetAllExhibitionNamesAsync();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    Task<bool> CheckIfInUseAsync(Guid id);
 }

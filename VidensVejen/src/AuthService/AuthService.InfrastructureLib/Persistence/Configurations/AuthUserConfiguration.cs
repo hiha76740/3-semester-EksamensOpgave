@@ -32,5 +32,8 @@ internal sealed class AuthUserConfiguration : IEntityTypeConfiguration<AuthUser>
         builder.HasMany(x => x.Permissions)
             .WithMany()
             .UsingEntity(p => p.ToTable("AuthUserAccessPermissions"));
+
+        builder.Property(x => x.RowVersion)
+            .IsRowVersion();
     }
 }

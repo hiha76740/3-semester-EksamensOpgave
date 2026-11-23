@@ -39,4 +39,11 @@ public interface IUserRepository
     /// </summary>
     /// <returns></returns>
     Task SaveAsync();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="user"></param>
+    /// <param name="rowVersion"></param>
+    void SetOriginalRowVersion(User user, byte[] rowVersion);
 }

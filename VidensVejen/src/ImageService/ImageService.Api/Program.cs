@@ -15,6 +15,7 @@ builder.Services.AddDatabaseDI(builder.Configuration);
 builder.Services.AddRepositoryDI();
 builder.Services.AddQueryDI();
 builder.Services.AddStorageDI(themeImageDirectory);
+builder.Services.AddInternalServicesDI();
 
 builder.Services.AddSingleton(builder.Configuration);
 

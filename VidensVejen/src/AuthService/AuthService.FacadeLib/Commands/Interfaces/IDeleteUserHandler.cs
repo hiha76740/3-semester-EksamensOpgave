@@ -1,3 +1,5 @@
+using AuthService.FacadeLib.Commands.DTOs;
+
 namespace AuthService.FacadeLib.Commands.Interfaces;
 
 /// <summary>
@@ -8,7 +10,7 @@ public interface IDeleteUserHandler
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="command"></param>
     /// <returns></returns>
-    Task HandleAsync(Guid id);
+    Task HandleAsync(DeleteAuthUserCommand command);
 }

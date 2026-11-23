@@ -3,6 +3,7 @@ using AuthService.DomainLib.Entities;
 using AuthService.DomainLib.ValueObjects;
 using AuthService.InfrastructureLib.Persistence;
 using Microsoft.EntityFrameworkCore;
+using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace AuthService.InfrastructureLib.Repositories;
 
@@ -41,6 +42,20 @@ public class AuthUserRepository(AuthUserDbContext db) : IAuthUserRepository
 
     async Task IAuthUserRepository.SaveAsync()
     {
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConcurrencyConflictException("The data was changed or deleted by another request", ex);
+        }
+    }
+
+    void IAuthUserRepository.SetOriginalRowVersion(AuthUser authUser, byte[] originalRowVersion)
+    {
+        db.Entry(authUser)
+            .Property(u => u.RowVersion)
+            .OriginalValue = originalRowVersion;
     }
 }

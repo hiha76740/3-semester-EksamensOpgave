@@ -169,4 +169,25 @@ public class ExhibitionsController(
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpGet("inuse")]
+    [EndpointSummary("Check if image is in use")]
+    [EndpointDescription("Checks if the requested image is in use by any exhibition ")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK, "application/json", Description = "Returns true if image is in use")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while checking requested image")]
+    public async Task<ActionResult<bool>> CheckIfInUse(
+        [Required][Description("Unique identifier for a image")] Guid id)
+    {
+        try
+        {
+            var inUse = await queries.CheckIfInUseAsync(id);
+
+            return Ok(inUse);
+        }
+        catch (Exception ex)
+        {
+
+            return BadRequest(ex.Message);
+        }
+    }
 }

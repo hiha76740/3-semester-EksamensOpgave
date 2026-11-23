@@ -14,7 +14,8 @@ internal static class UserMapper
             dto.Id,
             dto.Firstname,
             dto.Surname,
-            dto.Email
+            dto.Email,
+            dto.RowVersion
             );
 
         return output;
@@ -37,7 +38,8 @@ internal static class UserMapper
         var output = new UpdateUserCommand(
             id,
             request.Firstname,
-            request.Surname
+            request.Surname,
+            request.RowVersion
             );
 
         return output;

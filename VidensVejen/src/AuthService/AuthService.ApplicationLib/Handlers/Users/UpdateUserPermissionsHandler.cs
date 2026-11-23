@@ -58,6 +58,13 @@ public class UpdateUserPermissionsHandler(
                     authUser.RemovePermission(permission);
             }
 
+            authUserRepo.SetOriginalRowVersion(authUser, command.RowVersion);
+
+            await authUserRepo.SaveAsync();
+
+            if (logger.IsEnabled(LogLevel.Information))
+                logger.LogInformation("Permissions for user {UserId} updated successfully", authUser.Id.Value);
+
             return new AuthUserDto(
                 authUser.Id.Value,
                 authUser.Email.Value,
@@ -66,7 +73,9 @@ public class UpdateUserPermissionsHandler(
                     p => new AccessPermissionDto(
                         p.Id.Value,
                         p.Name))
-                .ToList());
+                .ToList(),
+                authUser.RowVersion
+                );
 
         }
         catch (Exception ex)
