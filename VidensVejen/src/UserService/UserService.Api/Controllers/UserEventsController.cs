@@ -62,4 +62,28 @@ public class UserEventsController(
 
         return Ok();
     }
+
+    [Topic("pubsub", "user-update-email")]
+    [HttpPost("events/user-update-email")]
+    [EndpointSummary("Updates email of a user")]
+    [EndpointDescription("Updates the email of a single instance of a user")]
+    [ProducesResponseType(StatusCodes.Status200OK, Description = "Email was updated successfully")]
+    public async Task<ActionResult> UpdateUserEmailAsync(
+        [Required][Description("Object used to update email for a user")] UserUpdateEmailIntegrationEvent integrationEvent,
+        CancellationToken cancellationToken)
+    {
+
+        var message = new InboxMessage
+        {
+            Id = integrationEvent.EventId,
+            Type = integrationEvent.GetType().FullName!,
+            Topic = integrationEvent.EventTopic,
+            Content = JsonSerializer.Serialize(integrationEvent),
+            RecievedOnUtc = DateTime.UtcNow
+        };
+
+        await inbox.StoreIfMissingAsync(message, cancellationToken);
+
+        return Ok();
+    }
 }

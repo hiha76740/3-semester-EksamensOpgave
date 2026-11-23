@@ -58,6 +58,20 @@ public class User
         return user;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="newEmail"></param>
+    /// <exception cref="DomainException"></exception>
+    public void ChangeEmail(string newEmail)
+    {
+        var email = new Email(newEmail);
+
+        if (EmailAddress == email)
+            throw new DomainException("New and old email can not be the same");
+
+        EmailAddress = email;
+    }
 
     private User(UserId id, string firstname, string surname, Email email)
     {

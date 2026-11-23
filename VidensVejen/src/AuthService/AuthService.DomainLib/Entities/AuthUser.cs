@@ -109,6 +109,18 @@ public class AuthUser
         Status = AuthUserStatus.Active;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <exception cref="DomainException"></exception>
+    public void SetStatusPending()
+    {
+        if (Status == AuthUserStatus.Pending)
+            throw new DomainException("User status is already pending");
+
+        Status = AuthUserStatus.Pending;
+    }
+
     private AuthUser(Email email, string passwordHash, List<AccessPermission> permissions)
     {
         Id = new AuthUserId(Guid.NewGuid());
