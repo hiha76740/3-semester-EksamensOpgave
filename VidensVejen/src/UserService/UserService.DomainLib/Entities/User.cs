@@ -61,6 +61,32 @@ public class User
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="newFirstname"></param>
+    /// <exception cref="DomainException"></exception>
+    public void ChangeFirstname(string newFirstname)
+    {
+        if (string.IsNullOrWhiteSpace(newFirstname))
+            throw new DomainException("Firstname could not be set, no value");
+
+        Firstname = newFirstname;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="newSurname"></param>
+    /// <exception cref="DomainException"></exception>
+    public void ChangeSurname(string newSurname)
+    {
+        if (string.IsNullOrWhiteSpace(newSurname))
+            throw new DomainException("Firstname could not be set, no value");
+
+        Firstname = newSurname;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="newEmail"></param>
     /// <exception cref="DomainException"></exception>
     public void ChangeEmail(string newEmail)

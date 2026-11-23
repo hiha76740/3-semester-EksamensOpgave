@@ -26,6 +26,11 @@ public class UserRepository(UserDbContext db) : IUserRepository
         return await db.Users.FindAsync(userId);
     }
 
+    async Task IUserRepository.SaveAsync()
+    {
+        await db.SaveChangesAsync();
+    }
+
     async Task<bool> IUserRepository.UserExistsAsync(UserId id)
     {
         return await db.Users.AnyAsync(u => u.Id == id);
