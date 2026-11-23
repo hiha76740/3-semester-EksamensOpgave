@@ -13,4 +13,11 @@ public interface IQuizQueries
     /// <param name="id"></param>
     /// <returns></returns>
     Task<QuizDto?> GetQuizByIdAsync(Guid id);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="exhibitionId"></param>
+    /// <returns></returns>
+    Task<List<QuizDto>> GetPublishedQuizzesAsync(Guid exhibitionId);
 }

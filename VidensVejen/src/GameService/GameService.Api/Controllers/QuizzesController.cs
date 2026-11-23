@@ -26,7 +26,7 @@ public class QuizzesController(
     [ProducesResponseType<QuizIdResponse>(StatusCodes.Status201Created, "Application/json", Description = "Returns the id of the created quiz")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to create quiz")]
     public async Task<ActionResult<QuizIdResponse>> CreateQuiz(
-    [Required][Description("Object used to create a quiz")] CreateQuizRequest request)
+        [Required][Description("Object used to create a quiz")] CreateQuizRequest request)
     {
         try
         {
@@ -45,7 +45,7 @@ public class QuizzesController(
     [HttpGet("{id:guid}")]
     [EndpointSummary("Get a quiz")]
     [EndpointDescription("Gets a single instance of quiz")]
-    [ProducesResponseType<QuizResponse>(StatusCodes.Status201Created, "Application/json", Description = "Returns a single instance of the requested quiz")]
+    [ProducesResponseType<QuizResponse>(StatusCodes.Status200OK, "Application/json", Description = "Returns a single instance of the requested quiz")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to get the requested quiz")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Quiz was not found")]
     public async Task<ActionResult<QuizResponse>> GetQuiz(
@@ -59,6 +59,26 @@ public class QuizzesController(
                 return NotFound("Quiz was not found");
 
             return Ok(dto.AsResponse());
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("published")]
+    [EndpointSummary("Get published quizzes")]
+    [EndpointDescription("Gets the published quizzes for an exhibition. Used by the kiosk, drafts are never returned")]
+    [ProducesResponseType<List<QuizResponse>>(StatusCodes.Status200OK, "Application/json", Description = "Returns the published quizzes for the exhibition")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to get the published quizzes")]
+    public async Task<ActionResult<List<QuizResponse>>> GetPublishedQuizzes(
+        [Required][Description("A unique identifier for the exhibition")] Guid exhibitionId)
+    {
+        try
+        {
+            var dtos = await queries.GetPublishedQuizzesAsync(exhibitionId);
+
+            return Ok(dtos.Select(d => d.AsResponse()).ToList());
         }
         catch (Exception ex)
         {

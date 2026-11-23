@@ -27,6 +27,8 @@ internal static class QuestionMapper
         var output = new QuestionResponse(
             dto.Id,
             dto.Text,
+            dto.CorrectFeedback,
+            dto.IncorrectFeedback,
             dto.Choices
             .Select(
                 q => q.AsResponse())

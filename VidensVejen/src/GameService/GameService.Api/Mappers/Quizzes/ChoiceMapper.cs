@@ -20,7 +20,6 @@ internal static class ChoiceMapper
     internal static ChoiceResponse AsResponse(this ChoiceDto dto)
     {
         var output = new ChoiceResponse(
-            dto.Id,
             dto.Text,
             dto.CorrectAnswer
             );
