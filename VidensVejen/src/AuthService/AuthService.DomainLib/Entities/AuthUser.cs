@@ -100,6 +100,19 @@ public class AuthUser
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="passwordHash"></param>
+    /// <exception cref="DomainException"></exception>
+    public void ChangePassword(string passwordHash)
+    {
+        if (string.IsNullOrWhiteSpace(passwordHash))
+            throw new DomainException("Passwordhash could not be set, no value");
+
+        PasswordHash = passwordHash;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <exception cref="DomainException"></exception>
     public void SetStatusActive()
     {
