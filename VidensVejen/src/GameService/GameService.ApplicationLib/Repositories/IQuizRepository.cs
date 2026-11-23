@@ -17,6 +17,13 @@ public interface IQuizRepository
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    Task<Quiz?> GetQuizByIdAsync(QuizId id);
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <returns></returns>
     Task SaveAsync();
 }
