@@ -21,8 +21,7 @@ internal sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             value => new QuizId(value));
 
         builder.Property(x => x.Text)
-            .HasMaxLength(500)
-            .IsRequired();
+            .HasMaxLength(500);
 
         builder.Property(x => x.CorrectFeedback)
             .HasMaxLength(500);

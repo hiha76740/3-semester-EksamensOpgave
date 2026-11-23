@@ -1,4 +1,5 @@
 using GameService.DomainLib.Entities;
+using GameService.DomainLib.Enums;
 using GameService.DomainLib.ValueObjects;
 using VidensVejen.SharedKernelLib.Exceptions;
 
@@ -12,7 +13,7 @@ public class QuizTests
     }
 
     [Fact]
-    public void Create_GivenValidData_InitializesQuizAndQuestion()
+    public void Create_GivenValidData_InitializesQuizAsDraft()
     {
         // Arrange
         var exhibitionId = Guid.NewGuid();
@@ -23,7 +24,8 @@ public class QuizTests
 
         // Assert
         Assert.NotEqual(Guid.Empty, quiz.Id.Value);
-        Assert.Equal(exhibitionId, quiz.ExhibitionId.Value);
+        Assert.Equal(PublicationStatus.Draft, quiz.Status);
+        Assert.Equal(exhibitionId, quiz.ExhibitionId?.Value);
         Assert.Equal("Quiz", quiz.Title);
         Assert.Equal("vertical", quiz.QuizLayout);
         Assert.Equal("Done", quiz.EndMessage);
@@ -35,56 +37,109 @@ public class QuizTests
         Assert.Equal(questions[0].Choices, question.Choices);
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void Create_GivenBlankTitle_ThrowsDomainException(string? title)
+    [Fact]
+    public void Create_GivenNoData_CreatesEmptyDraft()
     {
-        // Arrange
-        var questions = CreateQuestions();
+        // Act
+        var quiz = Quiz.Create(null, null, null, null, null);
 
-        // Act & Assert
-        Assert.Throws<DomainException>(() => Quiz.Create(title!, Guid.NewGuid(), "vertical", null, questions));
-    }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void Create_GivenBlankLayout_ThrowsDomainException(string? layout)
-    {
-        // Arrange
-        var questions = CreateQuestions();
-
-        // Act & Assert
-        Assert.Throws<DomainException>(() => Quiz.Create("Quiz", Guid.NewGuid(), layout!, null, questions));
+        // Assert
+        Assert.Equal(PublicationStatus.Draft, quiz.Status);
+        Assert.Null(quiz.Title);
+        Assert.Null(quiz.ExhibitionId);
+        Assert.Null(quiz.QuizLayout);
+        Assert.Empty(quiz.Questions);
     }
 
     [Fact]
-    public void Create_GivenEmptyExhibitionId_ThrowsDomainException()
+    public void Publish_GivenValidDraft_SetsStatusToPublished()
     {
         // Arrange
-        var questions = CreateQuestions();
+        var quiz = Quiz.Create("Quiz", Guid.NewGuid(), "vertical", null, CreateQuestions());
+
+        // Act
+        quiz.Publish();
+
+        // Assert
+        Assert.Equal(PublicationStatus.Published, quiz.Status);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Publish_GivenBlankTitle_ThrowsDomainException(string? title)
+    {
+        // Arrange
+        var quiz = Quiz.Create(title, Guid.NewGuid(), "vertical", null, CreateQuestions());
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => Quiz.Create("Quiz", Guid.Empty, "vertical", null, questions));
+        Assert.Throws<DomainException>(quiz.Publish);
+        Assert.Equal(PublicationStatus.Draft, quiz.Status);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Publish_GivenBlankLayout_ThrowsDomainException(string? layout)
+    {
+        // Arrange
+        var quiz = Quiz.Create("Quiz", Guid.NewGuid(), layout, null, CreateQuestions());
+
+        // Act & Assert
+        Assert.Throws<DomainException>(quiz.Publish);
+        Assert.Equal(PublicationStatus.Draft, quiz.Status);
     }
 
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public void Create_GivenMissingQuestions_ThrowsDomainException(bool useNull)
+    public void Publish_GivenMissingExhibition_ThrowsDomainException(bool useEmptyGuid)
     {
         // Arrange
-        List<NewQuestion> questions = [];
-        if (useNull)
+        Guid? exhibitionId = null;
+        if (useEmptyGuid)
         {
-            questions = null!;
+            exhibitionId = Guid.Empty;
         }
 
+        var quiz = Quiz.Create("Quiz", exhibitionId, "vertical", null, CreateQuestions());
+
         // Act & Assert
-        Assert.Throws<DomainException>(() => Quiz.Create("Quiz", Guid.NewGuid(), "vertical", null, questions));
+        Assert.Throws<DomainException>(quiz.Publish);
+        Assert.Equal(PublicationStatus.Draft, quiz.Status);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Publish_GivenMissingQuestions_ThrowsDomainException(bool useNull)
+    {
+        // Arrange
+        List<NewQuestion>? questions = [];
+        if (useNull)
+        {
+            questions = null;
+        }
+
+        var quiz = Quiz.Create("Quiz", Guid.NewGuid(), "vertical", null, questions);
+
+        // Act & Assert
+        Assert.Throws<DomainException>(quiz.Publish);
+        Assert.Equal(PublicationStatus.Draft, quiz.Status);
+    }
+
+    [Fact]
+    public void Publish_GivenInvalidQuestion_ThrowsDomainException()
+    {
+        // Arrange
+        List<NewQuestion> questions = [new NewQuestion("Question", [new Choice("Yes", true)], null, null)];
+        var quiz = Quiz.Create("Quiz", Guid.NewGuid(), "vertical", null, questions);
+
+        // Act & Assert
+        Assert.Throws<DomainException>(quiz.Publish);
+        Assert.Equal(PublicationStatus.Draft, quiz.Status);
     }
 
     [Fact]

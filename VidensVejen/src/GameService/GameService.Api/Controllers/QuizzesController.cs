@@ -16,6 +16,7 @@ public class QuizzesController(
     ICreateQuizHandler create,
     IUpdateQuizHandler update,
     IDeleteQuizHandler delete,
+    IPublishQuizHandler publish,
     IQuizQueries queries
     ) : ControllerBase
 {
@@ -104,6 +105,31 @@ public class QuizzesController(
             await delete.HandleAsync(id);
 
             return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("{id:guid}/publish")]
+    [EndpointSummary("Publish a quiz")]
+    [EndpointDescription("Publishes a draft quiz so it can be shown in the kiosk")]
+    [ProducesResponseType(StatusCodes.Status204NoContent, Description = "Quiz was published successfully")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "The quiz does not meet the rules for publishing")]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Quiz was not found")]
+    public async Task<ActionResult> PublishQuiz(
+        [Required][Description("A unique identifier for a quiz")] Guid id)
+    {
+        try
+        {
+            await publish.HandleAsync(id);
+
+            return NoContent();
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
         }
         catch (Exception ex)
         {

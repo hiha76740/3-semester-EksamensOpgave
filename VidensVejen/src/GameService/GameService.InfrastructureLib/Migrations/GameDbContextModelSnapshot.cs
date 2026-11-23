@@ -39,7 +39,6 @@ namespace GameService.InfrastructureLib.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Text")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -59,16 +58,17 @@ namespace GameService.InfrastructureLib.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid>("ExhibitionId")
+                    b.Property<Guid?>("ExhibitionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("QuizLayout")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
