@@ -1,3 +1,5 @@
+using ImageService.FacadeLib.Commands.DTOs;
+
 namespace ImageService.FacadeLib.Commands.Interfaces;
 
 /// <summary>
@@ -8,7 +10,7 @@ public interface IDeleteImageHandler
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="command"></param>
     /// <returns></returns>
-    Task HandleAsync(Guid id);
+    Task HandleAsync(DeleteImageCommand command);
 }

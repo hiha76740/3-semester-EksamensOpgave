@@ -2,6 +2,7 @@ using ImageService.ApplicationLib.Repositories;
 using ImageService.ApplicationLib.Services;
 using ImageService.ApplicationLib.Storages;
 using ImageService.DomainLib.Entities;
+using ImageService.FacadeLib.Commands.DTOs;
 using ImageService.FacadeLib.Commands.Interfaces;
 using Microsoft.Extensions.Logging;
 using VidensVejen.SharedKernelLib.Exceptions;
@@ -23,14 +24,14 @@ public class DeleteImageHandler(
     ILogger<DeleteImageHandler> logger
     ) : IDeleteImageHandler
 {
-    async Task IDeleteImageHandler.HandleAsync(Guid id)
+    async Task IDeleteImageHandler.HandleAsync(DeleteImageCommand command)
     {
         try
         {
             if (logger.IsEnabled(LogLevel.Information))
-                logger.LogInformation("Beginning to delete image {ImageId}", id);
+                logger.LogInformation("Beginning to delete image {ImageId}", command.Id);
 
-            var imageId = new ImageId(id);
+            var imageId = new ImageId(command.Id);
 
             var image = await imageRepo.GetImageByIdAsync(imageId)
                 ?? throw new NotFoundException("Image Id not found");
@@ -41,11 +42,15 @@ public class DeleteImageHandler(
                 throw new InvalidOperationException("Can not delete image that is still in use");
 
             if (logger.IsEnabled(LogLevel.Information))
-                logger.LogInformation("Deleting image {ImageId} from database", id);
+                logger.LogInformation("Deleting image {ImageId} from database", command.Id);
+
+            imageRepo.SetOriginalRowVersion(image, command.RowVersion);
 
             await imageStorage.DeleteAsync(image.StorageKey, image.Extension);
 
             imageRepo.Delete(image);
+
+            await imageRepo.SaveAsync();
         }
         catch (Exception ex)
         {

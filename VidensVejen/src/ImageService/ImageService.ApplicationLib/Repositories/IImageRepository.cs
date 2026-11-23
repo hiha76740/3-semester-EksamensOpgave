@@ -34,4 +34,11 @@ public interface IImageRepository
     /// </summary>
     /// <returns></returns>
     Task SaveAsync();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="image"></param>
+    /// <param name="rowVersion"></param>
+    void SetOriginalRowVersion(Image image, byte[] rowVersion);
 }

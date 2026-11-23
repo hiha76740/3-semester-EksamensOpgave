@@ -35,6 +35,12 @@ namespace ImageService.InfrastructureLib.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<string>("StorageKey")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

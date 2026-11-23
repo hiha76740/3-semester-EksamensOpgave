@@ -1,6 +1,8 @@
 using ImageService.ApplicationLib.Repositories;
 using ImageService.DomainLib.Entities;
 using ImageService.InfrastructureLib.Persistence;
+using Microsoft.EntityFrameworkCore;
+using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace ImageService.InfrastructureLib.Repositories;
 
@@ -27,6 +29,20 @@ public class ImageRepository(ImageDbContext db) : IImageRepository
 
     async Task IImageRepository.SaveAsync()
     {
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConcurrencyConflictException("The data was changed or deleted by another request", ex);
+        }
+    }
+
+    void IImageRepository.SetOriginalRowVersion(Image image, byte[] originalRowVersion)
+    {
+        db.Entry(image)
+            .Property(u => u.RowVersion)
+            .OriginalValue = originalRowVersion;
     }
 }

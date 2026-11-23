@@ -31,6 +31,12 @@ public class Image
     /// <summary>
     /// 
     /// </summary>
+    public byte[] RowVersion { get; private set; } = [];
+
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="contentType"></param>
     /// <param name="extension"></param>
     /// <returns></returns>
