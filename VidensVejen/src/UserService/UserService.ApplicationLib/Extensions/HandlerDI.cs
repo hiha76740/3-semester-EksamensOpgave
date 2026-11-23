@@ -19,7 +19,6 @@ public static class HandlerDI
     public static IServiceCollection AddHandlerDI(this IServiceCollection services)
     {
         services.AddScoped<IUpdateUserHandler, UpdateUserHandler>();
-        services.AddScoped<IUpdateEmailHandler, UpdateEmailHandler>();
         services.AddScoped<ProcessInboxMessageHandler>();
         services.AddScoped<PublishOutboxMessageHandler>();
 

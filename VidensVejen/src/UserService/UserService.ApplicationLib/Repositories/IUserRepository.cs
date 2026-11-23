@@ -33,4 +33,10 @@ public interface IUserRepository
     /// </summary>
     /// <param name="user"></param>
     void Delete(User user);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    Task SaveAsync();
 }

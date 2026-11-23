@@ -64,7 +64,8 @@ internal static class UsersMapper
     {
         var output = new UpdateAuthUserPasswordCommand(
             id,
-            request.Password
+            request.Password,
+            request.OldPassword
             );
 
         return output;

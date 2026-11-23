@@ -5,15 +5,22 @@ namespace VidensVejen.ContractsLib.Requests.AuthService;
 /// 
 /// </summary>
 /// <param name="Password"></param>
+/// <param name="OldPassword"></param>
 /// <example>
 /// {
-///     "password":"MySecretPassword123"
+///     "password": "MySecretPassword123",
+///     "oldPassword": "MyOldSecretPassword123"
 /// }
 /// </example>
-public record UpdateAuthUserPasswordRequest(string Password)
+public record UpdateAuthUserPasswordRequest(string Password, string OldPassword)
 {
     /// <summary>
-    /// The password of the user.
+    /// The new password of the user.
     /// </summary>
     public string Password { get; init; } = Password;
+
+    /// <summary>
+    /// The old password of the user.
+    /// </summary>
+    public string OldPassword { get; init; } = OldPassword;
 };
