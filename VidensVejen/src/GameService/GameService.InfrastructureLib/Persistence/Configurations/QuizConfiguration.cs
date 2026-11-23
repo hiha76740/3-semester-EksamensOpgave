@@ -1,4 +1,5 @@
 using GameService.DomainLib.Entities;
+using GameService.DomainLib.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -15,13 +16,17 @@ internal sealed class QuizConfiguration : IEntityTypeConfiguration<Quiz>
             id => id.Value,
             value => new QuizId(value));
 
+        builder.Property(x => x.ExhibitionId)
+            .HasConversion(
+            id => id!.Value,
+            value => new ExhibitionId(value))
+            .IsRequired(false);
+
         builder.Property(x => x.Title)
-            .HasMaxLength(500)
-            .IsRequired();
+            .HasMaxLength(500);
 
         builder.Property(x => x.QuizLayout)
-            .HasMaxLength(500)
-            .IsRequired();
+            .HasMaxLength(500);
 
         builder.Property(x => x.EndMessage)
             .HasMaxLength(500);

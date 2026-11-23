@@ -1,10 +1,10 @@
 using GameService.ApplicationLib.Handlers;
 using GameService.ApplicationLib.Repositories;
 using GameService.DomainLib.Entities;
+using GameService.DomainLib.Enums;
 using GameService.FacadeLib.Commands.DTOs;
 using GameService.FacadeLib.Commands.Interfaces;
 using Moq;
-using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.ApplicationLib.Tests;
 
@@ -36,7 +36,8 @@ public class CreateQuizTests
         Assert.NotNull(savedQuiz);
         Assert.NotEqual(Guid.Empty, id);
         Assert.Equal(id, savedQuiz.Id.Value);
-        Assert.Equal(command.ExhibitionId, savedQuiz.ExhibitionId.Value);
+        Assert.Equal(PublicationStatus.Draft, savedQuiz.Status);
+        Assert.Equal(command.ExhibitionId, savedQuiz.ExhibitionId?.Value);
         Assert.Equal(command.Title, savedQuiz.Title);
         Assert.Equal(command.QuizLayout, savedQuiz.QuizLayout);
         Assert.Equal(command.EndMessage, savedQuiz.EndMessage);
@@ -49,19 +50,6 @@ public class CreateQuizTests
             choice => { Assert.Equal("No", choice.Text); Assert.False(choice.IsCorrect); });
         repository.Verify(r => r.AddAsync(savedQuiz), Times.Once);
         repository.Verify(r => r.SaveAsync(), Times.Once);
-    }
-
-    [Fact]
-    public async Task Handle_GivenInvalidQuiz_ThrowsWithoutWriting()
-    {
-        // Arrange
-        var command = CreateCommand() with { Title = "" };
-        var repository = new Mock<IQuizRepository>();
-        ICreateQuizHandler handler = new CreateQuizHandler(repository.Object);
-
-        // Act & Assert
-        await Assert.ThrowsAsync<DomainException>(() => handler.HandleAsync(command));
-        repository.VerifyNoOtherCalls();
     }
 
     [Fact]
