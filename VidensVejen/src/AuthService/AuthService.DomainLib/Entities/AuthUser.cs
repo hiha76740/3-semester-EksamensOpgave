@@ -68,6 +68,34 @@ public class AuthUser
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="permission"></param>
+    /// <exception cref="DomainException"></exception>
+    public void AddPermission(AccessPermission permission)
+    {
+        if (_permissions.Contains(permission) == true)
+            throw new DomainException("User already has this permission");
+
+        _permissions.Add(permission);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="permission"></param>
+    /// <exception cref="DomainException"></exception>
+    public void RemovePermission(AccessPermission permission)
+    {
+        if (_permissions.Contains(permission) == false)
+            throw new DomainException("User does not have this permission");
+
+        _permissions.Remove(permission);
+    }
+
+
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="refreshToken"></param>
     /// <param name="refreshExpiryTime"></param>
     /// <exception cref="DomainException"></exception>
