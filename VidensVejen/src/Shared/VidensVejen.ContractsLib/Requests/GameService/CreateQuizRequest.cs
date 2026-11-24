@@ -4,10 +4,12 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 /// 
 /// </summary>
 /// <param name="Title"></param>
+/// <param name="TitleEn"></param>
 /// <param name="ExhibitionId"></param>
 /// <param name="QuizLayout"></param>
 /// <param name="Questions"></param>
 /// <param name="EndMessage"></param>
+/// <param name="EndMessageEn"></param>
 /// <example>
 /// {
 ///     "title": "Affaldshierakiet",
@@ -28,10 +30,13 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 /// </example>
 public record CreateQuizRequest(
     string Title,
+    string TitleEn,
     Guid ExhibitionId,
     string QuizLayout,
     List<CreateQuestionRequest> Questions,
-    string? EndMessage
+    string? EndMessage,
+    string? EndMessageEn
+
     )
 {
     /// <summary>
