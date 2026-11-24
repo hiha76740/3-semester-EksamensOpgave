@@ -22,6 +22,21 @@ namespace GameService.InfrastructureLib.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("GameService.DomainLib.Entities.GameSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("QuizId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuizId");
+
+                    b.ToTable("GameSessions");
+                });
+
             modelBuilder.Entity("GameService.DomainLib.Entities.Question", b =>
                 {
                     b.Property<Guid>("Id")

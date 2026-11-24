@@ -7,6 +7,7 @@ public class GameDbContext : DbContext
 {
     public DbSet<Quiz> Quizzes { get; set; }
     public DbSet<Question> Questions { get; set; }
+    public DbSet<GameSession> GameSessions { get; set; }
 
     public GameDbContext(DbContextOptions<GameDbContext> options) : base(options) { }
 
