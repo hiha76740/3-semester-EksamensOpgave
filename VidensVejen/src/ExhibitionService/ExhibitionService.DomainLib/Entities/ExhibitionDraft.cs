@@ -39,10 +39,10 @@ public class ExhibitionDraft
     /// 
     /// </summary>
     /// <returns></returns>
-    public static ExhibitionDraftId Create()
+    public static ExhibitionDraft Create()
     {
         var exhibitionDraft = new ExhibitionDraft();
-        return exhibitionDraft.Id;
+        return exhibitionDraft;
     }
 
 
