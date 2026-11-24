@@ -11,7 +11,7 @@ public interface IQuizService
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="request"></param>
+    /// <param name="quiz"></param>
     /// <returns></returns>
-    Task<HttpStatusCode> CreateAsync(CreateQuizRequest request);
+    Task<HttpStatusCode> CreateAsync(CreateQuizRequest quiz);
 }

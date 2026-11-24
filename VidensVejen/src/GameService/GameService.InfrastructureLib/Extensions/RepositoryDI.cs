@@ -17,6 +17,7 @@ public static class RepositoryDI
     public static IServiceCollection AddRepositoryDI(this IServiceCollection services)
     {
         services.AddScoped<IQuizRepository, QuizRepository>();
+        services.AddScoped<IQuizDraftRepository, QuizDraftRepository>();
         services.AddScoped<IGameSessionRepository, GameSessionRepository>();
 
         return services;

@@ -8,7 +8,7 @@ public interface IPublishQuizHandler
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="draftId"></param>
     /// <returns></returns>
-    Task HandleAsync(Guid id);
+    Task<Guid> HandleAsync(Guid draftId);
 }

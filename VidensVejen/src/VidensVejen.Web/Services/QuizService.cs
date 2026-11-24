@@ -1,4 +1,6 @@
 using System.Net;
+using System.Net.Http.Json;
+using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using VidensVejen.ContractsLib.Requests.GameService;
 using VidensVejen.Web.ServicesInterfaces;
 
@@ -7,10 +9,20 @@ namespace VidensVejen.Web.Services;
 /// <summary>
 /// 
 /// </summary>
-public class QuizService : IQuizService
+public class QuizService(HttpClient httpClient) : IQuizService
 {
-    Task<HttpStatusCode> IQuizService.CreateAsync(CreateQuizRequest request)
+    private const string BaseUrl = "/quizzes-api";
+
+    async Task<HttpStatusCode> IQuizService.CreateAsync(CreateQuizRequest quiz)
     {
-        throw new NotImplementedException();
+        using var request = new HttpRequestMessage(HttpMethod.Post, BaseUrl)
+        {
+            Content = JsonContent.Create(quiz)
+        };
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+        using var response = await httpClient.SendAsync(request);
+
+        return response.StatusCode;
     }
 }

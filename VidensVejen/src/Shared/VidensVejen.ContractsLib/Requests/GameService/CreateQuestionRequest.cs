@@ -4,33 +4,26 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 /// 
 /// </summary>
 /// <param name="Text"></param>
+/// <param name="TextEn"></param>
 /// <param name="Choices"></param>
-/// <param name="CorrectFeedback"></param>
-/// <param name="IncorrectFeedback"></param>
 public record CreateQuestionRequest(
-    string Text,
-    List<CreateChoiceRequest> Choices,
-    string? CorrectFeedback,
-    string? IncorrectFeedback
+    string? Text,
+    string? TextEn,
+    List<CreateChoiceRequest>? Choices
     )
 {
     /// <summary>
-    /// The text you want the choice to have.
+    /// The text of the question in Danish.
     /// </summary>
-    public string Text { get; init; } = Text;
+    public string? Text { get; init; } = Text;
+
+    /// <summary>
+    /// The text of the question in English.
+    /// </summary>
+    public string? TextEn { get; init; } = TextEn;
 
     /// <summary>
     /// A list of the choices you want the question to have.
     /// </summary>
-    public List<CreateChoiceRequest> Choices { get; init; } = Choices;
-
-    /// <summary>
-    /// Feedback shown when the guest answers correctly. Optional.
-    /// </summary>
-    public string? CorrectFeedback { get; init; } = CorrectFeedback;
-
-    /// <summary>
-    /// Feedback shown when the guest answers incorrectly. Optional.
-    /// </summary>
-    public string? IncorrectFeedback { get; init; } = IncorrectFeedback;
+    public List<CreateChoiceRequest>? Choices { get; init; } = Choices;
 }

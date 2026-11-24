@@ -20,7 +20,7 @@ public class SessionsController(
     [EndpointSummary("Start a session")]
     [EndpointDescription("Starts a new game session on a published quiz. Returns the quiz without the correct answers")]
     [ProducesResponseType<StartSessionResponse>(StatusCodes.Status201Created, "Application/json", Description = "Returns the session id and the quiz to play")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "The quiz is not published or the request is invalid")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "The request is invalid")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Quiz was not found")]
     public async Task<ActionResult<StartSessionResponse>> StartSession(
         [Required][Description("Object used to start a session")] StartSessionRequest request)

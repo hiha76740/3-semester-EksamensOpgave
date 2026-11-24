@@ -4,8 +4,14 @@ namespace GameService.FacadeLib.Queries.DTOs;
 /// 
 /// </summary>
 /// <param name="Text"></param>
+/// <param name="TextEn"></param>
 /// <param name="CorrectAnswer"></param>
+/// <param name="Feedback"></param>
+/// <param name="FeedbackEn"></param>
 public record ChoiceDto(
     string Text,
-    bool CorrectAnswer
+    string? TextEn,
+    bool CorrectAnswer,
+    string? Feedback,
+    string? FeedbackEn
     );

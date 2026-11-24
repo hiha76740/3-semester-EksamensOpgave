@@ -22,6 +22,29 @@ namespace GameService.InfrastructureLib.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("GameService.DomainLib.Entities.DraftQuestion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("QuizDraftId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Text")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TextEn")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuizDraftId");
+
+                    b.ToTable("DraftQuestions");
+                });
+
             modelBuilder.Entity("GameService.DomainLib.Entities.GameSession", b =>
                 {
                     b.Property<Guid>("Id")
@@ -42,18 +65,15 @@ namespace GameService.InfrastructureLib.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CorrectFeedback")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("IncorrectFeedback")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<Guid>("QuizId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TextEn")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -73,17 +93,24 @@ namespace GameService.InfrastructureLib.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<Guid?>("ExhibitionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("QuizLayout")
+                    b.Property<string>("EndMessageEn")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<Guid>("ExhibitionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("QuizLayout")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TitleEn")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -92,6 +119,80 @@ namespace GameService.InfrastructureLib.Migrations
                     b.HasIndex("ExhibitionId");
 
                     b.ToTable("Quizzes");
+                });
+
+            modelBuilder.Entity("GameService.DomainLib.Entities.QuizDraft", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("EndMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("EndMessageEn")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid?>("ExhibitionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("QuizLayout")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("TitleEn")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("QuizDrafts");
+                });
+
+            modelBuilder.Entity("GameService.DomainLib.Entities.DraftQuestion", b =>
+                {
+                    b.HasOne("GameService.DomainLib.Entities.QuizDraft", null)
+                        .WithMany("Questions")
+                        .HasForeignKey("QuizDraftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsMany("GameService.DomainLib.ValueObjects.Choice", "Choices", b1 =>
+                        {
+                            b1.Property<Guid>("DraftQuestionId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<string>("Feedback");
+
+                            b1.Property<string>("FeedbackEn");
+
+                            b1.Property<bool>("IsCorrect");
+
+                            b1.Property<string>("Text")
+                                .IsRequired();
+
+                            b1.Property<string>("TextEn");
+
+                            b1.HasKey("DraftQuestionId", "__synthesizedOrdinal");
+
+                            b1.ToTable("DraftQuestions");
+
+                            b1
+                                .ToJson("Choices")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DraftQuestionId");
+                        });
+
+                    b.Navigation("Choices");
                 });
 
             modelBuilder.Entity("GameService.DomainLib.Entities.GameSession", b =>
@@ -139,10 +240,16 @@ namespace GameService.InfrastructureLib.Migrations
                             b1.Property<int>("__synthesizedOrdinal")
                                 .ValueGeneratedOnAddOrUpdate();
 
+                            b1.Property<string>("Feedback");
+
+                            b1.Property<string>("FeedbackEn");
+
                             b1.Property<bool>("IsCorrect");
 
                             b1.Property<string>("Text")
                                 .IsRequired();
+
+                            b1.Property<string>("TextEn");
 
                             b1.HasKey("QuestionId", "__synthesizedOrdinal");
 
@@ -160,6 +267,11 @@ namespace GameService.InfrastructureLib.Migrations
                 });
 
             modelBuilder.Entity("GameService.DomainLib.Entities.Quiz", b =>
+                {
+                    b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("GameService.DomainLib.Entities.QuizDraft", b =>
                 {
                     b.Navigation("Questions");
                 });

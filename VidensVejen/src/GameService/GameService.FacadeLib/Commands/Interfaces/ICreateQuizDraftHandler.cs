@@ -5,7 +5,7 @@ namespace GameService.FacadeLib.Commands.Interfaces;
 /// <summary>
 /// 
 /// </summary>
-public interface ICreateQuizHandler
+public interface ICreateQuizDraftHandler
 {
     /// <summary>
     /// 

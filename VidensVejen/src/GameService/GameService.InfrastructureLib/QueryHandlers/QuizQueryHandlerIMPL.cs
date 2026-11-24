@@ -1,5 +1,4 @@
 using GameService.DomainLib.Entities;
-using GameService.DomainLib.Enums;
 using GameService.DomainLib.ValueObjects;
 using GameService.FacadeLib.Queries.DTOs;
 using GameService.FacadeLib.Queries.Interfaces;
@@ -29,14 +28,14 @@ public class QuizQueryHandlerIMPL(GameDbContext db) : IQuizQueries
         return AsDto(quiz);
     }
 
-    async Task<List<QuizDto>> IQuizQueries.GetPublishedQuizzesAsync(Guid exhibitionId)
+    async Task<List<QuizDto>> IQuizQueries.GetQuizzesByExhibitionAsync(Guid exhibitionId)
     {
         var exhibitionKey = new ExhibitionId(exhibitionId);
 
         var quizzes = await db.Quizzes
             .AsNoTracking()
             .Include(q => q.Questions)
-            .Where(q => q.Status == PublicationStatus.Published && q.ExhibitionId == exhibitionKey)
+            .Where(q => q.ExhibitionId == exhibitionKey)
             .ToListAsync();
 
         return quizzes.Select(AsDto).ToList();
@@ -47,22 +46,25 @@ public class QuizQueryHandlerIMPL(GameDbContext db) : IQuizQueries
         return new QuizDto(
             quiz.Id.Value,
             quiz.Title,
-            quiz.ExhibitionId?.Value,
+            quiz.TitleEn,
+            quiz.ExhibitionId.Value,
             quiz.QuizLayout,
             quiz.EndMessage,
-            quiz.Status.ToString(),
+            quiz.EndMessageEn,
             quiz.Questions
             .Select(
                 q => new QuestionDto(
                     q.Id.Value,
                     q.Text,
-                    q.CorrectFeedback,
-                    q.IncorrectFeedback,
+                    q.TextEn,
                     q.Choices
                     .Select(
                         c => new ChoiceDto(
                             c.Text,
-                            c.IsCorrect))
+                            c.TextEn,
+                            c.IsCorrect,
+                            c.Feedback,
+                            c.FeedbackEn))
                     .ToList()))
             .ToList());
     }

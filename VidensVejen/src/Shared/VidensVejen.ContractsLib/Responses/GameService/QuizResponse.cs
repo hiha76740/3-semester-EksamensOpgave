@@ -5,29 +5,33 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 /// </summary>
 /// <param name="Id"></param>
 /// <param name="Title"></param>
+/// <param name="TitleEn"></param>
 /// <param name="ExhibitionId"></param>
 /// <param name="QuizLayout"></param>
 /// <param name="EndMessage"></param>
-/// <param name="Status"></param>
+/// <param name="EndMessageEn"></param>
 /// <param name="Questions"></param>
 /// <example>
 /// {
 ///     "id": "123e4567-e89b-12d3-a456-426614174000",
 ///     "title": "Affaldshierakiet",
+///     "titleEn": "The waste hierarchy",
 ///     "exhibitionId": "123e4567-e89b-12d3-a456-426614174000",
 ///     "quizLayout": "Vertikalt",
 ///     "endMessage": "Godt klaret!",
-///     "status": "Published",
+///     "endMessageEn": "Well done!",
 ///     "questions": [
 ///         {
 ///             "id": "123e4567-e89b-12d3-a456-426614174000",
 ///             "text": "Hvad skal dette sorteres som?",
-///             "correctFeedback": "Rigtigt!",
-///             "incorrectFeedback": "Næsten! Det er plastik.",
+///             "textEn": "How should this be sorted?",
 ///             "choices": [
 ///                 {
 ///                     "text": "Plastik",
-///                     "correctAnswer": true
+///                     "textEn": "Plastic",
+///                     "correctAnswer": true,
+///                     "feedback": "Rigtigt!",
+///                     "feedbackEn": "Correct!"
 ///                 }
 ///             ]
 ///         }
@@ -36,11 +40,12 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 /// </example>
 public record QuizResponse(
     Guid Id,
-    string? Title,
-    Guid? ExhibitionId,
-    string? QuizLayout,
+    string Title,
+    string? TitleEn,
+    Guid ExhibitionId,
+    string QuizLayout,
     string? EndMessage,
-    string Status,
+    string? EndMessageEn,
     List<QuestionResponse> Questions
     )
 {
@@ -50,29 +55,34 @@ public record QuizResponse(
     public Guid Id { get; init; } = Id;
 
     /// <summary>
-    /// The title of the quiz.
+    /// The title of the quiz in Danish.
     /// </summary>
-    public string? Title { get; init; } = Title;
+    public string Title { get; init; } = Title;
+
+    /// <summary>
+    /// The title of the quiz in English.
+    /// </summary>
+    public string? TitleEn { get; init; } = TitleEn;
 
     /// <summary>
     /// A unique identifier for a exhibition the quiz associate to.
     /// </summary>
-    public Guid? ExhibitionId { get; init; } = ExhibitionId;
+    public Guid ExhibitionId { get; init; } = ExhibitionId;
 
     /// <summary>
     /// The layout of the quiz.
     /// </summary>
-    public string? QuizLayout { get; init; } = QuizLayout;
+    public string QuizLayout { get; init; } = QuizLayout;
 
     /// <summary>
-    /// Message shown when the quiz is finished.
+    /// Message shown in Danish when the quiz is finished.
     /// </summary>
     public string? EndMessage { get; init; } = EndMessage;
 
     /// <summary>
-    /// The status of the quiz, Draft or Published.
+    /// Message shown in English when the quiz is finished.
     /// </summary>
-    public string Status { get; init; } = Status;
+    public string? EndMessageEn { get; init; } = EndMessageEn;
 
     /// <summary>
     /// A list of the questions assoicated to the quiz.

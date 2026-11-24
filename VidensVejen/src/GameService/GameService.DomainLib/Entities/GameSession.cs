@@ -1,4 +1,3 @@
-using GameService.DomainLib.Enums;
 using GameService.DomainLib.ValueObjects;
 using VidensVejen.SharedKernelLib.Exceptions;
 
@@ -30,12 +29,8 @@ public class GameSession
     /// </summary>
     /// <param name="quiz"></param>
     /// <returns></returns>
-    /// <exception cref="DomainException"></exception>
     public static GameSession Start(Quiz quiz)
     {
-        if (quiz.Status != PublicationStatus.Published)
-            throw new DomainException("A session can only be started on a published quiz");
-
         var session = new GameSession(quiz.Id);
 
         return session;
@@ -70,9 +65,10 @@ public class GameSession
 
         var correctChoice = question.Choices.First(c => c.IsCorrect);
 
-        var feedback = isCorrect ? question.CorrectFeedback : question.IncorrectFeedback;
+        var feedback = question.Choices[choiceIndex].Feedback;
+        var feedbackEn = question.Choices[choiceIndex].FeedbackEn;
 
-        return new AnswerResult(isCorrect, feedback, correctChoice.Text);
+        return new AnswerResult(isCorrect, feedback, feedbackEn, correctChoice.Text);
     }
 
     private GameSession(QuizId quizId)

@@ -15,15 +15,11 @@ public class Question
     /// <summary>
     /// 
     /// </summary>
-    public string? Text { get; private set; }
+    public string Text { get; private set; } = string.Empty;
     /// <summary>
     /// 
     /// </summary>
-    public string? CorrectFeedback { get; private set; }
-    /// <summary>
-    /// 
-    /// </summary>
-    public string? IncorrectFeedback { get; private set; }
+    public string? TextEn { get; private set; }
 
     /// <summary>
     /// 
@@ -33,27 +29,21 @@ public class Question
     private readonly List<Choice> _choices = [];
 
 
-    internal Question(string? text, List<Choice>? choices, string? correctFeedback, string? incorrectFeedback)
+    internal Question(string? text, string? textEn, List<Choice>? choices)
     {
-        Id = new QuestionId(Guid.NewGuid());
-        Text = text;
-        CorrectFeedback = correctFeedback;
-        IncorrectFeedback = incorrectFeedback;
-
-        if (choices != null)
-            _choices.AddRange(choices);
-    }
-
-    internal void EnsureCanBePublished()
-    {
-        if (string.IsNullOrWhiteSpace(Text))
+        if (string.IsNullOrWhiteSpace(text))
             throw new DomainException("Question text could not be set, no value");
 
-        if (_choices.Count < 2)
+        if (choices == null || choices.Count < 2)
             throw new DomainException("A question must have at least two choices");
 
-        if (_choices.Count(c => c.IsCorrect) != 1)
+        if (choices.Count(c => c.IsCorrect) != 1)
             throw new DomainException("A question must have exactly one correct choice");
+
+        Id = new QuestionId(Guid.NewGuid());
+        Text = text;
+        TextEn = textEn;
+        _choices.AddRange(choices);
     }
 
     // EF Core constructor

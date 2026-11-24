@@ -19,5 +19,5 @@ public interface IQuizQueries
     /// </summary>
     /// <param name="exhibitionId"></param>
     /// <returns></returns>
-    Task<List<QuizDto>> GetPublishedQuizzesAsync(Guid exhibitionId);
+    Task<List<QuizDto>> GetQuizzesByExhibitionAsync(Guid exhibitionId);
 }

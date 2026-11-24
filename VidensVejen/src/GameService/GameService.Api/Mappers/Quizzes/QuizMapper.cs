@@ -11,13 +11,15 @@ internal static class QuizMapper
     {
         var output = new CreateQuizCommand(
             request.Title,
+            request.TitleEn,
             request.ExhibitionId,
             request.QuizLayout,
-            request.Questions
+            request.Questions?
             .Select(
                 q => q.AsCreateCommand())
             .ToList(),
-             request.EndMessage
+             request.EndMessage,
+             request.EndMessageEn
         );
 
         return output;
@@ -28,10 +30,11 @@ internal static class QuizMapper
         var output = new QuizResponse(
             dto.Id,
             dto.Title,
+            dto.TitleEn,
             dto.ExhibitionId,
             dto.QuizLayout,
             dto.EndMessage,
-            dto.Status,
+            dto.EndMessageEn,
             dto.Questions
             .Select(
                 q => q.AsResponse())
