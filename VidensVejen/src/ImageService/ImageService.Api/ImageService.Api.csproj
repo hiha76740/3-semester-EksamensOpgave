@@ -31,4 +31,8 @@
     <ProjectReference Include="..\..\..\VidensVejen.ServiceDefaults\VidensVejen.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Storage\images\themes\" />
+  </ItemGroup>
+
 </Project>
