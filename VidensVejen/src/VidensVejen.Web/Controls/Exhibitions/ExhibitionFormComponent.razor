@@ -32,13 +32,16 @@
             </RadzenAccordion>
 
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
-                <RadzenButton ButtonType="ButtonType.Submit" Text="Vis request-eksempel" />
+                <RadzenButton ButtonType="ButtonType.Submit" Text="@SubmitButtonText" />
             </RadzenStack>
         </RadzenStack>
     </RadzenTemplateForm>
 </RadzenCard>
 
 @code {
+    [Parameter, EditorRequired]
+    public string SubmitButtonText { get; set; }
+
     [Parameter, EditorRequired]
     public ExhibitionInputModel Model { get; set; } = default!;
 

@@ -19,6 +19,7 @@ public static class ServiceDI
         services.AddScoped<IAuthUserService, AuthUserService>();
         services.AddScoped<IExhibitionService, ExhibitionService>();
         services.AddScoped<IQuizService, QuizService>();
+        services.AddScoped<IImageService, ImageService>();
 
         return services;
     }
