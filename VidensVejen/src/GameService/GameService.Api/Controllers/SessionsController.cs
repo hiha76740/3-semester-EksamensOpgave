@@ -12,7 +12,8 @@ namespace GameService.Api.Controllers;
 [Route("/v1/games/sessions")]
 [ApiController]
 public class SessionsController(
-    IStartSessionHandler start
+    IStartSessionHandler start,
+    IAnswerQuestionHandler answer
     ) : ControllerBase
 {
     [HttpPost]
@@ -31,6 +32,32 @@ public class SessionsController(
             var response = dto.AsResponse();
 
             return Created($"/v1/games/sessions/{response.SessionId}", response);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("{id:guid}/answers")]
+    [EndpointSummary("Answer a question")]
+    [EndpointDescription("Answers a question in the session. The answer is validated in GameService and is final")]
+    [ProducesResponseType<AnswerResultResponse>(StatusCodes.Status200OK, "Application/json", Description = "Returns whether the answer was correct, the feedback and the correct answer")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "The question is already answered or the choice does not exist")]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Session or question was not found")]
+    public async Task<ActionResult<AnswerResultResponse>> AnswerQuestion(
+        [Required][Description("A unique identifier for the session")] Guid id,
+        [Required][Description("Object used to answer a question")] AnswerQuestionRequest request)
+    {
+        try
+        {
+            var dto = await answer.HandleAsync(request.AsCommand(id));
+
+            return Ok(dto.AsResponse());
         }
         catch (NotFoundException ex)
         {
