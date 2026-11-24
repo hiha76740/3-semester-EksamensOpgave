@@ -13,7 +13,7 @@ internal static class QuizMapper
             request.Title,
             request.ExhibitionId,
             request.QuizLayout,
-            request.Questions
+            request.Questions?
             .Select(
                 q => q.AsCreateCommand())
             .ToList(),

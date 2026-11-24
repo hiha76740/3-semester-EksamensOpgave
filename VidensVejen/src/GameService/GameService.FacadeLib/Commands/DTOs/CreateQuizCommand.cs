@@ -9,9 +9,9 @@ namespace GameService.FacadeLib.Commands.DTOs;
 /// <param name="Questions"></param>
 /// <param name="EndMessage"></param>
 public record CreateQuizCommand(
-    string Title,
-    Guid ExhibitionId,
-    string QuizLayout,
-    List<CreateQuestionCommand> Questions,
+    string? Title,
+    Guid? ExhibitionId,
+    string? QuizLayout,
+    List<CreateQuestionCommand>? Questions,
     string? EndMessage
     );

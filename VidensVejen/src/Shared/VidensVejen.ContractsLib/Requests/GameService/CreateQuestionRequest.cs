@@ -8,8 +8,8 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 /// <param name="CorrectFeedback"></param>
 /// <param name="IncorrectFeedback"></param>
 public record CreateQuestionRequest(
-    string Text,
-    List<CreateChoiceRequest> Choices,
+    string? Text,
+    List<CreateChoiceRequest>? Choices,
     string? CorrectFeedback,
     string? IncorrectFeedback
     )
@@ -17,12 +17,12 @@ public record CreateQuestionRequest(
     /// <summary>
     /// The text you want the choice to have.
     /// </summary>
-    public string Text { get; init; } = Text;
+    public string? Text { get; init; } = Text;
 
     /// <summary>
     /// A list of the choices you want the question to have.
     /// </summary>
-    public List<CreateChoiceRequest> Choices { get; init; } = Choices;
+    public List<CreateChoiceRequest>? Choices { get; init; } = Choices;
 
     /// <summary>
     /// Feedback shown when the guest answers correctly. Optional.

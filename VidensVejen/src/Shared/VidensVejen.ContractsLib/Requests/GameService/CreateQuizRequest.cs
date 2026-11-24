@@ -27,32 +27,32 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 /// }
 /// </example>
 public record CreateQuizRequest(
-    string Title,
-    Guid ExhibitionId,
-    string QuizLayout,
-    List<CreateQuestionRequest> Questions,
+    string? Title,
+    Guid? ExhibitionId,
+    string? QuizLayout,
+    List<CreateQuestionRequest>? Questions,
     string? EndMessage
     )
 {
     /// <summary>
     /// The title of the quiz.
     /// </summary>
-    public string Title { get; init; } = Title;
+    public string? Title { get; init; } = Title;
 
     /// <summary>
     /// A unique identifier for a exhibition the quiz associate to.
     /// </summary>
-    public Guid ExhibitionId { get; init; } = ExhibitionId;
+    public Guid? ExhibitionId { get; init; } = ExhibitionId;
 
     /// <summary>
     /// The layout of the quiz.
     /// </summary>
-    public string QuizLayout { get; init; } = QuizLayout;
+    public string? QuizLayout { get; init; } = QuizLayout;
 
     /// <summary>
     /// A list of the questions you want the quiz to have.
     /// </summary>
-    public List<CreateQuestionRequest> Questions { get; init; } = Questions;
+    public List<CreateQuestionRequest>? Questions { get; init; } = Questions;
 
     /// <summary>
     /// Message from Otto shown when the quiz is finished. Optional.

@@ -11,7 +11,7 @@ internal static class QuestionMapper
     {
         var output = new CreateQuestionCommand(
             request.Text,
-            request.Choices
+            request.Choices?
             .Select(
                 q => q.AsCreateCommand())
             .ToList(),

@@ -16,11 +16,11 @@ public class CreateQuizDraftHandler(IQuizDraftRepository draftRepo) : ICreateQui
     {
         var questions = new List<NewQuestion>();
 
-        foreach (var questionCommand in command.Questions)
+        foreach (var questionCommand in command.Questions ?? [])
         {
             var choices = new List<Choice>();
 
-            foreach (var choiceCommand in questionCommand.Choices)
+            foreach (var choiceCommand in questionCommand.Choices ?? [])
             {
                 choices.Add(new Choice(choiceCommand.Text, choiceCommand.CorrectAnswer));
             }

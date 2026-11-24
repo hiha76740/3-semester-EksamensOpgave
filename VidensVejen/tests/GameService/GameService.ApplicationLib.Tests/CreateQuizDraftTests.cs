@@ -39,7 +39,7 @@ public class CreateQuizDraftTests
         Assert.Equal(command.QuizLayout, savedDraft.QuizLayout);
         Assert.Equal(command.EndMessage, savedDraft.EndMessage);
         var question = Assert.Single(savedDraft.Questions);
-        Assert.Equal(command.Questions[0].Text, question.Text);
+        Assert.Equal(command.Questions![0].Text, question.Text);
         Assert.Collection(question.Choices,
             choice => { Assert.Equal("Yes", choice.Text); Assert.True(choice.IsCorrect); },
             choice => { Assert.Equal("No", choice.Text); Assert.False(choice.IsCorrect); });
@@ -48,19 +48,24 @@ public class CreateQuizDraftTests
     }
 
     [Fact]
-    public async Task Handle_GivenIncompleteCommand_SavesDraft()
+    public async Task Handle_GivenEmptyCommand_SavesEmptyDraft()
     {
         // Arrange
-        var command = new CreateQuizCommand(null!, Guid.Empty, null!,
-            [new CreateQuestionCommand("Question", [new CreateChoiceCommand("A", true), new CreateChoiceCommand("B", true)], null, null)], null);
+        var command = new CreateQuizCommand(null, null, null, null, null);
         var repository = new Mock<IQuizDraftRepository>();
+        QuizDraft? savedDraft = null;
+        repository.Setup(r => r.AddAsync(It.IsAny<QuizDraft>()))
+            .Callback<QuizDraft>(draft => savedDraft = draft);
         ICreateQuizDraftHandler handler = new CreateQuizDraftHandler(repository.Object);
 
         // Act
         await handler.HandleAsync(command);
 
         // Assert
-        repository.Verify(r => r.AddAsync(It.IsAny<QuizDraft>()), Times.Once);
+        Assert.NotNull(savedDraft);
+        Assert.Null(savedDraft.Title);
+        Assert.Null(savedDraft.ExhibitionId);
+        Assert.Empty(savedDraft.Questions);
         repository.Verify(r => r.SaveAsync(), Times.Once);
     }
 

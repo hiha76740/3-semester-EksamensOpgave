@@ -8,8 +8,8 @@ namespace GameService.FacadeLib.Commands.DTOs;
 /// <param name="CorrectFeedback"></param>
 /// <param name="IncorrectFeedback"></param>
 public record CreateQuestionCommand(
-    string Text,
-    List<CreateChoiceCommand> Choices,
+    string? Text,
+    List<CreateChoiceCommand>? Choices,
     string? CorrectFeedback,
     string? IncorrectFeedback
     );
