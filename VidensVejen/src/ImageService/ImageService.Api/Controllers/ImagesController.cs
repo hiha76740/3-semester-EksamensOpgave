@@ -117,6 +117,27 @@ public class ImagesController(
         }
     }
 
+    [HttpGet("exists")]
+    [EndpointSummary("Check image exists")]
+    [EndpointDescription("Checks if the requested image exists")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK, "application/json", Description = "Returns true if image exists")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while checking requested image")]
+    public async Task<ActionResult<bool>> CheckIfExists(
+        [Required][Description("Unique identifier for the image")] Guid id)
+    {
+        try
+        {
+            var exists = await queries.CheckIfExistsAsync(id);
+
+            return Ok(exists);
+        }
+        catch (Exception ex)
+        {
+
+            return BadRequest(ex.Message);
+        }
+    }
+
 
 
 }

@@ -12,11 +12,19 @@ namespace ImageService.InfrastructureLib.QueryHandlers;
 /// <param name="db"></param>
 public class ImageQueryHandlerIMPL(ImageDbContext db) : IImageQueries
 {
+    async Task<bool> IImageQueries.CheckIfExistsAsync(Guid id)
+    {
+        var imageKey = new ImageId(id);
+
+        return await db.Images.AnyAsync(i => i.Id == imageKey);
+    }
+
     async Task<ImageUrlComponentsDto?> IImageQueries.GetImageUrlComponentsById(Guid id)
     {
         var imageKey = new ImageId(id);
 
-        return await db.Images.AsNoTracking()
+        return await db.Images
+            .AsNoTracking()
             .Where(i => i.Id == imageKey)
             .Select(i => new ImageUrlComponentsDto(i.StorageKey, i.Extension))
             .FirstOrDefaultAsync();

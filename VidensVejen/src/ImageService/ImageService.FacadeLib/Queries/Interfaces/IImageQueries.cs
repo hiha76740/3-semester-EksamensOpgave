@@ -12,5 +12,12 @@ public interface IImageQueries
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
+    Task<bool> CheckIfExistsAsync(Guid id);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     Task<ImageUrlComponentsDto?> GetImageUrlComponentsById(Guid id);
 }
