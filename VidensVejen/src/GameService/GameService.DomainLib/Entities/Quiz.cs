@@ -21,6 +21,11 @@ public class Quiz
     /// 
     /// </summary>
     public string? Title { get; private set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string? TitleEn { get; private set; }
     /// <summary>
     /// 
     /// </summary>
@@ -29,6 +34,11 @@ public class Quiz
     /// 
     /// </summary>
     public string? EndMessage { get; private set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string? EndMessageEn { get; private set; }
     /// <summary>
     /// 
     /// </summary>
@@ -45,19 +55,21 @@ public class Quiz
     /// 
     /// </summary>
     /// <param name="title"></param>
+    /// <param name="titleEn"></param>
     /// <param name="exhibitionId"></param>
     /// <param name="quizLayout"></param>
     /// <param name="endMessage"></param>
+    /// <param name="endMessageEn"></param>
     /// <param name="questions"></param>
     /// <returns></returns>
-    public static Quiz Create(string? title, Guid? exhibitionId, string? quizLayout, string? endMessage, List<NewQuestion>? questions)
+    public static Quiz Create(string? title, string titleEn, Guid? exhibitionId, string? quizLayout, string? endMessage, string? endMessageEn, List<NewQuestion>? questions)
     {
         ExhibitionId? exhibitionKey = null;
 
         if (exhibitionId != null)
             exhibitionKey = new ExhibitionId(exhibitionId.Value);
 
-        var quiz = new Quiz(title, exhibitionKey, quizLayout, endMessage, questions ?? []);
+        var quiz = new Quiz(title, titleEn, exhibitionKey, quizLayout, endMessage, endMessageEn, questions ?? []);
 
         return quiz;
     }
@@ -90,17 +102,19 @@ public class Quiz
 
     private void AddQuestion(NewQuestion newQuestion)
     {
-        var question = new Question(newQuestion.Text, newQuestion.Choices, newQuestion.CorrectFeedback, newQuestion.IncorrectFeedback);
+        var question = new Question(newQuestion.Text, newQuestion.TextEn, newQuestion.Choices);
         _questions.Add(question);
     }
 
-    private Quiz(string? title, ExhibitionId? exhibitionId, string? quizLayout, string? endMessage, List<NewQuestion> questions)
+    private Quiz(string? title, string? titleEn, ExhibitionId? exhibitionId, string? quizLayout, string? endMessage, string? endMessageEn, List<NewQuestion> questions)
     {
         Id = new QuizId(Guid.NewGuid());
         Title = title;
+        TitleEn = titleEn;
         ExhibitionId = exhibitionId;
         QuizLayout = quizLayout;
         EndMessage = endMessage;
+        EndMessageEn = endMessageEn;
         Status = PublicationStatus.Draft;
 
         foreach (var question in questions)

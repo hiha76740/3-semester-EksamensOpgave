@@ -47,22 +47,26 @@ public class QuizQueryHandlerIMPL(GameDbContext db) : IQuizQueries
         return new QuizDto(
             quiz.Id.Value,
             quiz.Title,
+            quiz.TitleEn,
             quiz.ExhibitionId?.Value,
             quiz.QuizLayout,
             quiz.EndMessage,
+            quiz.EndMessageEn,
             quiz.Status.ToString(),
             quiz.Questions
             .Select(
                 q => new QuestionDto(
                     q.Id.Value,
                     q.Text,
-                    q.CorrectFeedback,
-                    q.IncorrectFeedback,
+                    q.TextEn,
                     q.Choices
                     .Select(
                         c => new ChoiceDto(
                             c.Text,
-                            c.IsCorrect))
+                            c.TextEn,
+                            c.IsCorrect,
+                            c.Feedback,
+                            c.FeedbackEn))
                     .ToList()))
             .ToList());
     }

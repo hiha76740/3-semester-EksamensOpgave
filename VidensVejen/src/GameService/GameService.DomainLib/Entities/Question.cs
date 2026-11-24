@@ -19,11 +19,7 @@ public class Question
     /// <summary>
     /// 
     /// </summary>
-    public string? CorrectFeedback { get; private set; }
-    /// <summary>
-    /// 
-    /// </summary>
-    public string? IncorrectFeedback { get; private set; }
+    public string? TextEn { get; private set; }
 
     /// <summary>
     /// 
@@ -33,12 +29,11 @@ public class Question
     private readonly List<Choice> _choices = [];
 
 
-    internal Question(string? text, List<Choice>? choices, string? correctFeedback, string? incorrectFeedback)
+    internal Question(string? text, string? textEn, List<Choice>? choices)
     {
         Id = new QuestionId(Guid.NewGuid());
         Text = text;
-        CorrectFeedback = correctFeedback;
-        IncorrectFeedback = incorrectFeedback;
+        TextEn = textEn;
 
         if (choices != null)
             _choices.AddRange(choices);

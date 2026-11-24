@@ -5,9 +5,13 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 /// </summary>
 /// <param name="Text"></param>
 /// <param name="CorrectAnswer"></param>
+/// <param name="Feedback"></param>
+/// <param name="FeedbackEn"></param>
 public record ChoiceResponse(
     string Text,
-    bool CorrectAnswer
+    bool CorrectAnswer,
+    string? Feedback,
+    string? FeedbackEn
     )
 {
     /// <summary>
@@ -19,4 +23,14 @@ public record ChoiceResponse(
     /// Marks the choice as correct
     /// </summary>
     public bool CorrectAnswer { get; init; } = CorrectAnswer;
+
+    /// <summary>
+    /// The feedback of the choice in Danish.
+    /// </summary>
+    public string? Feedback { get; init; } = Feedback;
+
+    /// <summary>
+    /// The feedback of the choice in English.
+    /// </summary>
+    public string? FeedbackEn { get; init; } = FeedbackEn;
 }

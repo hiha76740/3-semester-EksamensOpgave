@@ -70,9 +70,10 @@ public class GameSession
 
         var correctChoice = question.Choices.First(c => c.IsCorrect);
 
-        var feedback = isCorrect ? question.CorrectFeedback : question.IncorrectFeedback;
+        var feedback = question.Choices[choiceIndex].Feedback;
+        var feedbackEn = question.Choices[choiceIndex].FeedbackEn;
 
-        return new AnswerResult(isCorrect, feedback, correctChoice.Text);
+        return new AnswerResult(isCorrect, feedback, feedbackEn, correctChoice.Text);
     }
 
     private GameSession(QuizId quizId)

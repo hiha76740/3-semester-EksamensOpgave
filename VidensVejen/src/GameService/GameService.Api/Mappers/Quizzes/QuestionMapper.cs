@@ -11,12 +11,11 @@ internal static class QuestionMapper
     {
         var output = new CreateQuestionCommand(
             request.Text,
+            request.TextEn,
             request.Choices
             .Select(
                 q => q.AsCreateCommand())
-            .ToList(),
-            request.CorrectFeedback,
-            request.IncorrectFeedback
+            .ToList()
         );
 
         return output;
@@ -27,8 +26,7 @@ internal static class QuestionMapper
         var output = new QuestionResponse(
             dto.Id,
             dto.Text,
-            dto.CorrectFeedback,
-            dto.IncorrectFeedback,
+            dto.TextEn,
             dto.Choices
             .Select(
                 q => q.AsResponse())

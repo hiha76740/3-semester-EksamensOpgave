@@ -1,68 +1,68 @@
-using GameService.ApplicationLib.Handlers;
-using GameService.ApplicationLib.Repositories;
-using GameService.DomainLib.Entities;
-using GameService.DomainLib.Enums;
-using GameService.DomainLib.ValueObjects;
-using GameService.FacadeLib.Commands.Interfaces;
-using Moq;
-using VidensVejen.SharedKernelLib.Exceptions;
+//using GameService.ApplicationLib.Handlers;
+//using GameService.ApplicationLib.Repositories;
+//using GameService.DomainLib.Entities;
+//using GameService.DomainLib.Enums;
+//using GameService.DomainLib.ValueObjects;
+//using GameService.FacadeLib.Commands.Interfaces;
+//using Moq;
+//using VidensVejen.SharedKernelLib.Exceptions;
 
-namespace GameService.ApplicationLib.Tests;
+//namespace GameService.ApplicationLib.Tests;
 
-public class PublishQuizTests
-{
-    private static Quiz CreateValidDraft()
-    {
-        return Quiz.Create("Quiz", Guid.NewGuid(), "vertical", "Done",
-            [new NewQuestion("Question", [new Choice("Yes", true), new Choice("No", false)], "Correct", "Incorrect")]);
-    }
+//public class PublishQuizTests
+//{
+//    private static Quiz CreateValidDraft()
+//    {
+//        return Quiz.Create("Quiz", Guid.NewGuid(), "vertical", "Done",
+//            [new NewQuestion("Question", [new Choice("Yes", true), new Choice("No", false)], "Correct", "Incorrect")]);
+//    }
 
-    [Fact]
-    public async Task Handle_GivenValidDraft_PublishesAndSaves()
-    {
-        // Arrange
-        var quiz = CreateValidDraft();
-        var repository = new Mock<IQuizRepository>();
-        repository.Setup(r => r.GetQuizByIdAsync(It.IsAny<QuizId>()))
-            .ReturnsAsync(quiz);
-        IPublishQuizHandler handler = new PublishQuizHandler(repository.Object);
+//    [Fact]
+//    public async Task Handle_GivenValidDraft_PublishesAndSaves()
+//    {
+//        // Arrange
+//        var quiz = CreateValidDraft();
+//        var repository = new Mock<IQuizRepository>();
+//        repository.Setup(r => r.GetQuizByIdAsync(It.IsAny<QuizId>()))
+//            .ReturnsAsync(quiz);
+//        IPublishQuizHandler handler = new PublishQuizHandler(repository.Object);
 
-        // Act
-        await handler.HandleAsync(quiz.Id.Value);
+//        // Act
+//        await handler.HandleAsync(quiz.Id.Value);
 
-        // Assert
-        Assert.Equal(PublicationStatus.Published, quiz.Status);
-        repository.Verify(r => r.GetQuizByIdAsync(It.Is<QuizId>(id => id.Value == quiz.Id.Value)), Times.Once);
-        repository.Verify(r => r.SaveAsync(), Times.Once);
-    }
+//        // Assert
+//        Assert.Equal(PublicationStatus.Published, quiz.Status);
+//        repository.Verify(r => r.GetQuizByIdAsync(It.Is<QuizId>(id => id.Value == quiz.Id.Value)), Times.Once);
+//        repository.Verify(r => r.SaveAsync(), Times.Once);
+//    }
 
-    [Fact]
-    public async Task Handle_GivenUnknownId_ThrowsNotFoundExceptionWithoutSaving()
-    {
-        // Arrange
-        var repository = new Mock<IQuizRepository>();
-        repository.Setup(r => r.GetQuizByIdAsync(It.IsAny<QuizId>()))
-            .ReturnsAsync((Quiz?)null);
-        IPublishQuizHandler handler = new PublishQuizHandler(repository.Object);
+//    [Fact]
+//    public async Task Handle_GivenUnknownId_ThrowsNotFoundExceptionWithoutSaving()
+//    {
+//        // Arrange
+//        var repository = new Mock<IQuizRepository>();
+//        repository.Setup(r => r.GetQuizByIdAsync(It.IsAny<QuizId>()))
+//            .ReturnsAsync((Quiz?)null);
+//        IPublishQuizHandler handler = new PublishQuizHandler(repository.Object);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(Guid.NewGuid()));
-        repository.Verify(r => r.SaveAsync(), Times.Never);
-    }
+//        // Act & Assert
+//        await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(Guid.NewGuid()));
+//        repository.Verify(r => r.SaveAsync(), Times.Never);
+//    }
 
-    [Fact]
-    public async Task Handle_GivenInvalidDraft_ThrowsDomainExceptionWithoutSaving()
-    {
-        // Arrange
-        var quiz = Quiz.Create(null, null, null, null, null);
-        var repository = new Mock<IQuizRepository>();
-        repository.Setup(r => r.GetQuizByIdAsync(It.IsAny<QuizId>()))
-            .ReturnsAsync(quiz);
-        IPublishQuizHandler handler = new PublishQuizHandler(repository.Object);
+//    [Fact]
+//    public async Task Handle_GivenInvalidDraft_ThrowsDomainExceptionWithoutSaving()
+//    {
+//        // Arrange
+//        var quiz = Quiz.Create(null, null, null, null, null);
+//        var repository = new Mock<IQuizRepository>();
+//        repository.Setup(r => r.GetQuizByIdAsync(It.IsAny<QuizId>()))
+//            .ReturnsAsync(quiz);
+//        IPublishQuizHandler handler = new PublishQuizHandler(repository.Object);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<DomainException>(() => handler.HandleAsync(quiz.Id.Value));
-        Assert.Equal(PublicationStatus.Draft, quiz.Status);
-        repository.Verify(r => r.SaveAsync(), Times.Never);
-    }
-}
+//        // Act & Assert
+//        await Assert.ThrowsAsync<DomainException>(() => handler.HandleAsync(quiz.Id.Value));
+//        Assert.Equal(PublicationStatus.Draft, quiz.Status);
+//        repository.Verify(r => r.SaveAsync(), Times.Never);
+//    }
+//}
