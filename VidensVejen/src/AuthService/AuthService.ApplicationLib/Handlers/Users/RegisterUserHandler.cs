@@ -64,7 +64,7 @@ public class RegisterUserHandler(
             var authUser = AuthUser.Create(command.Email, hashedPassword, accessPermissionList);
 
             if (logger.IsEnabled(LogLevel.Information))
-                logger.LogInformation("User created with id: {UserId}", authUser.Id);
+                logger.LogInformation("User created with id: {UserId}", authUser.Id.Value);
 
 
             await authUserRepo.RegisterAsync(authUser);
@@ -93,7 +93,7 @@ public class RegisterUserHandler(
             unitOfWork.Commit();
 
             if (logger.IsEnabled(LogLevel.Information))
-                logger.LogInformation("User {Id} saved in database successfully", authUser.Id);
+                logger.LogInformation("User {Id} saved in database successfully", authUser.Id.Value);
         }
         catch (Exception ex)
         {
