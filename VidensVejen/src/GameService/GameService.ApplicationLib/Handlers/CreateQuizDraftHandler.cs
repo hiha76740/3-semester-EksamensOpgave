@@ -9,10 +9,10 @@ namespace GameService.ApplicationLib.Handlers;
 /// <summary>
 /// 
 /// </summary>
-/// <param name="quizRepo"></param>
-public class CreateQuizHandler(IQuizRepository quizRepo) : ICreateQuizHandler
+/// <param name="draftRepo"></param>
+public class CreateQuizDraftHandler(IQuizDraftRepository draftRepo) : ICreateQuizDraftHandler
 {
-    async Task<Guid> ICreateQuizHandler.HandleAsync(CreateQuizCommand command)
+    async Task<Guid> ICreateQuizDraftHandler.HandleAsync(CreateQuizCommand command)
     {
         var questions = new List<NewQuestion>();
 
@@ -32,16 +32,16 @@ public class CreateQuizHandler(IQuizRepository quizRepo) : ICreateQuizHandler
                 questionCommand.IncorrectFeedback));
         }
 
-        var quiz = Quiz.Create(
+        var draft = QuizDraft.Create(
             command.Title,
             command.ExhibitionId,
             command.QuizLayout,
             command.EndMessage,
             questions);
 
-        await quizRepo.AddAsync(quiz);
-        await quizRepo.SaveAsync();
+        await draftRepo.AddAsync(draft);
+        await draftRepo.SaveAsync();
 
-        return quiz.Id.Value;
+        return draft.Id.Value;
     }
 }

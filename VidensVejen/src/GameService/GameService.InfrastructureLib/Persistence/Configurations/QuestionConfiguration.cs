@@ -19,9 +19,9 @@ internal sealed class QuestionConfiguration : IEntityTypeConfiguration<Question>
             .HasConversion(
             id => id.Value,
             value => new QuizId(value));
-
         builder.Property(x => x.Text)
-            .HasMaxLength(500);
+            .HasMaxLength(500)
+            .IsRequired();
 
         builder.Property(x => x.CorrectFeedback)
             .HasMaxLength(500);

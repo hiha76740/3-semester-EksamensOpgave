@@ -11,19 +11,17 @@ namespace GameService.ApplicationLib.Tests;
 
 public class AnswerQuestionTests
 {
-    private static Quiz CreatePublishedQuiz()
+    private static Quiz CreateQuiz()
     {
-        var quiz = Quiz.Create("Quiz", Guid.NewGuid(), "vertical", "Done",
+        return Quiz.Create("Quiz", Guid.NewGuid(), "vertical", "Done",
             [new NewQuestion("Question", [new Choice("Yes", true), new Choice("No", false)], "Correct", "Incorrect")]);
-        quiz.Publish();
-        return quiz;
     }
 
     [Fact]
     public async Task Handle_GivenValidAnswer_SavesAndReturnsResult()
     {
         // Arrange
-        var quiz = CreatePublishedQuiz();
+        var quiz = CreateQuiz();
         var session = GameSession.Start(quiz);
         var sessionRepository = new Mock<IGameSessionRepository>();
         sessionRepository.Setup(r => r.GetSessionByIdAsync(It.IsAny<GameSessionId>()))
@@ -67,7 +65,7 @@ public class AnswerQuestionTests
     public async Task Handle_GivenAlreadyAnsweredQuestion_ThrowsDomainExceptionWithoutSaving()
     {
         // Arrange
-        var quiz = CreatePublishedQuiz();
+        var quiz = CreateQuiz();
         var session = GameSession.Start(quiz);
         var questionId = quiz.Questions[0].Id.Value;
         session.Answer(quiz, questionId, 0);

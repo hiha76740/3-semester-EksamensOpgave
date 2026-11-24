@@ -18,15 +18,17 @@ internal sealed class QuizConfiguration : IEntityTypeConfiguration<Quiz>
 
         builder.Property(x => x.ExhibitionId)
             .HasConversion(
-            id => id!.Value,
+            id => id.Value,
             value => new ExhibitionId(value))
-            .IsRequired(false);
+            .IsRequired();
 
         builder.Property(x => x.Title)
-            .HasMaxLength(500);
+            .HasMaxLength(500)
+            .IsRequired();
 
         builder.Property(x => x.QuizLayout)
-            .HasMaxLength(500);
+            .HasMaxLength(500)
+            .IsRequired();
 
         builder.Property(x => x.EndMessage)
             .HasMaxLength(500);

@@ -10,18 +10,17 @@ namespace GameService.ApplicationLib.Tests;
 
 public class StartSessionTests
 {
-    private static Quiz CreateValidDraft()
+    private static Quiz CreateQuiz()
     {
         return Quiz.Create("Quiz", Guid.NewGuid(), "vertical", "Done",
             [new NewQuestion("Question", [new Choice("Yes", true), new Choice("No", false)], "Correct", "Incorrect")]);
     }
 
     [Fact]
-    public async Task Handle_GivenPublishedQuiz_SavesSessionAndReturnsQuizWithoutAnswers()
+    public async Task Handle_GivenQuiz_SavesSessionAndReturnsQuizWithoutAnswers()
     {
         // Arrange
-        var quiz = CreateValidDraft();
-        quiz.Publish();
+        var quiz = CreateQuiz();
         var quizRepository = new Mock<IQuizRepository>();
         quizRepository.Setup(r => r.GetQuizByIdAsync(It.IsAny<QuizId>()))
             .ReturnsAsync(quiz);
@@ -45,22 +44,6 @@ public class StartSessionTests
             choice => { Assert.Equal(1, choice.Index); Assert.Equal("No", choice.Text); });
         sessionRepository.Verify(r => r.AddAsync(It.IsAny<GameSession>()), Times.Once);
         sessionRepository.Verify(r => r.SaveAsync(), Times.Once);
-    }
-
-    [Fact]
-    public async Task Handle_GivenDraft_ThrowsDomainExceptionWithoutSaving()
-    {
-        // Arrange
-        var quiz = CreateValidDraft();
-        var quizRepository = new Mock<IQuizRepository>();
-        quizRepository.Setup(r => r.GetQuizByIdAsync(It.IsAny<QuizId>()))
-            .ReturnsAsync(quiz);
-        var sessionRepository = new Mock<IGameSessionRepository>();
-        IStartSessionHandler handler = new StartSessionHandler(quizRepository.Object, sessionRepository.Object);
-
-        // Act & Assert
-        await Assert.ThrowsAsync<DomainException>(() => handler.HandleAsync(quiz.Id.Value));
-        sessionRepository.VerifyNoOtherCalls();
     }
 
     [Fact]

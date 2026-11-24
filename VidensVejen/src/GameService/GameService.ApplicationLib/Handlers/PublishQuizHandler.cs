@@ -8,16 +8,23 @@ namespace GameService.ApplicationLib.Handlers;
 /// <summary>
 /// 
 /// </summary>
+/// <param name="draftRepo"></param>
 /// <param name="quizRepo"></param>
-public class PublishQuizHandler(IQuizRepository quizRepo) : IPublishQuizHandler
+public class PublishQuizHandler(IQuizDraftRepository draftRepo, IQuizRepository quizRepo) : IPublishQuizHandler
 {
-    async Task IPublishQuizHandler.HandleAsync(Guid id)
+    async Task<Guid> IPublishQuizHandler.HandleAsync(Guid draftId)
     {
-        var quiz = await quizRepo.GetQuizByIdAsync(new QuizId(id))
-            ?? throw new NotFoundException("Quiz was not found");
+        var draft = await draftRepo.GetDraftByIdAsync(new QuizDraftId(draftId))
+            ?? throw new NotFoundException("Quiz draft was not found");
 
-        quiz.Publish();
+        var quiz = draft.Publish();
 
-        await quizRepo.SaveAsync();
+        await quizRepo.AddAsync(quiz);
+
+        draftRepo.Delete(draft);
+
+        await draftRepo.SaveAsync();
+
+        return quiz.Id.Value;
     }
 }

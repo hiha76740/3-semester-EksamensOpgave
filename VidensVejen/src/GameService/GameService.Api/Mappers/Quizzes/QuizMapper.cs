@@ -31,7 +31,6 @@ internal static class QuizMapper
             dto.ExhibitionId,
             dto.QuizLayout,
             dto.EndMessage,
-            dto.Status,
             dto.Questions
             .Select(
                 q => q.AsResponse())

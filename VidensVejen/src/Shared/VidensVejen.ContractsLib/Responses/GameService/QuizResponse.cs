@@ -8,7 +8,6 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 /// <param name="ExhibitionId"></param>
 /// <param name="QuizLayout"></param>
 /// <param name="EndMessage"></param>
-/// <param name="Status"></param>
 /// <param name="Questions"></param>
 /// <example>
 /// {
@@ -17,7 +16,6 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 ///     "exhibitionId": "123e4567-e89b-12d3-a456-426614174000",
 ///     "quizLayout": "Vertikalt",
 ///     "endMessage": "Godt klaret!",
-///     "status": "Published",
 ///     "questions": [
 ///         {
 ///             "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -36,11 +34,10 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 /// </example>
 public record QuizResponse(
     Guid Id,
-    string? Title,
-    Guid? ExhibitionId,
-    string? QuizLayout,
+    string Title,
+    Guid ExhibitionId,
+    string QuizLayout,
     string? EndMessage,
-    string Status,
     List<QuestionResponse> Questions
     )
 {
@@ -52,27 +49,22 @@ public record QuizResponse(
     /// <summary>
     /// The title of the quiz.
     /// </summary>
-    public string? Title { get; init; } = Title;
+    public string Title { get; init; } = Title;
 
     /// <summary>
     /// A unique identifier for a exhibition the quiz associate to.
     /// </summary>
-    public Guid? ExhibitionId { get; init; } = ExhibitionId;
+    public Guid ExhibitionId { get; init; } = ExhibitionId;
 
     /// <summary>
     /// The layout of the quiz.
     /// </summary>
-    public string? QuizLayout { get; init; } = QuizLayout;
+    public string QuizLayout { get; init; } = QuizLayout;
 
     /// <summary>
     /// Message shown when the quiz is finished.
     /// </summary>
     public string? EndMessage { get; init; } = EndMessage;
-
-    /// <summary>
-    /// The status of the quiz, Draft or Published.
-    /// </summary>
-    public string Status { get; init; } = Status;
 
     /// <summary>
     /// A list of the questions assoicated to the quiz.
