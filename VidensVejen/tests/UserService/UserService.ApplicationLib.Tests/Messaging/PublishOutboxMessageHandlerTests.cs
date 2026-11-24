@@ -6,7 +6,7 @@ using VidensVejen.BuildingBlocksLib.Messaging.Publisher;
 using VidensVejen.BuildingBlocksLib.UnitOfWork;
 using VidensVejen.ContractsLib.Events;
 
-namespace UserService.ApplicationLib.Tests;
+namespace UserService.ApplicationLib.Tests.Messaging;
 
 public class PublishOutboxMessageHandlerTests
 {

@@ -198,4 +198,108 @@ public class AuthUserTests
         // Act & Assert
         Assert.Throws<DomainException>(user.SetStatusActive);
     }
+
+    [Fact]
+    public void ChangePassword_GivenValidValue_UpdatesProperty()
+    {
+        // Arrange
+        var user = AuthUser.Create("sue@example.com", "old-hash", []);
+
+        // Act
+        user.ChangePassword("new-hash");
+
+        // Assert
+        Assert.Equal("new-hash", user.PasswordHash);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void ChangePassword_GivenBlankValue_ThrowsDomainException(string? value)
+    {
+        // Arrange
+        var user = AuthUser.Create("sue@example.com", "old-hash", []);
+        var original = user.PasswordHash;
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => user.ChangePassword(value!));
+        Assert.Equal(original, user.PasswordHash);
+    }
+
+    [Fact]
+    public void SetStatusPending_GivenActiveUser_ReturnsToPending()
+    {
+        // Arrange
+        var user = AuthUser.Create("sue@example.com", "hash", []);
+        user.SetStatusActive();
+
+        // Act
+        user.SetStatusPending();
+
+        // Assert
+        Assert.Equal(AuthUserStatus.Pending, user.Status);
+    }
+
+    [Fact]
+    public void SetStatusPending_GivenPendingUser_ThrowsDomainException()
+    {
+        // Arrange
+        var user = AuthUser.Create("sue@example.com", "hash", []);
+
+        // Act & Assert
+        Assert.Throws<DomainException>(user.SetStatusPending);
+    }
+
+    [Fact]
+    public void AddPermission_GivenNewPermission_AddsIt()
+    {
+        // Arrange
+        var user = AuthUser.Create("sue@example.com", "hash", []);
+        var permission = new AccessPermission("Quiz.Edit");
+
+        // Act
+        user.AddPermission(permission);
+
+        // Assert
+        Assert.Same(permission, Assert.Single(user.Permissions));
+    }
+
+    [Fact]
+    public void AddPermission_GivenExistingPermission_ThrowsWithoutDuplicating()
+    {
+        // Arrange
+        var permission = new AccessPermission("Quiz.Edit");
+        var user = AuthUser.Create("sue@example.com", "hash", [permission]);
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => user.AddPermission(permission));
+        Assert.Same(permission, Assert.Single(user.Permissions));
+    }
+
+    [Fact]
+    public void RemovePermission_GivenExistingPermission_RemovesIt()
+    {
+        // Arrange
+        var permission = new AccessPermission("Quiz.Edit");
+        var user = AuthUser.Create("sue@example.com", "hash", [permission]);
+
+        // Act
+        user.RemovePermission(permission);
+
+        // Assert
+        Assert.Empty(user.Permissions);
+    }
+
+    [Fact]
+    public void RemovePermission_GivenUnknownPermission_Throws()
+    {
+        // Arrange
+        var user = AuthUser.Create("sue@example.com", "hash", []);
+        var permission = new AccessPermission("Quiz.Edit");
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => user.RemovePermission(permission));
+        Assert.Empty(user.Permissions);
+    }
 }

@@ -1,178 +1,83 @@
-//using ExhibitionService.ApplicationLib.Handlers;
-//using ExhibitionService.ApplicationLib.Repositories;
-//using ExhibitionService.ApplicationLib.Services;
-//using ExhibitionService.DomainLib.Entities;
-//using ExhibitionService.FacadeLib.Commands.DTOs;
-//using ExhibitionService.FacadeLib.Commands.Interfaces;
-//using Moq;
-//using VidensVejen.SharedKernelLib.Exceptions;
+using ExhibitionService.ApplicationLib.Handlers;
+using ExhibitionService.ApplicationLib.Repositories;
+using ExhibitionService.ApplicationLib.Services;
+using ExhibitionService.DomainLib.Entities;
+using ExhibitionService.DomainLib.ValueObjects;
+using ExhibitionService.FacadeLib.Commands.DTOs;
+using ExhibitionService.FacadeLib.Commands.Interfaces;
+using Microsoft.Extensions.Logging;
+using Moq;
 
-//namespace ExhibitionService.ApplicationLib.Tests;
+namespace ExhibitionService.ApplicationLib.Tests;
 
-//public class CreateExhibitionTests
-//{
-//    private static CreateExhibitionCommand CreateCommand(
-//        string exhibitionName = "Livet i havet",
-//        Stream? imageStream = null,
-//        string? extension = null)
-//    {
-//        var topic = new CreateTopicCommand(
-//            "Tang",
-//            "Tang i danske farvande",
-//            "Tang giver små havdyr et sted at leve.",
-//            "Vidste du det?",
-//            "Tang kan vokse på sten.",
-//            "Der er liv mellem tangbladene.");
+public class CreateExhibitionTests
+{
 
-//        var subject = new CreateSubjectCommand(
-//            "Kysten",
-//            "Livet langs den danske kyst",
-//            [topic]);
+    private static CreateExhibitionCommand CreateCommand()
+    {
+        return new CreateExhibitionCommand("Ocean", Guid.NewGuid(),
+            [new CreateSubjectCommand("Coast", "coast", "Description",
+                [new CreateTopicCommand("Seaweed", "Description", "Body", "Label", "Text", "Quote")])]);
+    }
 
-//        // Exercise the handler's no-image branch even though the DTO declares non-nullable fields.
-//        return new CreateExhibitionCommand(exhibitionName, imageStream!, extension!, [subject]);
-//    }
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Handle_GivenImageLookup_OnlyCreatesWhenImageExists(bool exists)
+    {
+        // Arrange
+        var command = CreateCommand();
+        var repository = new Mock<IExhibitionRepository>();
+        var images = new Mock<IImageService>();
+        var logger = new Mock<ILogger<CreateExhibitionHandler>>();
+        images.Setup(s => s.ExistsAsync(new ImageId(command.ThemeImageId))).ReturnsAsync(exists);
+        Exhibition? captured = null;
+        repository.Setup(r => r.AddAsync(It.IsAny<Exhibition>())).Callback<Exhibition>(e => captured = e);
+        ICreateExhibitionHandler handler = new CreateExhibitionHandler(repository.Object, images.Object, logger.Object);
 
-//    [Fact]
-//    public async Task Handle_GivenValidCommandWithImage_MapsExhibitionAndSaves()
-//    {
-//        // Arrange
-//        using var imageStream = new MemoryStream([1, 2, 3]);
-//        var extension = ".png";
-//        var command = CreateCommand(imageStream: imageStream, extension: extension);
-//        var imageId = Guid.NewGuid();
-//        var imageService = new Mock<IImageService>();
-//        imageService.Setup(s => s.SaveAsync(imageStream, extension)).ReturnsAsync(imageId);
+        // Act & Assert
+        if (exists == false)
+        {
+            await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(command));
+            repository.VerifyNoOtherCalls();
+            return;
+        }
 
-//        var repository = new Mock<IExhibitionRepository>();
-//        Exhibition? savedExhibition = null;
-//        repository.Setup(r => r.AddAsync(It.IsAny<Exhibition>()))
-//            .Callback<Exhibition>(exhibition => savedExhibition = exhibition);
+        await handler.HandleAsync(command);
+        Assert.NotNull(captured);
+        Assert.Equal(command.ExhibtionName, captured.Name);
+        Assert.Equal(command.ThemeImageId, captured.ThemeImageId.Value);
+        var subject = Assert.Single(captured.Subjects);
+        Assert.Equal("Coast", subject.Title);
+        Assert.Equal("coast", subject.Slug);
+        Assert.Equal("Description", subject.Description);
+        var topic = Assert.Single(subject.Topics);
+        Assert.Equal("Seaweed", topic.Title);
+        Assert.Equal("Description", topic.Description);
+        Assert.Equal("Body", topic.Body);
+        Assert.Equal("Label", topic.CalloutLabel);
+        Assert.Equal("Text", topic.CalloutText);
+        Assert.Equal("Quote", topic.Quote);
+        repository.Verify(r => r.AddAsync(captured), Times.Once);
+        repository.Verify(r => r.SaveAsync(), Times.Once);
+    }
 
-//        ICreateExhibitionHandler handler = new CreateExhibitionHandler(repository.Object, imageService.Object);
+    [Fact]
+    public async Task Handle_GivenSaveFailure_Rethrows()
+    {
+        // Arrange
+        var command = CreateCommand();
+        var repository = new Mock<IExhibitionRepository>();
+        var images = new Mock<IImageService>();
+        images.Setup(s => s.ExistsAsync(It.IsAny<ImageId>())).ReturnsAsync(true);
+        var expected = new InvalidOperationException("Save failed");
+        repository.Setup(r => r.SaveAsync()).ThrowsAsync(expected);
+        ICreateExhibitionHandler handler = new CreateExhibitionHandler(
+            repository.Object, images.Object, new Mock<ILogger<CreateExhibitionHandler>>().Object);
 
-//        // Act
-//        await handler.HandleAsync(command);
-
-//        // Assert
-//        Assert.NotNull(savedExhibition);
-//        Assert.NotEqual(Guid.Empty, savedExhibition.Id.Value);
-//        Assert.Equal(command.ExhibtionName, savedExhibition.Name);
-//        Assert.Equal(imageId, savedExhibition.Theme?.Value);
-
-//        var subject = Assert.Single(savedExhibition.Subjects);
-//        var subjectCommand = command.Subjects[0];
-//        Assert.Equal(subjectCommand.Title, subject.Title);
-//        Assert.Equal(subjectCommand.Description, subject.Description);
-
-//        var topic = Assert.Single(subject.Topics);
-//        var topicCommand = subjectCommand.Topics[0];
-//        Assert.Equal(topicCommand.Title, topic.Title);
-//        Assert.Equal(topicCommand.Description, topic.Description);
-//        Assert.Equal(topicCommand.Body, topic.Body);
-//        Assert.Equal(topicCommand.CalloutLabel, topic.CalloutLabel);
-//        Assert.Equal(topicCommand.CalloutText, topic.CalloutText);
-//        Assert.Equal(topicCommand.Qoute, topic.Quote);
-
-//        imageService.Verify(s => s.SaveAsync(imageStream, extension), Times.Once);
-//        repository.Verify(r => r.AddAsync(savedExhibition), Times.Once);
-//        repository.Verify(r => r.SaveAsync(), Times.Once);
-//    }
-
-//    [Fact]
-//    public async Task Handle_GivenValidCommandWithoutImage_SavesWithoutTheme()
-//    {
-//        // Arrange
-//        var command = CreateCommand();
-//        var repository = new Mock<IExhibitionRepository>();
-//        var imageService = new Mock<IImageService>();
-//        ICreateExhibitionHandler handler = new CreateExhibitionHandler(repository.Object, imageService.Object);
-
-//        // Act
-//        await handler.HandleAsync(command);
-
-//        // Assert
-//        imageService.VerifyNoOtherCalls();
-//        repository.Verify(r => r.AddAsync(It.Is<Exhibition>(exhibition => exhibition.Theme == null)), Times.Once);
-//        repository.Verify(r => r.SaveAsync(), Times.Once);
-//    }
-
-//    [Fact]
-//    public async Task Handle_GivenInvalidExhibition_ThrowsWithoutWriting()
-//    {
-//        // Arrange
-//        var command = CreateCommand(exhibitionName: "");
-//        var repository = new Mock<IExhibitionRepository>();
-//        var imageService = new Mock<IImageService>();
-//        ICreateExhibitionHandler handler = new CreateExhibitionHandler(repository.Object, imageService.Object);
-
-//        // Act
-//        var exception = await Record.ExceptionAsync(() => handler.HandleAsync(command));
-
-//        // Assert
-//        Assert.IsType<DomainException>(exception);
-//        repository.VerifyNoOtherCalls();
-//    }
-
-//    [Fact]
-//    public async Task Handle_GivenImageUploadFailure_RethrowsWithoutWriting()
-//    {
-//        // Arrange
-//        using var imageStream = new MemoryStream([1, 2, 3]);
-//        var extension = ".png";
-//        var command = CreateCommand(imageStream: imageStream, extension: extension);
-//        var repository = new Mock<IExhibitionRepository>();
-//        var imageService = new Mock<IImageService>();
-//        var expected = new InvalidOperationException("Image upload failed");
-//        imageService.Setup(s => s.SaveAsync(imageStream, extension)).ThrowsAsync(expected);
-//        ICreateExhibitionHandler handler = new CreateExhibitionHandler(repository.Object, imageService.Object);
-
-//        // Act
-//        var exception = await Record.ExceptionAsync(() => handler.HandleAsync(command));
-
-//        // Assert
-//        Assert.Same(expected, exception);
-//        imageService.Verify(s => s.SaveAsync(imageStream, extension), Times.Once);
-//        repository.VerifyNoOtherCalls();
-//    }
-
-//    [Fact]
-//    public async Task Handle_GivenAddFailure_RethrowsOriginalException()
-//    {
-//        // Arrange
-//        var command = CreateCommand();
-//        var repository = new Mock<IExhibitionRepository>();
-//        var imageService = new Mock<IImageService>();
-//        var expected = new InvalidOperationException("Add failed");
-//        repository.Setup(r => r.AddAsync(It.IsAny<Exhibition>())).ThrowsAsync(expected);
-//        ICreateExhibitionHandler handler = new CreateExhibitionHandler(repository.Object, imageService.Object);
-
-//        // Act
-//        var exception = await Record.ExceptionAsync(() => handler.HandleAsync(command));
-
-//        // Assert
-//        Assert.Same(expected, exception);
-//        repository.Verify(r => r.AddAsync(It.IsAny<Exhibition>()), Times.Once);
-//        repository.Verify(r => r.SaveAsync(), Times.Never);
-//    }
-
-//    [Fact]
-//    public async Task Handle_GivenSaveFailure_RethrowsOriginalException()
-//    {
-//        // Arrange
-//        var command = CreateCommand();
-//        var repository = new Mock<IExhibitionRepository>();
-//        var imageService = new Mock<IImageService>();
-//        var expected = new InvalidOperationException("Save failed");
-//        repository.Setup(r => r.SaveAsync()).ThrowsAsync(expected);
-//        ICreateExhibitionHandler handler = new CreateExhibitionHandler(repository.Object, imageService.Object);
-
-//        // Act
-//        var exception = await Record.ExceptionAsync(() => handler.HandleAsync(command));
-
-//        // Assert
-//        Assert.Same(expected, exception);
-//        repository.Verify(r => r.AddAsync(It.IsAny<Exhibition>()), Times.Once);
-//        repository.Verify(r => r.SaveAsync(), Times.Once);
-//    }
-//}
+        // Act & Assert
+        var actual = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(command));
+        Assert.Same(expected, actual);
+        repository.Verify(r => r.AddAsync(It.IsAny<Exhibition>()), Times.Once);
+    }
+}

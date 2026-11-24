@@ -1,201 +1,257 @@
 using System.Data;
-using System.Text.Json;
 using AuthService.ApplicationLib.Messaging.Inbox.Handlers;
 using AuthService.ApplicationLib.Messaging.Inbox.Strategies;
-using AuthService.ApplicationLib.Repositories;
-using AuthService.DomainLib.Entities;
-using AuthService.DomainLib.Enums;
 using Moq;
 using VidensVejen.BuildingBlocksLib.Messaging.Inbox;
 using VidensVejen.BuildingBlocksLib.Messaging.Outbox;
 using VidensVejen.BuildingBlocksLib.UnitOfWork;
-using VidensVejen.ContractsLib.Events;
-using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace AuthService.ApplicationLib.Tests.Messaging;
 
 public class ProcessInboxMessageHandlerTests
 {
-    private static InboxMessage CreateMessage(Guid userId)
+    private const string EventType = "Tests.SampleEvent";
+
+    private static InboxMessage CreateMessage()
     {
-        var integrationEvent = new UserActivateIntegrationEvent(Guid.NewGuid(), "user-activate", userId);
         return new InboxMessage
         {
-            Id = integrationEvent.EventId,
-            Type = typeof(UserActivateIntegrationEvent).FullName!,
-            Topic = "user-activate",
-            Content = JsonSerializer.Serialize(integrationEvent),
+            Id = Guid.NewGuid(),
+            Type = EventType,
+            Topic = "sample",
+            Content = "{}",
             RecievedOnUtc = DateTime.UtcNow
         };
     }
 
     [Fact]
-    public async Task Handle_GivenPendingActivation_ActivatesUserAndCommits()
+    public async Task Handle_GivenStrategyWithoutOutboxMessage_ProcessesAndCommits()
     {
         // Arrange
         var token = TestContext.Current.CancellationToken;
-        var user = AuthUser.Create("sue@example.com", "password-hash", []);
-        var userId = user.Id;
-        var message = CreateMessage(userId.Value);
+        var message = CreateMessage();
         var inbox = new Mock<IInboxRepository>();
-        var userRepo = new Mock<IAuthUserRepository>();
         var outbox = new Mock<IOutboxRepository>();
-        var unitOfWork = new Mock<IUnitOfWork>();
-        inbox.Setup(repository => repository.FindAsync(message.Id, token)).ReturnsAsync(message);
-        userRepo.Setup(repository => repository.GetAuthUserByIdAsync(userId))
-            .ReturnsAsync(user);
-        var handler = new ProcessInboxMessageHandler(
-            inbox.Object,
-            outbox.Object,
-            unitOfWork.Object,
-            [new ActivateUserInboxStrategy(userRepo.Object)]);
+        var work = new Mock<IUnitOfWork>();
+        var strategy = new Mock<IInboxMessageStrategy>();
+        var otherStrategy = new Mock<IInboxMessageStrategy>();
+        strategy.SetupGet(s => s.EventType).Returns(EventType);
+        otherStrategy.SetupGet(s => s.EventType).Returns("Tests.OtherEvent");
+        inbox.Setup(r => r.FindAsync(message.Id, token)).ReturnsAsync(message);
+        strategy.Setup(s => s.ApplyAsync(message.Id, message.Content, token))
+            .ReturnsAsync((OutboxMessage?)null);
+        var handler = new ProcessInboxMessageHandler(inbox.Object, outbox.Object, work.Object,
+            [otherStrategy.Object, strategy.Object]);
 
         // Act
         await handler.HandleAsync(message.Id, token);
 
         // Assert
-        Assert.Equal(AuthUserStatus.Active, user.Status);
+        strategy.Verify(s => s.ApplyAsync(message.Id, message.Content, token), Times.Once);
+        otherStrategy.Verify(s => s.ApplyAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
         Assert.NotNull(message.ProccessedOnUtc);
-        userRepo.Verify(repository => repository.GetAuthUserByIdAsync(userId), Times.Once);
-        outbox.Verify(repository => repository.AddAsync(It.IsAny<OutboxMessage>()), Times.Never);
-        unitOfWork.Verify(work => work.BeginTransaction(IsolationLevel.Serializable), Times.Once);
-        unitOfWork.Verify(work => work.SaveChangesAsync(), Times.Once);
-        unitOfWork.Verify(work => work.Commit(), Times.Once);
-        unitOfWork.Verify(work => work.Rollback(), Times.Never);
+        outbox.Verify(r => r.AddAsync(It.IsAny<OutboxMessage>()), Times.Never);
+        work.Verify(w => w.BeginTransaction(IsolationLevel.Serializable), Times.Once);
+        work.Verify(w => w.SaveChangesAsync(), Times.Once);
+        work.Verify(w => w.Commit(), Times.Once);
+        work.Verify(w => w.Rollback(), Times.Never);
     }
 
     [Fact]
-    public async Task Handle_GivenUnknownUser_RollsBackAndThrows()
+    public async Task Handle_GivenStrategyWithOutboxMessage_ProcessesAndCommits()
     {
         // Arrange
         var token = TestContext.Current.CancellationToken;
-        var userId = new AuthUserId(Guid.NewGuid());
-        var message = CreateMessage(userId.Value);
+        var message = CreateMessage();
         var inbox = new Mock<IInboxRepository>();
-        var userRepo = new Mock<IAuthUserRepository>();
         var outbox = new Mock<IOutboxRepository>();
-        var unitOfWork = new Mock<IUnitOfWork>();
-        inbox.Setup(repository => repository.FindAsync(message.Id, token)).ReturnsAsync(message);
-        userRepo.Setup(repository => repository.GetAuthUserByIdAsync(userId))
-            .ReturnsAsync((AuthUser?)null);
-        var handler = new ProcessInboxMessageHandler(
-            inbox.Object,
-            outbox.Object,
-            unitOfWork.Object,
-            [new ActivateUserInboxStrategy(userRepo.Object)]);
-
-        // Act & Assert
-        await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(message.Id, token));
-
-        Assert.Null(message.ProccessedOnUtc);
-        userRepo.Verify(repository => repository.GetAuthUserByIdAsync(userId), Times.Once);
-        outbox.Verify(repository => repository.AddAsync(It.IsAny<OutboxMessage>()), Times.Never);
-        unitOfWork.Verify(work => work.BeginTransaction(IsolationLevel.Serializable), Times.Once);
-        unitOfWork.Verify(work => work.SaveChangesAsync(), Times.Never);
-        unitOfWork.Verify(work => work.Commit(), Times.Never);
-        unitOfWork.Verify(work => work.Rollback(), Times.Once);
-    }
-
-    [Fact]
-    public async Task Handle_GivenUnregisteredEventType_RollsBackAndThrows()
-    {
-        // Arrange
-        var token = TestContext.Current.CancellationToken;
-        var message = new InboxMessage
+        var work = new Mock<IUnitOfWork>();
+        var strategy = new Mock<IInboxMessageStrategy>();
+        var otherStrategy = new Mock<IInboxMessageStrategy>();
+        strategy.SetupGet(s => s.EventType).Returns(EventType);
+        otherStrategy.SetupGet(s => s.EventType).Returns("Tests.OtherEvent");
+        inbox.Setup(r => r.FindAsync(message.Id, token)).ReturnsAsync(message);
+        var outgoing = new OutboxMessage
         {
-            Id = Guid.NewGuid(),
-            Type = "UnknownEvent",
-            Topic = "unknown-event",
+            Id = message.Id,
+            Type = "Tests.OutgoingEvent",
+            Topic = "outgoing",
             Content = "{}",
-            RecievedOnUtc = DateTime.UtcNow
+            CreatedAtUtc = DateTime.UtcNow
         };
-        var inbox = new Mock<IInboxRepository>();
-        var outbox = new Mock<IOutboxRepository>();
-        var unitOfWork = new Mock<IUnitOfWork>();
-        var userRepo = new Mock<IAuthUserRepository>();
-        inbox.Setup(repository => repository.FindAsync(message.Id, token)).ReturnsAsync(message);
-        var handler = new ProcessInboxMessageHandler(
-            inbox.Object,
-            outbox.Object,
-            unitOfWork.Object,
-            [new ActivateUserInboxStrategy(userRepo.Object)]);
-
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => handler.HandleAsync(message.Id, token));
-
-        Assert.Contains(message.Type, exception.Message);
-        Assert.Null(message.ProccessedOnUtc);
-        userRepo.VerifyNoOtherCalls();
-        outbox.Verify(repository => repository.AddAsync(It.IsAny<OutboxMessage>()), Times.Never);
-        unitOfWork.Verify(work => work.SaveChangesAsync(), Times.Never);
-        unitOfWork.Verify(work => work.Commit(), Times.Never);
-        unitOfWork.Verify(work => work.Rollback(), Times.Once);
-    }
-
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task Handle_GivenMissingOrProcessedMessage_SkipsActivation(bool alreadyProcessed)
-    {
-        // Arrange
-        var token = TestContext.Current.CancellationToken;
-        var eventId = Guid.NewGuid();
-        InboxMessage? message = null;
-        if (alreadyProcessed)
-        {
-            message = CreateMessage(Guid.NewGuid());
-            eventId = message.Id;
-            message.SetProccesedAtUtc();
-        }
-
-        var inbox = new Mock<IInboxRepository>();
-        var userRepo = new Mock<IAuthUserRepository>();
-        var outbox = new Mock<IOutboxRepository>();
-        var unitOfWork = new Mock<IUnitOfWork>();
-        inbox.Setup(repository => repository.FindAsync(eventId, token)).ReturnsAsync(message);
-        var handler = new ProcessInboxMessageHandler(
-            inbox.Object, outbox.Object, unitOfWork.Object,
-            [new ActivateUserInboxStrategy(userRepo.Object)]);
+        strategy.Setup(s => s.ApplyAsync(message.Id, message.Content, token))
+            .ReturnsAsync(outgoing);
+        var handler = new ProcessInboxMessageHandler(inbox.Object, outbox.Object, work.Object,
+            [otherStrategy.Object, strategy.Object]);
 
         // Act
-        await handler.HandleAsync(eventId, token);
+        await handler.HandleAsync(message.Id, token);
 
         // Assert
-        inbox.Verify(repository => repository.FindAsync(eventId, token), Times.Once);
-        userRepo.VerifyNoOtherCalls();
-        outbox.VerifyNoOtherCalls();
-        unitOfWork.Verify(work => work.SaveChangesAsync(), Times.Never);
-        unitOfWork.Verify(work => work.Commit(), Times.Once);
-        unitOfWork.Verify(work => work.Rollback(), Times.Never);
+        strategy.Verify(s => s.ApplyAsync(message.Id, message.Content, token), Times.Once);
+        otherStrategy.Verify(s => s.ApplyAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        Assert.NotNull(message.ProccessedOnUtc);
+        outbox.Verify(r => r.AddAsync(outgoing), Times.Once);
+        work.Verify(w => w.BeginTransaction(IsolationLevel.Serializable), Times.Once);
+        work.Verify(w => w.SaveChangesAsync(), Times.Once);
+        work.Verify(w => w.Commit(), Times.Once);
+        work.Verify(w => w.Rollback(), Times.Never);
     }
 
     [Fact]
-    public async Task Handle_GivenSaveFailure_RollsBackAndRethrows()
+    public async Task Handle_GivenMissingMessage_SkipsStrategyAndCommits()
     {
         // Arrange
         var token = TestContext.Current.CancellationToken;
-        var user = AuthUser.Create("sue@example.com", "password-hash", []);
-        var message = CreateMessage(user.Id.Value);
+        var message = CreateMessage();
+
         var inbox = new Mock<IInboxRepository>();
-        var userRepo = new Mock<IAuthUserRepository>();
         var outbox = new Mock<IOutboxRepository>();
-        var unitOfWork = new Mock<IUnitOfWork>();
-        var expectedException = new InvalidOperationException("Save failed");
-        inbox.Setup(repository => repository.FindAsync(message.Id, token)).ReturnsAsync(message);
-        userRepo.Setup(repository => repository.GetAuthUserByIdAsync(user.Id)).ReturnsAsync(user);
-        unitOfWork.Setup(work => work.SaveChangesAsync()).ThrowsAsync(expectedException);
-        var handler = new ProcessInboxMessageHandler(
-            inbox.Object, outbox.Object, unitOfWork.Object,
-            [new ActivateUserInboxStrategy(userRepo.Object)]);
+        var work = new Mock<IUnitOfWork>();
+        var strategy = new Mock<IInboxMessageStrategy>();
+        strategy.SetupGet(s => s.EventType).Returns(EventType);
+        inbox.Setup(r => r.FindAsync(message.Id, token)).ReturnsAsync((InboxMessage?)null);
+        var handler = new ProcessInboxMessageHandler(inbox.Object, outbox.Object, work.Object, [strategy.Object]);
+
+        // Act
+        await handler.HandleAsync(message.Id, token);
+
+        // Assert
+        inbox.Verify(r => r.FindAsync(message.Id, token), Times.Once);
+        strategy.Verify(s => s.ApplyAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        outbox.VerifyNoOtherCalls();
+        work.Verify(w => w.SaveChangesAsync(), Times.Never);
+        work.Verify(w => w.Commit(), Times.Once);
+        work.Verify(w => w.Rollback(), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_GivenProcessedMessage_SkipsStrategyAndCommits()
+    {
+        // Arrange
+        var token = TestContext.Current.CancellationToken;
+        var message = CreateMessage();
+        message.SetProccesedAtUtc();
+        var inbox = new Mock<IInboxRepository>();
+        var outbox = new Mock<IOutboxRepository>();
+        var work = new Mock<IUnitOfWork>();
+        var strategy = new Mock<IInboxMessageStrategy>();
+        strategy.SetupGet(s => s.EventType).Returns(EventType);
+        inbox.Setup(r => r.FindAsync(message.Id, token)).ReturnsAsync(message);
+        var handler = new ProcessInboxMessageHandler(inbox.Object, outbox.Object, work.Object, [strategy.Object]);
+
+        // Act
+        await handler.HandleAsync(message.Id, token);
+
+        // Assert
+        inbox.Verify(r => r.FindAsync(message.Id, token), Times.Once);
+        strategy.Verify(s => s.ApplyAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        outbox.VerifyNoOtherCalls();
+        work.Verify(w => w.SaveChangesAsync(), Times.Never);
+        work.Verify(w => w.Commit(), Times.Once);
+        work.Verify(w => w.Rollback(), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_GivenUnknownTypeFailure_RollsBackAndThrows()
+    {
+        // Arrange
+        var token = TestContext.Current.CancellationToken;
+        var message = CreateMessage();
+        var inbox = new Mock<IInboxRepository>();
+        var outbox = new Mock<IOutboxRepository>();
+        var work = new Mock<IUnitOfWork>();
+        var strategy = new Mock<IInboxMessageStrategy>();
+        strategy.SetupGet(s => s.EventType).Returns("Tests.OtherEvent");
+        inbox.Setup(r => r.FindAsync(message.Id, token)).ReturnsAsync(message);
+        var handler = new ProcessInboxMessageHandler(inbox.Object, outbox.Object, work.Object, [strategy.Object]);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => handler.HandleAsync(message.Id, token));
+        var actual = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(message.Id, token));
+        Assert.Contains(EventType, actual.Message);
+        strategy.Verify(s => s.ApplyAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        Assert.Null(message.ProccessedOnUtc);
+        outbox.VerifyNoOtherCalls();
+        work.Verify(w => w.SaveChangesAsync(), Times.Never);
+        work.Verify(w => w.Commit(), Times.Never);
+        work.Verify(w => w.Rollback(), Times.Once);
+    }
 
-        Assert.Same(expectedException, exception);
-        unitOfWork.Verify(work => work.SaveChangesAsync(), Times.Once);
-        unitOfWork.Verify(work => work.Commit(), Times.Never);
-        unitOfWork.Verify(work => work.Rollback(), Times.Once);
+    [Fact]
+    public async Task Handle_GivenStrategyFailure_RollsBackAndThrows()
+    {
+        // Arrange
+        var token = TestContext.Current.CancellationToken;
+        var message = CreateMessage();
+        var inbox = new Mock<IInboxRepository>();
+        var outbox = new Mock<IOutboxRepository>();
+        var work = new Mock<IUnitOfWork>();
+        var strategy = new Mock<IInboxMessageStrategy>();
+        strategy.SetupGet(s => s.EventType).Returns(EventType);
+        inbox.Setup(r => r.FindAsync(message.Id, token)).ReturnsAsync(message);
+        var expected = new InvalidOperationException("Operation failed");
+        strategy.Setup(s => s.ApplyAsync(message.Id, message.Content, token)).ThrowsAsync(expected);
+        var handler = new ProcessInboxMessageHandler(inbox.Object, outbox.Object, work.Object, [strategy.Object]);
+
+        // Act & Assert
+        var actual = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(message.Id, token));
+        Assert.Same(expected, actual);
+        Assert.Null(message.ProccessedOnUtc);
+        outbox.VerifyNoOtherCalls();
+        work.Verify(w => w.SaveChangesAsync(), Times.Never);
+        work.Verify(w => w.Commit(), Times.Never);
+        work.Verify(w => w.Rollback(), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_GivenOutboxFailure_RollsBackAndThrows()
+    {
+        // Arrange
+        var token = TestContext.Current.CancellationToken;
+        var message = CreateMessage();
+        var inbox = new Mock<IInboxRepository>();
+        var outbox = new Mock<IOutboxRepository>();
+        var work = new Mock<IUnitOfWork>();
+        var strategy = new Mock<IInboxMessageStrategy>();
+        strategy.SetupGet(s => s.EventType).Returns(EventType);
+        inbox.Setup(r => r.FindAsync(message.Id, token)).ReturnsAsync(message);
+        var expected = new InvalidOperationException("Operation failed");
+        var outgoing = new OutboxMessage { Id = message.Id, Type = "Outgoing", Topic = "outgoing", Content = "{}" };
+        strategy.Setup(s => s.ApplyAsync(message.Id, message.Content, token)).ReturnsAsync(outgoing);
+        outbox.Setup(r => r.AddAsync(outgoing)).ThrowsAsync(expected);
+        var handler = new ProcessInboxMessageHandler(inbox.Object, outbox.Object, work.Object, [strategy.Object]);
+
+        // Act & Assert
+        var actual = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(message.Id, token));
+        Assert.Same(expected, actual);
+        work.Verify(w => w.SaveChangesAsync(), Times.Never);
+        work.Verify(w => w.Commit(), Times.Never);
+        work.Verify(w => w.Rollback(), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_GivenSaveFailure_RollsBackAndThrows()
+    {
+        // Arrange
+        var token = TestContext.Current.CancellationToken;
+        var message = CreateMessage();
+        var inbox = new Mock<IInboxRepository>();
+        var outbox = new Mock<IOutboxRepository>();
+        var work = new Mock<IUnitOfWork>();
+        var strategy = new Mock<IInboxMessageStrategy>();
+        strategy.SetupGet(s => s.EventType).Returns(EventType);
+        inbox.Setup(r => r.FindAsync(message.Id, token)).ReturnsAsync(message);
+        var expected = new InvalidOperationException("Operation failed");
+        strategy.Setup(s => s.ApplyAsync(message.Id, message.Content, token)).ReturnsAsync((OutboxMessage?)null);
+        work.Setup(w => w.SaveChangesAsync()).ThrowsAsync(expected);
+        var handler = new ProcessInboxMessageHandler(inbox.Object, outbox.Object, work.Object, [strategy.Object]);
+
+        // Act & Assert
+        var actual = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(message.Id, token));
+        Assert.Same(expected, actual);
+        outbox.VerifyNoOtherCalls();
+        work.Verify(w => w.SaveChangesAsync(), Times.Once);
+        work.Verify(w => w.Commit(), Times.Never);
+        work.Verify(w => w.Rollback(), Times.Once);
     }
 }
