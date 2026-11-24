@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ImageService.InfrastructureLib.Migrations
 {
     [DbContext(typeof(ImageDbContext))]
-    [Migration("20261123164302_AddedRowVersion")]
-    partial class AddedRowVersion
+    [Migration("20261124080022_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,10 +29,6 @@ namespace ImageService.InfrastructureLib.Migrations
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Extension")
                         .IsRequired()

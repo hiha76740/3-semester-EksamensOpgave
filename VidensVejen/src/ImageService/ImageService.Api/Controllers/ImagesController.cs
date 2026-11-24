@@ -103,7 +103,7 @@ public class ImagesController(
 
             using var stream = imageFile.OpenReadStream();
 
-            var uploadImageCommand = new UploadImageCommand(stream, imageFile.ContentType, extension);
+            var uploadImageCommand = new UploadImageCommand(stream, extension);
 
             var id = await upload.HandleAsync(uploadImageCommand, cancellationToken);
 

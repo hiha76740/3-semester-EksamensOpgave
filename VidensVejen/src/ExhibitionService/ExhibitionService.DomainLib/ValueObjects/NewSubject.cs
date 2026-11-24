@@ -4,12 +4,15 @@ namespace ExhibitionService.DomainLib.ValueObjects;
 /// 
 /// </summary>
 /// <param name="Title"></param>
+/// <param name="TitleEn"></param>
 /// <param name="Slug"></param>
 /// <param name="Description"></param>
-
+/// <param name="DescriptionEn"></param>
 /// <param name="Topics"></param>
 public record NewSubject(
     string Title,
+    string TitleEn,
     string Slug,
     string Description,
+    string DescriptionEn,
     List<NewTopic> Topics);

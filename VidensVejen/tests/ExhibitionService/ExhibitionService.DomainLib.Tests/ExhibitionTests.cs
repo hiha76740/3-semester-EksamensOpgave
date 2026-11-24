@@ -8,8 +8,8 @@ public class ExhibitionTests
 {
     private static List<NewSubject> CreateSubjects()
     {
-        return [new NewSubject("Subject", "subject", "Description",
-            [new NewTopic("Topic", "Topic description", "Body", "Label", "Callout", null)])];
+        return [new NewSubject("Subject", "Subject EN", "subject", "Description", "Description EN",
+            [new NewTopic("Topic", "Topic EN", "Topic description", "Description EN", "Body", "Body EN", "Label", "Label EN", "Callout", "Callout EN", null, null)])];
     }
 
     [Fact]
@@ -20,15 +20,19 @@ public class ExhibitionTests
         var subjects = CreateSubjects();
 
         // Act
-        var exhibition = Exhibition.Create("Exhibition", theme, subjects);
+        var exhibition = Exhibition.Create("Exhibition", "Exhibition EN", theme, subjects);
 
         // Assert
         Assert.NotEqual(Guid.Empty, exhibition.Id.Value);
         Assert.Equal("Exhibition", exhibition.Name);
+        Assert.Equal("Exhibition EN", exhibition.NameEn);
         Assert.Equal(theme, exhibition.ThemeImageId);
         var subject = Assert.Single(exhibition.Subjects);
         Assert.NotEqual(Guid.Empty, subject.Id.Value);
         Assert.Equal("Subject", subject.Title);
+        Assert.Equal("Subject EN", subject.TitleEn);
+        Assert.Equal("Description EN", subject.DescriptionEn);
+        Assert.Equal("subject", subject.Slug);
         Assert.Equal("Description", subject.Description);
         var topic = Assert.Single(subject.Topics);
         Assert.Equal("Topic", topic.Title);
@@ -37,6 +41,12 @@ public class ExhibitionTests
         Assert.Equal("Label", topic.CalloutLabel);
         Assert.Equal("Callout", topic.CalloutText);
         Assert.Null(topic.Quote);
+        Assert.Null(topic.QuoteEn);
+        Assert.Equal("Topic EN", topic.TitleEn);
+        Assert.Equal("Description EN", topic.DescriptionEn);
+        Assert.Equal("Body EN", topic.BodyEn);
+        Assert.Equal("Label EN", topic.CalloutLabelEn);
+        Assert.Equal("Callout EN", topic.CalloutTextEn);
     }
 
     [Fact]
@@ -46,7 +56,7 @@ public class ExhibitionTests
         List<NewSubject> subjects = [];
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", new ImageId(Guid.NewGuid()), subjects));
+        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", "Exhibition EN", new ImageId(Guid.NewGuid()), subjects));
     }
 
     [Theory]
@@ -62,7 +72,7 @@ public class ExhibitionTests
         subjects[0] = subjects[0] with { Topics = topics };
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", new ImageId(Guid.NewGuid()), subjects));
+        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", "Exhibition EN", new ImageId(Guid.NewGuid()), subjects));
     }
 
     [Theory]
@@ -77,7 +87,7 @@ public class ExhibitionTests
         name = invalidValue!;
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => Exhibition.Create(name, new ImageId(Guid.NewGuid()), subjects));
+        Assert.Throws<DomainException>(() => Exhibition.Create(name, "Exhibition EN", new ImageId(Guid.NewGuid()), subjects));
     }
 
     [Theory]
@@ -92,7 +102,7 @@ public class ExhibitionTests
         subjects[0] = subjects[0] with { Title = invalidValue! };
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => Exhibition.Create(name, new ImageId(Guid.NewGuid()), subjects));
+        Assert.Throws<DomainException>(() => Exhibition.Create(name, "Exhibition EN", new ImageId(Guid.NewGuid()), subjects));
     }
 
     [Theory]
@@ -107,7 +117,7 @@ public class ExhibitionTests
         subjects[0] = subjects[0] with { Description = invalidValue! };
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => Exhibition.Create(name, new ImageId(Guid.NewGuid()), subjects));
+        Assert.Throws<DomainException>(() => Exhibition.Create(name, "Exhibition EN", new ImageId(Guid.NewGuid()), subjects));
     }
 
     [Theory]
@@ -122,7 +132,7 @@ public class ExhibitionTests
         subjects[0].Topics[0] = subjects[0].Topics[0] with { Title = invalidValue! };
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => Exhibition.Create(name, new ImageId(Guid.NewGuid()), subjects));
+        Assert.Throws<DomainException>(() => Exhibition.Create(name, "Exhibition EN", new ImageId(Guid.NewGuid()), subjects));
     }
 
     [Theory]
@@ -137,7 +147,7 @@ public class ExhibitionTests
         subjects[0].Topics[0] = subjects[0].Topics[0] with { Description = invalidValue! };
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => Exhibition.Create(name, new ImageId(Guid.NewGuid()), subjects));
+        Assert.Throws<DomainException>(() => Exhibition.Create(name, "Exhibition EN", new ImageId(Guid.NewGuid()), subjects));
     }
 
     [Theory]
@@ -152,7 +162,7 @@ public class ExhibitionTests
         subjects[0].Topics[0] = subjects[0].Topics[0] with { Body = invalidValue! };
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => Exhibition.Create(name, new ImageId(Guid.NewGuid()), subjects));
+        Assert.Throws<DomainException>(() => Exhibition.Create(name, "Exhibition EN", new ImageId(Guid.NewGuid()), subjects));
     }
 
     [Theory]
@@ -167,7 +177,7 @@ public class ExhibitionTests
         subjects[0].Topics[0] = subjects[0].Topics[0] with { CalloutLabel = invalidValue! };
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => Exhibition.Create(name, new ImageId(Guid.NewGuid()), subjects));
+        Assert.Throws<DomainException>(() => Exhibition.Create(name, "Exhibition EN", new ImageId(Guid.NewGuid()), subjects));
     }
 
     [Theory]
@@ -182,7 +192,7 @@ public class ExhibitionTests
         subjects[0].Topics[0] = subjects[0].Topics[0] with { CalloutText = invalidValue! };
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => Exhibition.Create(name, new ImageId(Guid.NewGuid()), subjects));
+        Assert.Throws<DomainException>(() => Exhibition.Create(name, "Exhibition EN", new ImageId(Guid.NewGuid()), subjects));
     }
 
     [Fact]
@@ -190,12 +200,12 @@ public class ExhibitionTests
     {
         // Arrange
         var subjects = CreateSubjects();
-        subjects[0].Topics.Add(new NewTopic("Second topic", "Description", "Body", "Label", "Text", "A quote"));
-        subjects.Add(new NewSubject("Second subject", "second-subject", "Description",
-            [new NewTopic("Third topic", "Description", "Body", "Label", "Text", null)]));
+        subjects[0].Topics.Add(new NewTopic("Second topic", "Second topic EN", "Description", "Description EN", "Body", "Body EN", "Label", "Label EN", "Text", "Text EN", "A quote", "A quote EN"));
+        subjects.Add(new NewSubject("Second subject", "Second subject EN", "second-subject", "Description", "Description EN",
+            [new NewTopic("Third topic", "Third topic EN", "Description", "Description EN", "Body", "Body EN", "Label", "Label EN", "Text", "Text EN", null, null)]));
 
         // Act
-        var exhibition = Exhibition.Create("Exhibition", new ImageId(Guid.NewGuid()), subjects);
+        var exhibition = Exhibition.Create("Exhibition", "Exhibition EN", new ImageId(Guid.NewGuid()), subjects);
 
         // Assert
         Assert.Equal(2, exhibition.Subjects.Count);
@@ -205,7 +215,151 @@ public class ExhibitionTests
         Assert.Equal("Topic", exhibition.Subjects[0].Topics[0].Title);
         Assert.Equal("Second topic", exhibition.Subjects[0].Topics[1].Title);
         Assert.Equal("A quote", exhibition.Subjects[0].Topics[1].Quote);
+        Assert.Equal("A quote EN", exhibition.Subjects[0].Topics[1].QuoteEn);
         Assert.Equal("Third topic", Assert.Single(exhibition.Subjects[1].Topics).Title);
         Assert.NotEqual(exhibition.Subjects[0].Id, exhibition.Subjects[1].Id);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_GivenBlankNameEn_ThrowsDomainException(string? invalidValue)
+    {
+        // Arrange
+        var subjects = CreateSubjects();
+        var nameEn = invalidValue!;
+        var imageId = new ImageId(Guid.NewGuid());
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", nameEn, imageId, subjects));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_GivenBlankSubjectTitleEn_ThrowsDomainException(string? invalidValue)
+    {
+        // Arrange
+        var subjects = CreateSubjects();
+        var nameEn = "Exhibition EN";
+        subjects[0] = subjects[0] with { TitleEn = invalidValue! };
+        var imageId = new ImageId(Guid.NewGuid());
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", nameEn, imageId, subjects));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_GivenBlankSubjectDescriptionEn_ThrowsDomainException(string? invalidValue)
+    {
+        // Arrange
+        var subjects = CreateSubjects();
+        var nameEn = "Exhibition EN";
+        subjects[0] = subjects[0] with { DescriptionEn = invalidValue! };
+        var imageId = new ImageId(Guid.NewGuid());
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", nameEn, imageId, subjects));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_GivenBlankSubjectSlug_ThrowsDomainException(string? invalidValue)
+    {
+        // Arrange
+        var subjects = CreateSubjects();
+        var nameEn = "Exhibition EN";
+        subjects[0] = subjects[0] with { Slug = invalidValue! };
+        var imageId = new ImageId(Guid.NewGuid());
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", nameEn, imageId, subjects));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_GivenBlankTopicTitleEn_ThrowsDomainException(string? invalidValue)
+    {
+        // Arrange
+        var subjects = CreateSubjects();
+        var nameEn = "Exhibition EN";
+        subjects[0].Topics[0] = subjects[0].Topics[0] with { TitleEn = invalidValue! };
+        var imageId = new ImageId(Guid.NewGuid());
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", nameEn, imageId, subjects));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_GivenBlankTopicDescriptionEn_ThrowsDomainException(string? invalidValue)
+    {
+        // Arrange
+        var subjects = CreateSubjects();
+        var nameEn = "Exhibition EN";
+        subjects[0].Topics[0] = subjects[0].Topics[0] with { DescriptionEn = invalidValue! };
+        var imageId = new ImageId(Guid.NewGuid());
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", nameEn, imageId, subjects));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_GivenBlankBodyEn_ThrowsDomainException(string? invalidValue)
+    {
+        // Arrange
+        var subjects = CreateSubjects();
+        var nameEn = "Exhibition EN";
+        subjects[0].Topics[0] = subjects[0].Topics[0] with { BodyEn = invalidValue! };
+        var imageId = new ImageId(Guid.NewGuid());
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", nameEn, imageId, subjects));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_GivenBlankCalloutLabelEn_ThrowsDomainException(string? invalidValue)
+    {
+        // Arrange
+        var subjects = CreateSubjects();
+        var nameEn = "Exhibition EN";
+        subjects[0].Topics[0] = subjects[0].Topics[0] with { CalloutLabelEn = invalidValue! };
+        var imageId = new ImageId(Guid.NewGuid());
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", nameEn, imageId, subjects));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Create_GivenBlankCalloutTextEn_ThrowsDomainException(string? invalidValue)
+    {
+        // Arrange
+        var subjects = CreateSubjects();
+        var nameEn = "Exhibition EN";
+        subjects[0].Topics[0] = subjects[0].Topics[0] with { CalloutTextEn = invalidValue! };
+        var imageId = new ImageId(Guid.NewGuid());
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => Exhibition.Create("Exhibition", nameEn, imageId, subjects));
     }
 }

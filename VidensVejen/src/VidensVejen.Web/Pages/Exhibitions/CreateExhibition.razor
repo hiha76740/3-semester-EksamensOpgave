@@ -1,14 +1,18 @@
 @page "/exhibition/create"
 
-@using System.Text.Json
-
+@inject IImageService ImageService
+@inject IExhibitionService ExhibitionService
 @inject DialogService Dialog
+@inject NavigationManager NavigationManager
 
 <PageTitle>Opret udstilling</PageTitle>
 
 @if (model != null)
 {
-    <ExhibitionFormComponent Model="model" SubmitCallback="ShowRequest" Error="@error" />
+    <ExhibitionFormComponent Model="model"
+                             SubmitCallback="Create"
+                             Error="@error"
+                             SubmitButtonText="@submitButtonText" />
 }
 else
 {
@@ -16,10 +20,7 @@ else
 }
 
 @code {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
-    {
-        WriteIndented = true
-    };
+    private string submitButtonText = "Opret";
 
     private ExhibitionInputModel? model;
     private string? error;
@@ -46,82 +47,82 @@ else
         }
     }
 
-    private async Task ShowRequest(ExhibitionInputModel input)
+    public async Task Create(ExhibitionInputModel input)
     {
-        error = null;
-
-        for (var i = 0; i < input.Subjects.Count; i++)
+        if (input.ThemeFile == null)
         {
-            var subject = input.Subjects[i];
-            if (string.IsNullOrWhiteSpace(subject.Title) || string.IsNullOrWhiteSpace(subject.TitleEn)
-                || string.IsNullOrWhiteSpace(subject.Description) || string.IsNullOrWhiteSpace(subject.DescriptionEn))
-            {
-                error = $"Udfyld titel og beskrivelse på begge sprog for subject {i + 1}.";
-                return;
-            }
-
-            if (subject.IsQuiz && subject.QuizId == null && subject.NewQuiz == null)
-            {
-                error = $"Vælg eller opret en quiz for subject {i + 1}.";
-                return;
-            }
-
-            if (!subject.IsQuiz && subject.Topics.Count == 0)
-            {
-                error = $"Tilføj mindst ét emne til subject {i + 1}.";
-                return;
-            }
+            error = "Venligst tilføj tema billede fil";
         }
-
-        var request = new
+        else
         {
-            name = Localized(input.ExhibitionName, input.ExhibitionNameEn),
-            subjects = input.Subjects.Select(subject => new
+            error = null;
+
+            for (var i = 0; i < input.Subjects.Count; i++)
             {
-                title = Localized(subject.Title, subject.TitleEn),
-                description = Localized(subject.Description, subject.DescriptionEn),
-                type = subject.IsQuiz ? "quiz" : "content",
-                topics = subject.IsQuiz ? null : subject.Topics.Select(topic => new
+                var subject = input.Subjects[i];
+                if (string.IsNullOrWhiteSpace(subject.Title) || string.IsNullOrWhiteSpace(subject.TitleEn)
+                    || string.IsNullOrWhiteSpace(subject.Description) || string.IsNullOrWhiteSpace(subject.DescriptionEn))
                 {
-                    title = Localized(topic.Title, topic.TitleEn),
-                    description = Localized(topic.Description, topic.DescriptionEn),
-                    body = Localized(topic.Body, topic.BodyEn),
-                    calloutLabel = Localized(topic.CalloutLabel, topic.CalloutLabelEn),
-                    calloutText = Localized(topic.CalloutText, topic.CalloutTextEn),
-                    quote = Localized(topic.Quote, topic.QuoteEn)
-                }),
-                quizId = subject.IsQuiz ? subject.QuizId : null,
-                newQuiz = subject.IsQuiz && subject.NewQuiz is QuizInputModel quiz ? new
+                    error = $"Udfyld titel og beskrivelse på begge sprog for subject {i + 1}.";
+                    return;
+                }
+
+                if (subject.IsQuiz && subject.QuizId == null && subject.NewQuiz == null)
                 {
-                    title = Localized(quiz.Title, quiz.TitleEn),
-                    instruction = Localized(quiz.Instruction, quiz.InstructionEn),
-                    questions = quiz.Questions.Select(question => new
-                    {
-                        text = Localized(question.Text, question.TextEn),
-                        choices = question.Answers.Select(answer => new
-                        {
-                            text = Localized(answer.Text, answer.TextEn),
-                            feedback = Localized(answer.Feedback, answer.FeedbackEn),
-                            correctAnswer = answer.IsCorrect
-                        })
-                    })
-                } : null
-            })
-        };
+                    error = $"Vælg eller opret en quiz for subject {i + 1}.";
+                    return;
+                }
 
-        var json = JsonSerializer.Serialize(request, JsonOptions);
-        await Dialog.OpenAsync("Eksempel på request", _ => @<RadzenStack Gap="1rem">
-            <RadzenText Text="Frontend-prototype. Eksemplet gemmes ikke." />
-            <RadzenTextArea Value="@json" ReadOnly="true" Rows="22" Style="width: 100%;" />
-        </RadzenStack>, new DialogOptions { Width = "min(92vw, 800px)" });
-    }
+                if (!subject.IsQuiz && subject.Topics.Count == 0)
+                {
+                    error = $"Tilføj mindst ét emne til subject {i + 1}.";
+                    return;
+                }
+            }
 
-    private static Dictionary<string, string> Localized(string danish, string english)
-    {
-        return new Dictionary<string, string>
-        {
-            ["da"] = danish.Trim(),
-            ["en"] = english.Trim()
-        };
+            if (error == null)
+            {
+                var imageResponse = await ImageService.UploadImage(input.ThemeFile, ExhibitionInputModel.MaxThemeFileSize);
+
+                var request = new CreateExhibitionRequest(
+                    input.ExhibitionName,
+                    input.ExhibitionNameEn,
+                    imageResponse.ImageId,
+                    input.Subjects.Select(s => new CreateSubjectRequest(
+                        s.Title,
+                        s.TitleEn,
+                        s.Title.ToLower(),
+                        s.Description,
+                        s.DescriptionEn,
+                        s.Topics.Select(t => new CreateTopicRequest(
+                            t.Title,
+                            t.TitleEn,
+                            t.Description,
+                            t.DescriptionEn,
+                            t.Body,
+                            t.BodyEn,
+                            t.CalloutLabel,
+                            t.CalloutLabelEn,
+                            t.CalloutText,
+                            t.CalloutTextEn,
+                            t.Quote,
+                            t.QuoteEn)).ToList()
+                    )).ToList()
+                );
+
+                var statusCode = await ExhibitionService.CreateAsync(request);
+
+                if (statusCode == HttpStatusCode.Created)
+                {
+                    await Dialog.Alert("Udstilling oprettet", "Udstilling oprettelse");
+                    NavigationManager.NavigateTo("/exhibitions");
+                }
+                else
+                {
+                    error = "Fejl opstået ved oprettelse af udstilling. Prøv igen";
+                }
+            }        
+        }
+        
     }
 }

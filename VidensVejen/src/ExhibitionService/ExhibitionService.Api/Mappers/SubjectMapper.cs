@@ -42,8 +42,10 @@ internal static class SubjectMapper
     {
         var output = new CreateSubjectCommand(
             request.Title,
+            request.TitleEn,
             request.Slug,
             request.Description,
+            request.DescriptionEn,
             request.Topics
             .Select(
                 t => t.AsCreateCommand())

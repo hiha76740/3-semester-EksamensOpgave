@@ -40,6 +40,7 @@ internal static class ExhibitionMapper
     {
         var output = new CreateExhibitionCommand(
             request.ExhibitionName,
+            request.ExhibitionNameEn,
             request.ThemeImageId,
             request.Subjects
             .Select(
