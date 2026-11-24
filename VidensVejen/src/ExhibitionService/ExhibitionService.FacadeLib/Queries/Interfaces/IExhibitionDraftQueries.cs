@@ -12,7 +12,7 @@ public interface IExhibitionDraftQueries
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task<ExhibitionDraftDto> GetExhibitionDraftByIdAsync(Guid id);
+    Task<ExhibitionDraftDto?> GetExhibitionDraftByIdAsync(Guid id);
 
     /// <summary>
     /// 
