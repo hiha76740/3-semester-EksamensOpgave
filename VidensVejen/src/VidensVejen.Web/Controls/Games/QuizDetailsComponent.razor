@@ -1,17 +1,28 @@
-@using VidensVejen.ContractsLib.Responses.ExhibitionService
-@using VidensVejen.Web.Models
-@using VidensVejen.Web.Models.Games
-
 <RadzenCard>
     <RadzenStack Gap="0.75rem">
         <RadzenText TextStyle="TextStyle.H4" Text="Quizinformation" />
-        <RadzenFormField Text="Titel *">
+        <RadzenFormField Text="Titel * (DA)">
             <RadzenTextBox @bind-Value="Model.Title" @bind-Value:after="NotifyChanged" Placeholder="Fx Affald og genbrug" />
         </RadzenFormField>
-        <RadzenFormField Text="Instruktion *">
+        <RadzenFormField Text="Titel * (EN)">
+            <RadzenTextBox @bind-Value="Model.TitleEn" @bind-Value:after="NotifyChanged" Placeholder="Fx Affald og genbrug" />
+        </RadzenFormField>
+        <RadzenFormField Text="Instruktion * (DA)">
             <RadzenTextArea @bind-Value="Model.Instruction" @bind-Value:after="NotifyChanged" Rows="3"
                             Placeholder="Skriv en kort instruktion til gæsten." />
         </RadzenFormField>
+        <RadzenFormField Text="Instruktion * (EN)">
+            <RadzenTextArea @bind-Value="Model.InstructionEn" @bind-Value:after="NotifyChanged" Rows="3"
+                            Placeholder="Skriv en kort instruktion til gæsten." />
+        </RadzenFormField>
+        @if (LockedExhibitionName != null)
+        {
+            <RadzenFormField Text="Udstilling">
+                <RadzenTextBox Value="@LockedExhibitionName" ReadOnly="true" />
+            </RadzenFormField>
+        }
+        else
+        {
         <RadzenFormField Text="Udstilling *">
             <RadzenDropDown TValue="Guid?" Data="@Exhibitions"
                             TextProperty="@nameof(ExhibitionNameResponse.Name)"
@@ -20,6 +31,7 @@
                             Placeholder="Vælg en udstilling" AllowFiltering="true"
                             Disabled="@(Exhibitions.Count == 0)" />
         </RadzenFormField>
+        }
     </RadzenStack>
 </RadzenCard>
 
@@ -32,6 +44,9 @@
 
     [Parameter, EditorRequired]
     public IReadOnlyList<ExhibitionNameResponse> Exhibitions { get; set; } = [];
+
+    [Parameter]
+    public string? LockedExhibitionName { get; set; }
 
     private Task NotifyChanged() => Changed.InvokeAsync();
 }

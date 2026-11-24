@@ -1,38 +1,108 @@
-@using VidensVejen.Web.Models
-@using VidensVejen.Web.Models.Exhibitions
 @inject DialogService Dialog
 
 <RadzenStack Gap="0.75rem">
-    <RadzenFormField Text="Titel *">
+    <RadzenFormField Text="Titel * (DA)">
         <RadzenTextBox @bind-Value="Model.Title" />
     </RadzenFormField>
-    <RadzenFormField Text="Beskrivelse *">
+    <RadzenFormField Text="Titel * (EN)">
+        <RadzenTextBox @bind-Value="Model.TitleEn" />
+    </RadzenFormField>
+    <RadzenFormField Text="Beskrivelse * (DA)">
         <RadzenTextArea @bind-Value="Model.Description" Rows="3" />
     </RadzenFormField>
-    <RadzenText TextStyle="TextStyle.Subtitle1" Text="Emner" />
-    @for (var index = 0; index < Model.Topics.Count; index++)
+    <RadzenFormField Text="Beskrivelse * (EN)">
+        <RadzenTextArea @bind-Value="Model.DescriptionEn" Rows="3" />
+    </RadzenFormField>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+        <RadzenCheckBox TValue="bool" Name="@($"{Id}-quiz")" @bind-Value="Model.IsQuiz" />
+        <RadzenLabel Text="Dette subject er en quiz" Component="@($"{Id}-quiz")" />
+    </RadzenStack>
+    @if (Model.IsQuiz)
     {
-        var topicIndex = index;
-        var topic = Model.Topics[topicIndex];
-        <RadzenCard @key="topicIndex" Variant="Variant.Outlined">
-            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
-                         JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.Wrap">
-                <RadzenText Text="@topic.Title" />
-                <RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap">
-                    <RadzenButton Text="Redigér" Icon="edit" Variant="Variant.Outlined"
-                                  Click="@(() => OpenTopic(topicIndex))" />
-                    <RadzenButton Text="Fjern" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Outlined"
-                                  Click="@(() => Model.Topics.RemoveAt(topicIndex))" />
-                </RadzenStack>
-            </RadzenStack>
-        </RadzenCard>
+        <RadzenFormField Text="Quiz *">
+            <RadzenDropDown TValue="string" @key="quizPickerVersion" Data="@QuizOptions"
+                            TextProperty="@nameof(QuizOption.Title)" ValueProperty="@nameof(QuizOption.Value)"
+                            Value="@SelectedQuiz" Change="SelectQuizAsync" Placeholder="Vælg en quiz" />
+        </RadzenFormField>
+        @if (Model.NewQuiz != null)
+        {
+            <RadzenText Text="@($"Ny quizkladde: {Model.NewQuiz.Title}")" />
+        }
     }
-    <RadzenButton Text="Tilføj emne" Icon="add" Click="@(() => OpenTopic())" />
+    else
+    {
+        <RadzenText TextStyle="TextStyle.Subtitle1" Text="Emner" />
+        @for (var index = 0; index < Model.Topics.Count; index++)
+        {
+            var topicIndex = index;
+            var topic = Model.Topics[topicIndex];
+            <RadzenCard @key="topicIndex" Variant="Variant.Outlined">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                             JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.Wrap">
+                    <RadzenText Text="@topic.Title" />
+                    <RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap">
+                        <RadzenButton Text="Redigér" Icon="edit" Variant="Variant.Outlined"
+                                      Click="@(() => OpenTopic(topicIndex))" />
+                        <RadzenButton Text="Fjern" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Outlined"
+                                      Click="@(() => Model.Topics.RemoveAt(topicIndex))" />
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+        }
+        <RadzenButton Text="Tilføj emne" Icon="add" Click="@(() => OpenTopic())" />
+    }
 </RadzenStack>
 
 @code {
     [Parameter, EditorRequired]
     public ExhibitionSubjectInputModel Model { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public string ExhibitionName { get; set; } = string.Empty;
+
+    private string Id { get; } = $"subject-{Guid.NewGuid():N}";
+    private int quizPickerVersion;
+
+    private const string CreateNew = "new";
+
+    // Example data for the prototype. Replace with the available quizzes from GameService.
+    private static readonly IReadOnlyList<QuizOption> QuizOptions =
+    [
+        new("d520d7f7-2455-4b06-b835-4df14a3a2088", "Affaldssortering (demo)"),
+        new("512cb527-4b08-4ea8-a3f1-5fcf7b9313ca", "Vand og hav (demo)"),
+        new(CreateNew, "Lav en ny quiz")
+    ];
+
+    private string? SelectedQuiz => Model.QuizId?.ToString();
+
+    private async Task SelectQuizAsync(object? value)
+    {
+        if (value is string option && option == CreateNew)
+        {
+            object? result = await Dialog.OpenAsync<ExhibitionQuizDraftDialog>(
+                "Opret quiz",
+                new Dictionary<string, object?>
+                {
+                    [nameof(ExhibitionQuizDraftDialog.ExhibitionName)] = ExhibitionName
+                },
+                new DialogOptions { Width = "min(92vw, 900px)", CloseDialogOnOverlayClick = false });
+
+            if (result is QuizInputModel draft)
+            {
+                Model.NewQuiz = draft;
+                Model.QuizId = null;
+            }
+
+            quizPickerVersion++;
+        }
+        else if (value is string quizId && Guid.TryParse(quizId, out var id))
+        {
+            Model.QuizId = id;
+            Model.NewQuiz = null;
+        }
+    }
+
+    private sealed record QuizOption(string Value, string Title);
 
     private async Task OpenTopic(int? index = null)
     {

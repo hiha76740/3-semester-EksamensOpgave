@@ -1,41 +1,28 @@
 @page "/exhibition/create"
+
 @using System.Text.Json
-@using Microsoft.AspNetCore.Components.WebAssembly.Http
-@using VidensVejen.ContractsLib.Requests.ExhibitionService
-@using VidensVejen.Web.Controls.Exhibitions
-@using VidensVejen.Web.Models
-@using VidensVejen.Web.Models.Exhibitions
+
 @inject DialogService Dialog
-@inject HttpClient Http
 
 <PageTitle>Opret udstilling</PageTitle>
 
 @if (model != null)
 {
-    <ExhibitionFormComponent Model="model" SubmitCallback="CreateAsync"
-                             IsSaving="isSaving" Error="@error" />
+    <ExhibitionFormComponent Model="model" SubmitCallback="ShowRequest" Error="@error" />
 }
 else
 {
-    <RadzenCard class="rz-my-4 rz-mx-auto rz-p-4" Style="max-width: 900px;">
-        <RadzenStack Gap="1rem" AlignItems="AlignItems.Start">
-            @if (createdName != null)
-            {
-                <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">
-                    Udstillingen «@createdName» er oprettet.
-                </RadzenAlert>
-            }
-            <RadzenButton Text="Opret udstilling" Icon="add" Click="NameExhibitionAsync" />
-        </RadzenStack>
-    </RadzenCard>
+    <RadzenButton Text="Opret udstilling" Icon="add" Click="NameExhibitionAsync" />
 }
 
 @code {
-    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
+    {
+        WriteIndented = true
+    };
+
     private ExhibitionInputModel? model;
     private string? error;
-    private string? createdName;
-    private bool isSaving;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -52,83 +39,89 @@ else
             "Opret udstilling",
             options: new DialogOptions { Width = "min(92vw, 420px)", CloseDialogOnOverlayClick = false });
 
-        if (result is string name)
+        if (result is ExhibitionInputModel exhibition)
         {
-            model = new ExhibitionInputModel { ExhibitionName = name };
-            createdName = null;
+            model = exhibition;
             error = null;
         }
     }
 
-    private async Task CreateAsync(ExhibitionInputModel input)
+    private async Task ShowRequest(ExhibitionInputModel input)
     {
-        if (isSaving)
-        {
-            return;
-        }
-
         error = null;
-        var themeFile = input.ThemeFile;
-        if (themeFile == null)
-        {
-            error = "Vælg et gyldigt temabillede.";
-            return;
-        }
 
-        for (var index = 0; index < input.Subjects.Count; index++)
+        for (var i = 0; i < input.Subjects.Count; i++)
         {
-            var subject = input.Subjects[index];
-            if (string.IsNullOrWhiteSpace(subject.Title) || string.IsNullOrWhiteSpace(subject.Description)
-                || subject.Topics.Count == 0)
+            var subject = input.Subjects[i];
+            if (string.IsNullOrWhiteSpace(subject.Title) || string.IsNullOrWhiteSpace(subject.TitleEn)
+                || string.IsNullOrWhiteSpace(subject.Description) || string.IsNullOrWhiteSpace(subject.DescriptionEn))
             {
-                error = $"Subject {index + 1} skal have en titel, beskrivelse og mindst ét emne.";
+                error = $"Udfyld titel og beskrivelse på begge sprog for subject {i + 1}.";
+                return;
+            }
+
+            if (subject.IsQuiz && subject.QuizId == null && subject.NewQuiz == null)
+            {
+                error = $"Vælg eller opret en quiz for subject {i + 1}.";
+                return;
+            }
+
+            if (!subject.IsQuiz && subject.Topics.Count == 0)
+            {
+                error = $"Tilføj mindst ét emne til subject {i + 1}.";
                 return;
             }
         }
 
-        isSaving = true;
-        try
+        var request = new
         {
-            var createRequest = new CreateExhibitionRequest(
-                input.ExhibitionName,
-                // TODO: FIX so it comes from ImageService call
-                Guid.NewGuid(),
-                input.Subjects.Select(subject => new CreateSubjectRequest(
-                    subject.Title.Trim(),
-                    subject.Title.ToLower().Trim(),
-                    subject.Description.Trim(),
-                    subject.Topics.Select(topic => new CreateTopicRequest(
-                        topic.Title.Trim(), topic.Description.Trim(), topic.Body.Trim(),
-                        topic.CalloutLabel.Trim(), topic.CalloutText.Trim(), topic.Quote.Trim())).ToList())).ToList());
-
-            using var payload = new MultipartFormDataContent();
-            payload.Add(new StringContent(JsonSerializer.Serialize(createRequest, JsonOptions)), "data");
-            payload.Add(new StreamContent(themeFile.OpenReadStream(ExhibitionInputModel.MaxThemeFileSize)),
-                "themeFile", themeFile.Name);
-
-            using var request = new HttpRequestMessage(HttpMethod.Post, "exhibitions-api/api/exhibitions")
+            name = Localized(input.ExhibitionName, input.ExhibitionNameEn),
+            subjects = input.Subjects.Select(subject => new
             {
-                Content = payload
-            };
-            request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+                title = Localized(subject.Title, subject.TitleEn),
+                description = Localized(subject.Description, subject.DescriptionEn),
+                type = subject.IsQuiz ? "quiz" : "content",
+                topics = subject.IsQuiz ? null : subject.Topics.Select(topic => new
+                {
+                    title = Localized(topic.Title, topic.TitleEn),
+                    description = Localized(topic.Description, topic.DescriptionEn),
+                    body = Localized(topic.Body, topic.BodyEn),
+                    calloutLabel = Localized(topic.CalloutLabel, topic.CalloutLabelEn),
+                    calloutText = Localized(topic.CalloutText, topic.CalloutTextEn),
+                    quote = Localized(topic.Quote, topic.QuoteEn)
+                }),
+                quizId = subject.IsQuiz ? subject.QuizId : null,
+                newQuiz = subject.IsQuiz && subject.NewQuiz is QuizInputModel quiz ? new
+                {
+                    title = Localized(quiz.Title, quiz.TitleEn),
+                    instruction = Localized(quiz.Instruction, quiz.InstructionEn),
+                    questions = quiz.Questions.Select(question => new
+                    {
+                        text = Localized(question.Text, question.TextEn),
+                        choices = question.Answers.Select(answer => new
+                        {
+                            text = Localized(answer.Text, answer.TextEn),
+                            feedback = Localized(answer.Feedback, answer.FeedbackEn),
+                            correctAnswer = answer.IsCorrect
+                        })
+                    })
+                } : null
+            })
+        };
 
-            using var response = await Http.SendAsync(request);
-            if (!response.IsSuccessStatusCode)
-            {
-                error = $"Udstillingen kunne ikke oprettes (HTTP {(int)response.StatusCode}).";
-                return;
-            }
+        var json = JsonSerializer.Serialize(request, JsonOptions);
+        await Dialog.OpenAsync("Eksempel på request", _ => @<RadzenStack Gap="1rem">
+            <RadzenText Text="Frontend-prototype. Eksemplet gemmes ikke." />
+            <RadzenTextArea Value="@json" ReadOnly="true" Rows="22" Style="width: 100%;" />
+        </RadzenStack>, new DialogOptions { Width = "min(92vw, 800px)" });
+    }
 
-            createdName = input.ExhibitionName;
-            model = null;
-        }
-        catch (Exception exception) when (exception is HttpRequestException or IOException or OperationCanceledException)
+    private static Dictionary<string, string> Localized(string danish, string english)
+    {
+        return new Dictionary<string, string>
         {
-            error = "Oprettelsen kunne ikke bekræftes. Kontrollér forbindelsen og udstillingslisten.";
-        }
-        finally
-        {
-            isSaving = false;
-        }
+            ["da"] = danish.Trim(),
+            ["en"] = english.Trim()
+        };
     }
 }

@@ -1,7 +1,6 @@
 @inherits LayoutComponentBase
 @implements IDisposable
-@using Microsoft.AspNetCore.Components.Authorization
-@using VidensVejen.Web.Authentication
+
 @inject IAuthService AuthService
 @inject CustomAuthenticationStateProvider AuthStateProvider
 @inject DialogService Dialog
@@ -20,7 +19,6 @@
         </div>
         <a class="vidensvejen-brand" href="">
             <span class="vidensvejen-logo" aria-hidden="true"></span>
-            @* <span>VidensVejen</span> *@
         </a>
         @if (sectionTitle != null)
         {

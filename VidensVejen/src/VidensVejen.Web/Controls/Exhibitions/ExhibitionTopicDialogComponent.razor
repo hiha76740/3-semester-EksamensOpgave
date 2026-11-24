@@ -1,5 +1,3 @@
-@using VidensVejen.Web.Models
-@using VidensVejen.Web.Models.Exhibitions
 @inject DialogService Dialog
 
 <RadzenTemplateForm TItem="ExhibitionTopicInputModel" Data="@Model" Submit="Save">
@@ -12,23 +10,41 @@
         {
             <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">Udfyld alle felter markeret med *.</RadzenAlert>
         }
-        <RadzenFormField Text="Titel *">
+        <RadzenFormField Text="Titel * (DA)">
             <RadzenTextBox @bind-Value="Model.Title" />
         </RadzenFormField>
-        <RadzenFormField Text="Beskrivelse *">
+        <RadzenFormField Text="Titel * (EN)">
+            <RadzenTextBox @bind-Value="Model.TitleEn" />
+        </RadzenFormField>
+        <RadzenFormField Text="Beskrivelse * (DA)">
             <RadzenTextArea @bind-Value="Model.Description" Rows="2" />
         </RadzenFormField>
-        <RadzenFormField Text="Brødtekst *">
+        <RadzenFormField Text="Beskrivelse * (EN)">
+            <RadzenTextArea @bind-Value="Model.DescriptionEn" Rows="2" />
+        </RadzenFormField>
+        <RadzenFormField Text="Brødtekst * (DA)">
             <RadzenTextArea @bind-Value="Model.Body" Rows="4" />
         </RadzenFormField>
-        <RadzenFormField Text="Label til fremhævet boks *">
+        <RadzenFormField Text="Brødtekst * (EN)">
+            <RadzenTextArea @bind-Value="Model.BodyEn" Rows="4" />
+        </RadzenFormField>
+        <RadzenFormField Text="Label til fremhævet boks * (DA)">
             <RadzenTextBox @bind-Value="Model.CalloutLabel" Placeholder="Fx Otto siger" />
         </RadzenFormField>
-        <RadzenFormField Text="Tekst i fremhævet boks *">
+        <RadzenFormField Text="Label til fremhævet boks * (EN)">
+            <RadzenTextBox @bind-Value="Model.CalloutLabelEn" Placeholder="Fx Otto siger" />
+        </RadzenFormField>
+        <RadzenFormField Text="Tekst i fremhævet boks * (DA)">
             <RadzenTextArea @bind-Value="Model.CalloutText" Rows="3" />
         </RadzenFormField>
-        <RadzenFormField Text="Citat">
+        <RadzenFormField Text="Tekst i fremhævet boks * (EN)">
+            <RadzenTextArea @bind-Value="Model.CalloutTextEn" Rows="3" />
+        </RadzenFormField>
+        <RadzenFormField Text="Citat (DA)">
             <RadzenTextArea @bind-Value="Model.Quote" Rows="2" />
+        </RadzenFormField>
+        <RadzenFormField Text="Citat (EN)">
+            <RadzenTextArea @bind-Value="Model.QuoteEn" Rows="2" />
         </RadzenFormField>
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Wrap="FlexWrap.Wrap">
             <RadzenButton Text="Annullér" Variant="Variant.Outlined" Click="@(() => Dialog.Close())" />
@@ -52,7 +68,12 @@
             || string.IsNullOrWhiteSpace(topic.Description)
             || string.IsNullOrWhiteSpace(topic.Body)
             || string.IsNullOrWhiteSpace(topic.CalloutLabel)
-            || string.IsNullOrWhiteSpace(topic.CalloutText);
+            || string.IsNullOrWhiteSpace(topic.CalloutText)
+            || string.IsNullOrWhiteSpace(topic.TitleEn)
+            || string.IsNullOrWhiteSpace(topic.DescriptionEn)
+            || string.IsNullOrWhiteSpace(topic.BodyEn)
+            || string.IsNullOrWhiteSpace(topic.CalloutLabelEn)
+            || string.IsNullOrWhiteSpace(topic.CalloutTextEn);
 
         if (!showError)
         {

@@ -1,9 +1,7 @@
 @page "/games/create"
-@using VidensVejen.ContractsLib.Responses.ExhibitionService
-@using VidensVejen.Web.Controls.Games
-@using VidensVejen.Web.Models
-@using VidensVejen.Web.Models.Games
-@inject IExhibitionService exhibitionService
+
+@inject IExhibitionService ExhibitionService
+@inject IQuizService QuizService
 
 <PageTitle>Opret quiz</PageTitle>
 
@@ -34,14 +32,7 @@
     {
         try
         {
-            // var options = await exhibitionService.GetAllNamesAsync();
-
-            // TODO: remove and call database
-            var options = new List<ExhibitionNameResponse>
-            {
-                new ExhibitionNameResponse(Guid.NewGuid(), "Test 1"),
-                new ExhibitionNameResponse(Guid.NewGuid(), "Test 2")
-            };
+            var options = await ExhibitionService.GetAllNamesAsync();
 
             exhibitions = options.Where(option => option.Id != Guid.Empty).ToList();
             if (options.Count > 0 && exhibitions.Count == 0)
@@ -67,14 +58,14 @@
     {
         ClearMessages();
 
-        if (string.IsNullOrWhiteSpace(submittedModel.Title))
+        if (string.IsNullOrWhiteSpace(submittedModel.Title) || string.IsNullOrWhiteSpace(submittedModel.TitleEn))
         {
-            errors.Add("Quizzen skal have en titel.");
+            errors.Add("Quizzen skal have en titel på dansk og engelsk.");
         }
 
-        if (string.IsNullOrWhiteSpace(submittedModel.Instruction))
+        if (string.IsNullOrWhiteSpace(submittedModel.Instruction) || string.IsNullOrWhiteSpace(submittedModel.InstructionEn))
         {
-            errors.Add("Quizzen skal have en instruktion.");
+            errors.Add("Quizzen skal have en instruktion på dansk og engelsk.");
         }
 
         if (!exhibitions.Any(option => option.Id == submittedModel.ExhibitionId))
@@ -86,9 +77,9 @@
         {
             var question = submittedModel.Questions[i];
 
-            if (string.IsNullOrWhiteSpace(question.Text))
+            if (string.IsNullOrWhiteSpace(question.Text) || string.IsNullOrWhiteSpace(question.TextEn))
             {
-                errors.Add($"Spørgsmål {i + 1} mangler en tekst.");
+                errors.Add($"Spørgsmål {i + 1} skal have tekst på dansk og engelsk.");
             }
 
             if (question.Answers.Count < 2)
@@ -103,9 +94,9 @@
 
             for (var j = 0; j < question.Answers.Count; j++)
             {
-                if (string.IsNullOrWhiteSpace(question.Answers[j].Text))
+                if (string.IsNullOrWhiteSpace(question.Answers[j].Text) || string.IsNullOrWhiteSpace(question.Answers[j].TextEn))
                 {
-                    errors.Add($"Spørgsmål {i + 1}, svar {j + 1} mangler svartekst.");
+                    errors.Add($"Spørgsmål {i + 1}, svar {j + 1} skal have svartekst på dansk og engelsk.");
                 }
             }
         }

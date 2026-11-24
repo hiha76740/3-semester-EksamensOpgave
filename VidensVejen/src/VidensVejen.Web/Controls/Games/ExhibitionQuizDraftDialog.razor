@@ -1,0 +1,43 @@
+@inject DialogService Dialog
+
+<QuizFormComponent Model="quiz" FormTitle="Ny quiz" SubmitText="Brug quizkladden"
+                   LockedExhibitionName="@ExhibitionName" Exhibitions="noExhibitions"
+                   SubmitCallback="Save" ResetCallback="Cancel" ResetText="Annullér"
+                   Errors="errors" />
+
+@code {
+    [Parameter, EditorRequired]
+    public string ExhibitionName { get; set; } = string.Empty;
+
+    private readonly QuizInputModel quiz = new();
+    private readonly IReadOnlyList<ExhibitionNameResponse> noExhibitions = [];
+    private readonly List<string> errors = [];
+
+    private void Save(QuizInputModel draft)
+    {
+        errors.Clear();
+        if (string.IsNullOrWhiteSpace(draft.Title) || string.IsNullOrWhiteSpace(draft.TitleEn)
+            || string.IsNullOrWhiteSpace(draft.Instruction) || string.IsNullOrWhiteSpace(draft.InstructionEn))
+        {
+            errors.Add("Udfyld titel og instruktion på dansk og engelsk.");
+        }
+
+        for (var i = 0; i < draft.Questions.Count; i++)
+        {
+            var question = draft.Questions[i];
+            if (string.IsNullOrWhiteSpace(question.Text) || string.IsNullOrWhiteSpace(question.TextEn)
+                || question.Answers.Any(answer => string.IsNullOrWhiteSpace(answer.Text)
+                    || string.IsNullOrWhiteSpace(answer.TextEn)))
+            {
+                errors.Add($"Udfyld spørgsmål {i + 1} og dets svar på begge sprog.");
+            }
+        }
+
+        if (errors.Count == 0)
+        {
+            Dialog.Close(draft);
+        }
+    }
+
+    private void Cancel() => Dialog.Close();
+}

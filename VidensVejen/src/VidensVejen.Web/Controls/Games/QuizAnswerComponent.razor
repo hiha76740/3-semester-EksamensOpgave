@@ -1,6 +1,3 @@
-@using VidensVejen.Web.Models
-@using VidensVejen.Web.Models.Games
-
 <RadzenCard Variant="Variant.Outlined">
     <RadzenStack Gap="0.75rem">
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
@@ -11,13 +8,19 @@
 
         <RadzenRow AlignItems="AlignItems.Center">
             <RadzenColumn Size="12" SizeMD="6">
-                <RadzenFormField Text="@($"Svar {Number} *")" Style="width: 100%;">
+                <RadzenFormField Text="@($"Svar {Number} (DA) *")" Style="width: 100%;">
                     <RadzenTextBox @bind-Value="Answer.Text" @bind-Value:after="NotifyChanged" />
+                </RadzenFormField>
+                <RadzenFormField Text="Svartekst (EN) *" Style="width: 100%;">
+                    <RadzenTextBox @bind-Value="Answer.TextEn" @bind-Value:after="NotifyChanged" />
                 </RadzenFormField>
             </RadzenColumn>
             <RadzenColumn Size="12" SizeMD="6">
-                <RadzenFormField Text="Feedback (valgfrit)" Style="width: 100%;">
+                <RadzenFormField Text="Feedback (DA)" Style="width: 100%;">
                     <RadzenTextBox @bind-Value="Answer.Feedback" @bind-Value:after="NotifyChanged" />
+                </RadzenFormField>
+                <RadzenFormField Text="Feedback (EN)" Style="width: 100%;">
+                    <RadzenTextBox @bind-Value="Answer.FeedbackEn" @bind-Value:after="NotifyChanged" />
                 </RadzenFormField>
             </RadzenColumn>
         </RadzenRow>

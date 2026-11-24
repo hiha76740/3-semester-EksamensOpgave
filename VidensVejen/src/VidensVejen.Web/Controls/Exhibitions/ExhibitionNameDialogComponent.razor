@@ -1,14 +1,16 @@
 @inject DialogService Dialog
 
-<RadzenTemplateForm TItem="NameInput" Data="@model" Submit="Continue">
+<RadzenTemplateForm TItem="ExhibitionInputModel" Data="@model" Submit="Continue">
     <RadzenStack Gap="1rem">
-        <RadzenFormField Text="Udstillingsnavn *">
-            <RadzenTextBox Name="ExhibitionName" @bind-Value="model.Name" />
+        <RadzenFormField Text="Udstillingsnavn (DA) *">
+            <RadzenTextBox Name="ExhibitionName" @bind-Value="model.ExhibitionName" />
         </RadzenFormField>
-        <RadzenRequiredValidator Component="ExhibitionName" Text="Skriv et navn til udstillingen." />
+        <RadzenFormField Text="Udstillingsnavn (EN) *">
+            <RadzenTextBox @bind-Value="model.ExhibitionNameEn" />
+        </RadzenFormField>
         @if (showError)
         {
-            <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">Skriv et navn til udstillingen.</RadzenAlert>
+            <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">Skriv udstillingsnavnet på dansk og engelsk.</RadzenAlert>
         }
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
             <RadzenButton Text="Annullér" Variant="Variant.Outlined" Click="@(() => Dialog.Close())" />
@@ -18,20 +20,15 @@
 </RadzenTemplateForm>
 
 @code {
-    private readonly NameInput model = new();
+    private readonly ExhibitionInputModel model = new();
     private bool showError;
 
-    private void Continue(NameInput input)
+    private void Continue(ExhibitionInputModel input)
     {
-        showError = string.IsNullOrWhiteSpace(input.Name);
+        showError = string.IsNullOrWhiteSpace(input.ExhibitionName) || string.IsNullOrWhiteSpace(input.ExhibitionNameEn);
         if (!showError)
         {
-            Dialog.Close(input.Name.Trim());
+            Dialog.Close(input);
         }
-    }
-
-    private sealed class NameInput
-    {
-        public string Name { get; set; } = string.Empty;
     }
 }

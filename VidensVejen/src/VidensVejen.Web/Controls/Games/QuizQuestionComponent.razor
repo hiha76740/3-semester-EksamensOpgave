@@ -1,5 +1,3 @@
-@using VidensVejen.Web.Models
-@using VidensVejen.Web.Models.Games
 @inject DialogService Dialog
 
 <RadzenCard Variant="Variant.Outlined">
@@ -11,8 +9,11 @@
                           Disabled="@(!CanRemove)" Click="@(() => Remove.InvokeAsync())" />
         </RadzenStack>
 
-        <RadzenFormField Text="Spørgsmålstekst *">
+        <RadzenFormField Text="Spørgsmålstekst * (DA)">
             <RadzenTextArea @bind-Value="Question.Text" @bind-Value:after="NotifyChanged" Rows="2" />
+        </RadzenFormField>
+        <RadzenFormField Text="Spørgsmålstekst * (EN)">
+            <RadzenTextArea @bind-Value="Question.TextEn" @bind-Value:after="NotifyChanged" Rows="2" />
         </RadzenFormField>
         <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Wrap="FlexWrap.Wrap">
             <RadzenButton ButtonType="ButtonType.Button" Text="Svarmuligheder" Variant="Variant.Outlined"
@@ -46,16 +47,15 @@
         var draft = Question.Answers.Select(answer => new QuizAnswerInputModel
         {
             Text = answer.Text,
+            TextEn = answer.TextEn,
             Feedback = answer.Feedback,
+            FeedbackEn = answer.FeedbackEn,
             IsCorrect = answer.IsCorrect
         }).ToList();
 
         object? result = await Dialog.OpenAsync<QuizAnswersDialogComponent>(
             $"Svarmuligheder – spørgsmål {Number}",
-            new Dictionary<string, object?>
-            {
-                [nameof(QuizAnswersDialogComponent.Answers)] = draft
-            },
+            new Dictionary<string, object?> { [nameof(QuizAnswersDialogComponent.Answers)] = draft },
             new DialogOptions { Width = "min(90vw, 760px)", CloseDialogOnOverlayClick = false });
 
         if (result is List<QuizAnswerInputModel> answers)

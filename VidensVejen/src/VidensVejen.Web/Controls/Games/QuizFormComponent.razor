@@ -1,7 +1,3 @@
-@using VidensVejen.ContractsLib.Responses.ExhibitionService
-@using VidensVejen.Web.Models
-@using VidensVejen.Web.Models.Games
-
 <RadzenTemplateForm TItem="QuizInputModel" Data="@Model" Submit="@HandleSubmit">
     <RadzenStack Gap="1rem" Class="rz-my-4 rz-mx-auto rz-px-4" Style="max-width: 1000px;">
         <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween"
@@ -28,7 +24,7 @@
             </RadzenAlert>
         }
 
-        <QuizDetailsComponent Model="Model" Exhibitions="Exhibitions" Changed="Changed" />
+        <QuizDetailsComponent Model="Model" Exhibitions="Exhibitions" LockedExhibitionName="@LockedExhibitionName" Changed="Changed" />
 
         <RadzenCard>
             <RadzenStack Gap="1rem">
@@ -48,7 +44,7 @@
 
                 <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End"
                              Wrap="FlexWrap.Wrap">
-                    <RadzenButton Text="Nulstil" Variant="Variant.Outlined" ButtonType="ButtonType.Button" Click="@(() => ResetCallback.InvokeAsync())" />
+                    <RadzenButton Text="@ResetText" Variant="Variant.Outlined" ButtonType="ButtonType.Button" Click="@(() => ResetCallback.InvokeAsync())" />
                     <RadzenButton Text="@SubmitText" ButtonType="ButtonType.Submit" />
                 </RadzenStack>
             </RadzenStack>
@@ -85,6 +81,12 @@
 
     [Parameter, EditorRequired]
     public IReadOnlyList<ExhibitionNameResponse> Exhibitions { get; set; } = [];
+
+    [Parameter]
+    public string ResetText { get; set; } = "Nulstil";
+
+    [Parameter]
+    public string? LockedExhibitionName { get; set; }
 
     private Task HandleSubmit(QuizInputModel submittedModel) => SubmitCallback.InvokeAsync(submittedModel);
 
