@@ -32,6 +32,10 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("NameEn")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("ThemeImageId")
                         .HasColumnType("uniqueidentifier");
 
@@ -50,6 +54,10 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                         .HasMaxLength(700)
                         .HasColumnType("nvarchar(700)");
 
+                    b.Property<string>("DescriptionEn")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("ExhibitionId")
                         .HasColumnType("uniqueidentifier");
 
@@ -61,6 +69,10 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TitleEn")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -87,18 +99,35 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                             b1.Property<string>("Body")
                                 .IsRequired();
 
+                            b1.Property<string>("BodyEn")
+                                .IsRequired();
+
                             b1.Property<string>("CalloutLabel")
+                                .IsRequired();
+
+                            b1.Property<string>("CalloutLabelEn")
                                 .IsRequired();
 
                             b1.Property<string>("CalloutText")
                                 .IsRequired();
 
+                            b1.Property<string>("CalloutTextEn")
+                                .IsRequired();
+
                             b1.Property<string>("Description")
+                                .IsRequired();
+
+                            b1.Property<string>("DescriptionEn")
                                 .IsRequired();
 
                             b1.Property<string>("Quote");
 
+                            b1.Property<string>("QuoteEn");
+
                             b1.Property<string>("Title")
+                                .IsRequired();
+
+                            b1.Property<string>("TitleEn")
                                 .IsRequired();
 
                             b1.HasKey("SubjectId", "__synthesizedOrdinal");

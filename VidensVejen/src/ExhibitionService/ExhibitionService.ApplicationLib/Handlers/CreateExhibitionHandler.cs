@@ -43,23 +43,32 @@ public class CreateExhibitionHandler(
                 {
                     topics.Add(new NewTopic(
                         topicCommand.Title,
+                        topicCommand.TitleEn,
                         topicCommand.Description,
+                        topicCommand.DescriptionEn,
                         topicCommand.Body,
+                        topicCommand.BodyEn,
                         topicCommand.CalloutLabel,
+                        topicCommand.CalloutLabelEn,
                         topicCommand.CalloutText,
-                        topicCommand.Qoute
+                        topicCommand.CalloutTextEn,
+                        topicCommand.Qoute,
+                        topicCommand.QouteEn
                         ));
                 }
 
                 subjects.Add(new NewSubject(
                     subjectCommand.Title,
+                    subjectCommand.TitleEn,
                     subjectCommand.Slug,
                     subjectCommand.Description,
+                    subjectCommand.DescriptionEn,
                     topics));
             }
 
             var exhibition = Exhibition.Create(
                 command.ExhibtionName,
+                command.ExhibitionNameEn,
                 imageId,
                 subjects);
 

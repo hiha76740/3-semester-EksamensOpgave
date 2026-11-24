@@ -40,11 +40,17 @@ internal static class TopicMapper
     {
         var output = new CreateTopicCommand(
             request.Title,
+            request.TitleEn,
             request.Description,
+            request.DescriptionEn,
             request.Body,
+            request.BodyEn,
             request.CalloutLabel,
+            request.CalloutLabelEn,
             request.CalloutText,
-            request.Qoute
+            request.CalloutTextEn,
+            request.Qoute,
+            request.QouteEn
             );
 
         return output;
