@@ -1,4 +1,3 @@
-using ExhibitionService.DomainLib.Entities;
 using ExhibitionService.DomainLib.ValueObjects;
 using ExhibitionService.FacadeLib.Queries.DTOs;
 using ExhibitionService.FacadeLib.Queries.Interfaces;

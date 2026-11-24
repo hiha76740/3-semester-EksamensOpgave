@@ -1,4 +1,5 @@
 using ExhibitionService.DomainLib.Entities;
+using ExhibitionService.DomainLib.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

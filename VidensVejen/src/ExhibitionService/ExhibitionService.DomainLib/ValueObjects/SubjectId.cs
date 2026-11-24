@@ -1,4 +1,4 @@
-namespace ExhibitionService.DomainLib.Entities;
+namespace ExhibitionService.DomainLib.ValueObjects;
 
 /// <summary>
 /// 
