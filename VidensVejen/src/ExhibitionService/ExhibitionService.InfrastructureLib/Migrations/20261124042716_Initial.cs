@@ -17,7 +17,7 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Theme = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    ThemeImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,6 +30,7 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Slug = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(700)", maxLength: 700, nullable: false),
                     ExhibitionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Topics = table.Column<string>(type: "nvarchar(max)", nullable: true)

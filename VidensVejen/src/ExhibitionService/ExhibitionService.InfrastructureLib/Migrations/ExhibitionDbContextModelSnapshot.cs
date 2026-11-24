@@ -32,7 +32,7 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<Guid?>("Theme")
+                    b.Property<Guid>("ThemeImageId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -52,6 +52,10 @@ namespace ExhibitionService.InfrastructureLib.Migrations
 
                     b.Property<Guid>("ExhibitionId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
                         .IsRequired()
