@@ -3,7 +3,6 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// <summary>
 /// 
 /// </summary>
-/// <param name="Id"></param>
 /// <param name="Title"></param>
 /// <param name="Description"></param>
 /// <param name="Body"></param>
@@ -11,20 +10,14 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// <param name="CalloutText"></param>
 /// <param name="Quote"></param>
 public record TopicResponse(
-    Guid Id,
     string Title,
     string Description,
     string Body,
     string CalloutLabel,
     string CalloutText,
-    string Quote
+    string? Quote
     )
 {
-    /// <summary>
-    /// A unique identifier for a topic.
-    /// </summary>
-    public Guid Id { get; init; } = Id;
-
     /// <summary>
     /// The title of the topic.
     /// </summary>
@@ -53,5 +46,5 @@ public record TopicResponse(
     /// <summary>
     /// The quote of the mascot
     /// </summary>
-    public string Quote { get; init; } = Quote;
+    public string? Quote { get; init; } = Quote;
 }

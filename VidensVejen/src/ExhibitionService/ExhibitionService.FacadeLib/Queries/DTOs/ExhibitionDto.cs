@@ -4,12 +4,12 @@ namespace ExhibitionService.FacadeLib.Queries.DTOs;
 /// 
 /// </summary>
 /// <param name="Id"></param>
-/// <param name="Title"></param>
+/// <param name="Name"></param>
 /// <param name="Subjects"></param>
-/// <param name="ThemeFileName"></param>
+/// <param name="ThemeImageId"></param>
 public record ExhibitionDto(
     Guid Id,
-    string Title,
+    string Name,
     IReadOnlyList<SubjectDto> Subjects,
-    string ThemeFileName
+    Guid ThemeImageId
     );

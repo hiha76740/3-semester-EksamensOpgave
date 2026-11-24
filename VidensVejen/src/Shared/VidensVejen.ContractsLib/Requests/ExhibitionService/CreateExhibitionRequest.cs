@@ -4,10 +4,12 @@ namespace VidensVejen.ContractsLib.Requests.ExhibitionService;
 /// 
 /// </summary>
 /// <param name="ExhibitionName"></param>
+/// <param name="ThemeImageId"></param>
 /// <param name="Subjects"></param>
 /// <example>
 /// {
 ///     "exhibitionName": "Vand og hav",
+///     "themeImageId": "123e4567-e89b-12d3-a456-426614174000",
 ///     "subjects": [
 ///         {
 ///             "title": "Affaldshierakiet",
@@ -28,6 +30,7 @@ namespace VidensVejen.ContractsLib.Requests.ExhibitionService;
 /// </example>
 public record CreateExhibitionRequest(
     string ExhibitionName,
+    Guid ThemeImageId,
     List<CreateSubjectRequest> Subjects
     )
 {
@@ -35,6 +38,11 @@ public record CreateExhibitionRequest(
     /// The name of the exhibition.
     /// </summary>
     public string ExhibitionName { get; init; } = ExhibitionName;
+
+    /// <summary>
+    /// The unique identifier for the theme image.
+    /// </summary>
+    public Guid ThemeImageId { get; init; } = ThemeImageId;
 
     /// <summary>
     /// List of the subjects objects you want exhibition to have

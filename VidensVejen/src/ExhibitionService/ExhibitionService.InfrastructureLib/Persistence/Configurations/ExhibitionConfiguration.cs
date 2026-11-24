@@ -20,11 +20,10 @@ internal sealed class ExhibitionConfiguration : IEntityTypeConfiguration<Exhibit
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(e => e.Theme)
+        builder.Property(e => e.ThemeImageId)
             .HasConversion(
-            id => id!.Value,
-            value => new ImageId(value))
-            .IsRequired(false);
+            id => id.Value,
+            value => new ImageId(value));
 
         builder.HasMany(e => e.Subjects)
             .WithOne()

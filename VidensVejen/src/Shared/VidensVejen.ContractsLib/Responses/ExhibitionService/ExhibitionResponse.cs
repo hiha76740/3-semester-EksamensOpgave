@@ -6,12 +6,12 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// <param name="Id"></param>
 /// <param name="Title"></param>
 /// <param name="Subjects"></param>
-/// <param name="ThemeUrl"></param>
+/// <param name="ThemeImageId"></param>
 /// <example>
 /// {
 ///     "id": "123e4567-e89b-12d3-a456-426614174000",
 ///     "exhibitionName": "Vand og hav",
-///     "themeUrl":"https://example.com/image"
+///     "themeImageId": "123e4567-e89b-12d3-a456-426614174000",
 ///     "subjects": [
 ///         {
 ///             "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -35,7 +35,7 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 public record ExhibitionResponse(
     Guid Id,
     string Title,
-    string ThemeUrl,
+    Guid ThemeImageId,
     IReadOnlyList<SubjectResponse> Subjects
     )
 {
@@ -52,7 +52,7 @@ public record ExhibitionResponse(
     /// <summary>
     /// The url of the theme.
     /// </summary>
-    public string ThemeUrl { get; init; } = ThemeUrl;
+    public Guid ThemeImageId { get; init; } = ThemeImageId;
 
     /// <summary>
     /// A list of subjects the exhibition has associated.

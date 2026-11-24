@@ -11,9 +11,8 @@ internal static class ExhibitionMapper
     {
         var output = new ExhibitionResponse(
             dto.Id,
-            dto.Title,
-            // TODO: Insert correct url when made
-            "",
+            dto.Name,
+            dto.ThemeImageId,
             dto.Subjects
             .Select(
                 s => s.AsResponse())
@@ -37,12 +36,11 @@ internal static class ExhibitionMapper
         return output;
     }
 
-    internal static CreateExhibitionCommand AsCreateCommand(this CreateExhibitionRequest request, Stream imageStream, string extension)
+    internal static CreateExhibitionCommand AsCreateCommand(this CreateExhibitionRequest request)
     {
         var output = new CreateExhibitionCommand(
             request.ExhibitionName,
-            imageStream,
-            extension,
+            request.ThemeImageId,
             request.Subjects
             .Select(
                 s => s.AsCreateCommand())

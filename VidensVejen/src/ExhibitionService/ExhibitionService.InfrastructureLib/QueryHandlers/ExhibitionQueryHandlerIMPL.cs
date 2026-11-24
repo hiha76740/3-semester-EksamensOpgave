@@ -1,3 +1,4 @@
+using ExhibitionService.DomainLib.Entities;
 using ExhibitionService.DomainLib.ValueObjects;
 using ExhibitionService.FacadeLib.Queries.DTOs;
 using ExhibitionService.FacadeLib.Queries.Interfaces;
@@ -11,22 +12,50 @@ namespace ExhibitionService.InfrastructureLib.QueryHandlers;
 /// </summary>
 public class ExhibitionQueryHandlerIMPL(ExhibitionDbContext db) : IExhibitionQueries
 {
-    Task<bool> IExhibitionQueries.CheckIfInUseAsync(Guid id)
+    async Task<bool> IExhibitionQueries.CheckIfInUseAsync(Guid id)
     {
         var imageId = new ImageId(id);
 
-        return db.Exhibitions
+        return await db.Exhibitions
             .AsNoTracking()
-            .AnyAsync(e => e.Theme == imageId);
+            .AnyAsync(e => e.ThemeImageId == imageId);
     }
 
-    Task<IReadOnlyList<ExhibitionNameDto>> IExhibitionQueries.GetAllExhibitionNamesAsync()
+    async Task<IReadOnlyList<ExhibitionNameDto>> IExhibitionQueries.GetAllExhibitionNamesAsync()
     {
-        throw new NotImplementedException();
+        return await db.Exhibitions
+            .AsNoTracking()
+            .Select(e => new ExhibitionNameDto(
+                e.Id.Value,
+                e.Name))
+            .ToListAsync();
     }
 
-    Task<ExhibitionDto?> IExhibitionQueries.GetExhibitionByIdAsync(Guid id)
+    async Task<ExhibitionDto?> IExhibitionQueries.GetExhibitionByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        var exhibitionId = new ExhibitionId(id);
+
+        return await db.Exhibitions
+            .AsNoTracking()
+            .Where(e => e.Id == exhibitionId)
+            .Select(e => new ExhibitionDto(
+                e.Id.Value,
+                e.Name,
+                e.Subjects.Select(s => new SubjectDto(
+                    s.Id.Value,
+                    s.Slug,
+                    s.Title,
+                    s.Description,
+                    s.Topics.Select(t => new TopicDto(
+                        t.Title,
+                        t.Description,
+                        t.Body,
+                        t.CalloutLabel,
+                        t.CalloutText,
+                        t.Quote))
+                    .ToList()))
+                .ToList(),
+                e.ThemeImageId.Value))
+            .FirstOrDefaultAsync();
     }
 }

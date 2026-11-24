@@ -1,3 +1,5 @@
+using ExhibitionService.DomainLib.ValueObjects;
+
 namespace ExhibitionService.ApplicationLib.Services;
 
 /// <summary>
@@ -8,8 +10,7 @@ public interface IImageService
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="content"></param>
-    /// <param name="extension"></param>
+    /// <param name="imageId"></param>
     /// <returns></returns>
-    Task<Guid> SaveAsync(Stream content, string extension);
+    Task<bool> ExistsAsync(ImageId imageId);
 }

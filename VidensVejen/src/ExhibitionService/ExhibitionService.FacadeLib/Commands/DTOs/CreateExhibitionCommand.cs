@@ -4,12 +4,10 @@ namespace ExhibitionService.FacadeLib.Commands.DTOs;
 /// 
 /// </summary>
 /// <param name="ExhibtionName"></param>
-/// <param name="ImageStream"></param>
-/// <param name="Extension"></param>
+/// <param name="ThemeImageId"></param>
 /// <param name="Subjects"></param>
 public record CreateExhibitionCommand(
     string ExhibtionName,
-    Stream ImageStream,
-    string Extension,
+    Guid ThemeImageId,
     List<CreateSubjectCommand> Subjects
     );

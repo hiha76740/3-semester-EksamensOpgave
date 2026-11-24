@@ -10,7 +10,6 @@ internal static class TopicMapper
     internal static TopicResponse AsResponse(this TopicDto dto)
     {
         var output = new TopicResponse(
-            dto.Id,
             dto.Title,
             dto.Description,
             dto.Body,

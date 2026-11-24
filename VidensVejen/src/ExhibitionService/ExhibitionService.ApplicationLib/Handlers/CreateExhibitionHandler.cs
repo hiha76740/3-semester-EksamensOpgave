@@ -4,53 +4,85 @@ using ExhibitionService.DomainLib.Entities;
 using ExhibitionService.DomainLib.ValueObjects;
 using ExhibitionService.FacadeLib.Commands.DTOs;
 using ExhibitionService.FacadeLib.Commands.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace ExhibitionService.ApplicationLib.Handlers;
 
 /// <summary>
 /// 
 /// </summary>
+/// <param name="exhibitionRepo"></param>
+/// <param name="imageService"></param>
+/// <param name="logger"></param>
 public class CreateExhibitionHandler(
     IExhibitionRepository exhibitionRepo,
-    IImageService imageService) : ICreateExhibitionHandler
+    IImageService imageService,
+    ILogger<CreateExhibitionHandler> logger) : ICreateExhibitionHandler
 {
     async Task ICreateExhibitionHandler.HandleAsync(CreateExhibitionCommand command)
     {
-        var subjects = new List<NewSubject>();
-
-        foreach (var subjectCommand in command.Subjects)
+        try
         {
-            var topics = new List<NewTopic>();
+            if (logger.IsEnabled(LogLevel.Information))
+                logger.LogInformation("Beginning to create exhibition with name {ExhibitionName}", command.ExhibtionName);
 
-            foreach (var topicCommand in subjectCommand.Topics)
+            var imageId = new ImageId(command.ThemeImageId);
+
+            var imageExists = await imageService.ExistsAsync(imageId);
+
+            if (imageExists == false)
+                throw new InvalidOperationException("Creation aborted, Theme image not found");
+
+            var subjects = new List<NewSubject>();
+
+            foreach (var subjectCommand in command.Subjects)
             {
-                topics.Add(new NewTopic(
-                    topicCommand.Title,
-                    topicCommand.Description,
-                    topicCommand.Body,
-                    topicCommand.CalloutLabel,
-                    topicCommand.CalloutText,
-                    topicCommand.Qoute
-                    ));
+                var topics = new List<NewTopic>();
+
+                foreach (var topicCommand in subjectCommand.Topics)
+                {
+                    topics.Add(new NewTopic(
+                        topicCommand.Title,
+                        topicCommand.Description,
+                        topicCommand.Body,
+                        topicCommand.CalloutLabel,
+                        topicCommand.CalloutText,
+                        topicCommand.Qoute
+                        ));
+                }
+
+                subjects.Add(new NewSubject(
+                    subjectCommand.Title,
+                    subjectCommand.Slug,
+                    subjectCommand.Description,
+                    topics));
             }
 
-            subjects.Add(new NewSubject(
-                subjectCommand.Title,
-                subjectCommand.Description,
-                topics));
+            var exhibition = Exhibition.Create(
+                command.ExhibtionName,
+                imageId,
+                subjects);
+
+            if (logger.IsEnabled(LogLevel.Information))
+                logger.LogInformation("Exhibition created with id: {ExhibitionId}", exhibition.Id.Value);
+
+            await exhibitionRepo.AddAsync(exhibition);
+            await exhibitionRepo.SaveAsync();
+
+            if (logger.IsEnabled(LogLevel.Information))
+                logger.LogInformation("Exhibition {Id} saved in database successfully", exhibition.Id.Value);
         }
+        catch (Exception ex)
+        {
+            if (logger.IsEnabled(LogLevel.Error))
+            {
+                logger.LogError("Error {ErrorMessage}", ex.Message);
 
-        Guid? theme = null;
+                if (ex.InnerException != null)
+                    logger.LogError("InnerException Error {Error}", ex.InnerException.Message);
+            }
 
-        if (command.ImageStream != null && command.Extension != null)
-            theme = await imageService.SaveAsync(command.ImageStream, command.Extension);
-
-        var exhibition = Exhibition.Create(
-            command.ExhibtionName,
-            theme,
-            subjects);
-
-        await exhibitionRepo.AddAsync(exhibition);
-        await exhibitionRepo.SaveAsync();
+            throw;
+        }
     }
 }

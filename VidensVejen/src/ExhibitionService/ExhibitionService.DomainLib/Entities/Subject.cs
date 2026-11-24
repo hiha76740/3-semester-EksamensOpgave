@@ -18,6 +18,12 @@ public class Subject
     /// </summary>
     public string Title { get; private set; } = string.Empty;
 
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string Slug { get; set; } = string.Empty;
+
     /// <summary>
     /// 
     /// </summary>
@@ -31,7 +37,7 @@ public class Subject
     public IReadOnlyList<Topic> Topics => _topics.AsReadOnly();
 
 
-    internal Subject(string title, string description, List<NewTopic> topics)
+    internal Subject(string title, string slug, string description, List<NewTopic> topics)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new DomainException("Subject must have a title.");
@@ -39,12 +45,16 @@ public class Subject
         if (string.IsNullOrWhiteSpace(description))
             throw new DomainException("Subject must have a description.");
 
+        if (string.IsNullOrWhiteSpace(slug))
+            throw new DomainException("Could not set slug, no value.");
+
         if (topics == null || topics.Count == 0)
             throw new DomainException("A subject must have at least one topic");
 
         Id = new SubjectId(Guid.NewGuid());
         Title = title;
         Description = description;
+        Slug = slug;
 
         foreach (var topic in topics)
         {
