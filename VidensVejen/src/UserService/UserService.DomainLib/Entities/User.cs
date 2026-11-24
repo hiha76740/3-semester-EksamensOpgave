@@ -87,7 +87,7 @@ public class User
         if (string.IsNullOrWhiteSpace(newSurname))
             throw new DomainException("Firstname could not be set, no value");
 
-        Firstname = newSurname;
+        Surname = newSurname;
     }
 
     /// <summary>
