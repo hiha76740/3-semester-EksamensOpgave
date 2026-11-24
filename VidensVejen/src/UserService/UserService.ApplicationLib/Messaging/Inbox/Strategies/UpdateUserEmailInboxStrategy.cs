@@ -13,7 +13,7 @@ namespace UserService.ApplicationLib.Messaging.Inbox.Strategies;
 /// <param name="userRepo"></param>
 public class UpdateUserEmailInboxStrategy(IUserRepository userRepo) : IInboxMessageStrategy
 {
-    string IInboxMessageStrategy.EventType => typeof(UserRegisteredIntegrationEvent).FullName!;
+    string IInboxMessageStrategy.EventType => typeof(UserUpdateEmailIntegrationEvent).FullName!;
 
     async Task<OutboxMessage?> IInboxMessageStrategy.ApplyAsync(Guid eventId, string content, CancellationToken cancellationToken)
     {
