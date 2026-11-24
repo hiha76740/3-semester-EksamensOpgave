@@ -28,7 +28,7 @@ public sealed class QuizInputModel
     /// <summary>
     /// Gets or sets the identifier of the associated exhibition, if one has been selected.
     /// </summary>
-    public Guid ExhibitionId { get; set; }
+    public Guid? ExhibitionId { get; set; }
 
     /// <summary>
     /// Gets the editable questions in display order. The draft starts with one question.
