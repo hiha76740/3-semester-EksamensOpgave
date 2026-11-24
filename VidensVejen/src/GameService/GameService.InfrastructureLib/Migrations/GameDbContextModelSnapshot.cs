@@ -94,6 +94,36 @@ namespace GameService.InfrastructureLib.Migrations
                     b.ToTable("Quizzes");
                 });
 
+            modelBuilder.Entity("GameService.DomainLib.Entities.GameSession", b =>
+                {
+                    b.OwnsMany("GameService.DomainLib.ValueObjects.SessionAnswer", "Answers", b1 =>
+                        {
+                            b1.Property<Guid>("GameSessionId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<int>("ChoiceIndex");
+
+                            b1.Property<bool>("IsCorrect");
+
+                            b1.Property<Guid>("QuestionId");
+
+                            b1.HasKey("GameSessionId", "__synthesizedOrdinal");
+
+                            b1.ToTable("GameSessions");
+
+                            b1
+                                .ToJson("Answers")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.WithOwner()
+                                .HasForeignKey("GameSessionId");
+                        });
+
+                    b.Navigation("Answers");
+                });
+
             modelBuilder.Entity("GameService.DomainLib.Entities.Question", b =>
                 {
                     b.HasOne("GameService.DomainLib.Entities.Quiz", null)

@@ -22,5 +22,7 @@ internal sealed class GameSessionConfiguration : IEntityTypeConfiguration<GameSe
             .IsRequired();
 
         builder.HasIndex(x => x.QuizId);
+
+        builder.OwnsMany(x => x.Answers, answers => answers.ToJson());
     }
 }

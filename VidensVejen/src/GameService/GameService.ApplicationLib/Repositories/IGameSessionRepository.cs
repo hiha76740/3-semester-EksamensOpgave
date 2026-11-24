@@ -17,6 +17,13 @@ public interface IGameSessionRepository
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    Task<GameSession?> GetSessionByIdAsync(GameSessionId id);
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <returns></returns>
     Task SaveAsync();
 }
