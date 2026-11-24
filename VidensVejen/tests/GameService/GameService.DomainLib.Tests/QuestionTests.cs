@@ -42,81 +42,67 @@ public class QuestionTests
         Assert.Null(question.IncorrectFeedback);
     }
 
-    [Fact]
-    public void Constructor_GivenNoData_CreatesEmptyQuestion()
-    {
-        // Act
-        var question = new Question(null, null, null, null);
-
-        // Assert
-        Assert.Null(question.Text);
-        Assert.Empty(question.Choices);
-    }
-
-    [Fact]
-    public void EnsureCanBePublished_GivenValidQuestion_DoesNotThrow()
-    {
-        // Arrange
-        var question = new Question("Question", CreateChoices(), null, null);
-
-        // Act
-        var exception = Record.Exception(question.EnsureCanBePublished);
-
-        // Assert
-        Assert.Null(exception);
-    }
-
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void EnsureCanBePublished_GivenBlankText_ThrowsDomainException(string? text)
+    public void Constructor_GivenBlankText_ThrowsDomainException(string? text)
     {
         // Arrange
-        var question = new Question(text, CreateChoices(), null, null);
+        var choices = CreateChoices();
 
         // Act & Assert
-        Assert.Throws<DomainException>(question.EnsureCanBePublished);
+        Assert.Throws<DomainException>(() => new Question(text!, choices, null, null));
     }
 
     [Fact]
-    public void EnsureCanBePublished_GivenNoChoices_ThrowsDomainException()
+    public void Constructor_GivenNullChoices_ThrowsDomainException()
     {
         // Arrange
-        var question = new Question("Question", [], null, null);
+        List<Choice> choices = null!;
 
         // Act & Assert
-        Assert.Throws<DomainException>(question.EnsureCanBePublished);
+        Assert.Throws<DomainException>(() => new Question("Question", choices, null, null));
     }
 
     [Fact]
-    public void EnsureCanBePublished_GivenOneChoice_ThrowsDomainException()
+    public void Constructor_GivenNoChoices_ThrowsDomainException()
     {
         // Arrange
-        var question = new Question("Question", [new Choice("Only", true)], null, null);
+        List<Choice> choices = [];
 
         // Act & Assert
-        Assert.Throws<DomainException>(question.EnsureCanBePublished);
+        Assert.Throws<DomainException>(() => new Question("Question", choices, null, null));
     }
 
     [Fact]
-    public void EnsureCanBePublished_GivenNoCorrectChoice_ThrowsDomainException()
+    public void Constructor_GivenOneChoice_ThrowsDomainException()
     {
         // Arrange
-        var question = new Question("Question", [new Choice("A", false), new Choice("B", false)], null, null);
+        List<Choice> choices = [new Choice("Only", true)];
 
         // Act & Assert
-        Assert.Throws<DomainException>(question.EnsureCanBePublished);
+        Assert.Throws<DomainException>(() => new Question("Question", choices, null, null));
     }
 
     [Fact]
-    public void EnsureCanBePublished_GivenMultipleCorrectChoices_ThrowsDomainException()
+    public void Constructor_GivenNoCorrectChoice_ThrowsDomainException()
     {
         // Arrange
-        var question = new Question("Question", [new Choice("A", true), new Choice("B", true)], null, null);
+        List<Choice> choices = [new Choice("A", false), new Choice("B", false)];
 
         // Act & Assert
-        Assert.Throws<DomainException>(question.EnsureCanBePublished);
+        Assert.Throws<DomainException>(() => new Question("Question", choices, null, null));
+    }
+
+    [Fact]
+    public void Constructor_GivenMultipleCorrectChoices_ThrowsDomainException()
+    {
+        // Arrange
+        List<Choice> choices = [new Choice("A", true), new Choice("B", true)];
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => new Question("Question", choices, null, null));
     }
 
     [Fact]

@@ -6,24 +6,17 @@ namespace GameService.DomainLib.Tests;
 
 public class GameSessionTests
 {
-    private static Quiz CreateValidDraft()
+    private static Quiz CreateQuiz()
     {
         return Quiz.Create("Quiz", Guid.NewGuid(), "vertical", "Done",
             [new NewQuestion("Question", [new Choice("Yes", true), new Choice("No", false)], "Correct", "Incorrect")]);
     }
 
-    private static Quiz CreatePublishedQuiz()
-    {
-        var quiz = CreateValidDraft();
-        quiz.Publish();
-        return quiz;
-    }
-
     [Fact]
-    public void Start_GivenPublishedQuiz_CreatesSession()
+    public void Start_GivenQuiz_CreatesSession()
     {
         // Arrange
-        var quiz = CreatePublishedQuiz();
+        var quiz = CreateQuiz();
 
         // Act
         var session = GameSession.Start(quiz);
@@ -35,20 +28,10 @@ public class GameSessionTests
     }
 
     [Fact]
-    public void Start_GivenDraft_ThrowsDomainException()
-    {
-        // Arrange
-        var quiz = CreateValidDraft();
-
-        // Act & Assert
-        Assert.Throws<DomainException>(() => GameSession.Start(quiz));
-    }
-
-    [Fact]
     public void Answer_GivenCorrectChoice_ReturnsCorrectWithFeedbackAndStoresAnswer()
     {
         // Arrange
-        var quiz = CreatePublishedQuiz();
+        var quiz = CreateQuiz();
         var session = GameSession.Start(quiz);
         var questionId = quiz.Questions[0].Id.Value;
 
@@ -69,7 +52,7 @@ public class GameSessionTests
     public void Answer_GivenWrongChoice_ReturnsIncorrectWithCorrectAnswer()
     {
         // Arrange
-        var quiz = CreatePublishedQuiz();
+        var quiz = CreateQuiz();
         var session = GameSession.Start(quiz);
         var questionId = quiz.Questions[0].Id.Value;
 
@@ -87,7 +70,7 @@ public class GameSessionTests
     public void Answer_GivenAlreadyAnsweredQuestion_ThrowsDomainException()
     {
         // Arrange
-        var quiz = CreatePublishedQuiz();
+        var quiz = CreateQuiz();
         var session = GameSession.Start(quiz);
         var questionId = quiz.Questions[0].Id.Value;
         session.Answer(quiz, questionId, 0);
@@ -103,7 +86,7 @@ public class GameSessionTests
     public void Answer_GivenInvalidChoiceIndex_ThrowsDomainException(int choiceIndex)
     {
         // Arrange
-        var quiz = CreatePublishedQuiz();
+        var quiz = CreateQuiz();
         var session = GameSession.Start(quiz);
         var questionId = quiz.Questions[0].Id.Value;
 
@@ -116,7 +99,7 @@ public class GameSessionTests
     public void Answer_GivenUnknownQuestion_ThrowsNotFoundException()
     {
         // Arrange
-        var quiz = CreatePublishedQuiz();
+        var quiz = CreateQuiz();
         var session = GameSession.Start(quiz);
 
         // Act & Assert
@@ -127,8 +110,8 @@ public class GameSessionTests
     public void Answer_GivenOtherQuiz_ThrowsDomainException()
     {
         // Arrange
-        var quiz = CreatePublishedQuiz();
-        var otherQuiz = CreatePublishedQuiz();
+        var quiz = CreateQuiz();
+        var otherQuiz = CreateQuiz();
         var session = GameSession.Start(quiz);
         var questionId = otherQuiz.Questions[0].Id.Value;
 

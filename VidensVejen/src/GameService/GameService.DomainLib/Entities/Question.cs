@@ -15,7 +15,7 @@ public class Question
     /// <summary>
     /// 
     /// </summary>
-    public string? Text { get; private set; }
+    public string Text { get; private set; } = string.Empty;
     /// <summary>
     /// 
     /// </summary>
@@ -35,25 +35,20 @@ public class Question
 
     internal Question(string? text, List<Choice>? choices, string? correctFeedback, string? incorrectFeedback)
     {
+        if (string.IsNullOrWhiteSpace(text))
+            throw new DomainException("Question text could not be set, no value");
+
+        if (choices == null || choices.Count < 2)
+            throw new DomainException("A question must have at least two choices");
+
+        if (choices.Count(c => c.IsCorrect) != 1)
+            throw new DomainException("A question must have exactly one correct choice");
+
         Id = new QuestionId(Guid.NewGuid());
         Text = text;
         CorrectFeedback = correctFeedback;
         IncorrectFeedback = incorrectFeedback;
-
-        if (choices != null)
-            _choices.AddRange(choices);
-    }
-
-    internal void EnsureCanBePublished()
-    {
-        if (string.IsNullOrWhiteSpace(Text))
-            throw new DomainException("Question text could not be set, no value");
-
-        if (_choices.Count < 2)
-            throw new DomainException("A question must have at least two choices");
-
-        if (_choices.Count(c => c.IsCorrect) != 1)
-            throw new DomainException("A question must have exactly one correct choice");
+        _choices.AddRange(choices);
     }
 
     // EF Core constructor
