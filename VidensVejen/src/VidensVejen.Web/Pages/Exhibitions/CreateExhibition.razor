@@ -80,45 +80,48 @@ else
                 }
             }
 
-            var imageResponse = await ImageService.UploadImage(input.ThemeFile, ExhibitionInputModel.MaxThemeFileSize);
-
-            var request = new CreateExhibitionRequest(
-                input.ExhibitionName,
-                input.ExhibitionNameEn,
-                imageResponse.ImageId,
-                input.Subjects.Select(s => new CreateSubjectRequest(
-                    s.Title,
-                    s.TitleEn,
-                    s.Title.ToLower(),
-                    s.Description,
-                    s.DescriptionEn,
-                    s.Topics.Select(t => new CreateTopicRequest(
-                        t.Title,
-                        t.TitleEn,
-                        t.Description,
-                        t.DescriptionEn,
-                        t.Body,
-                        t.BodyEn,
-                        t.CalloutLabel,
-                        t.CalloutLabelEn,
-                        t.CalloutText,
-                        t.CalloutTextEn,
-                        t.Quote,
-                        t.QuoteEn)).ToList()
-                )).ToList()
-            );
-
-            var statusCode = await ExhibitionService.CreateAsync(request);
-
-            if (statusCode == HttpStatusCode.Created)
+            if (error == null)
             {
-                await Dialog.Alert("Udstilling oprettet", "Udstilling oprettelse");
-                NavigationManager.NavigateTo("/exhibitions");
-            }
-            else
-            {
-                error = "Fejl opstået ved oprettelse af udstilling. Prøv igen";
-            }
+                var imageResponse = await ImageService.UploadImage(input.ThemeFile, ExhibitionInputModel.MaxThemeFileSize);
+
+                var request = new CreateExhibitionRequest(
+                    input.ExhibitionName,
+                    input.ExhibitionNameEn,
+                    imageResponse.ImageId,
+                    input.Subjects.Select(s => new CreateSubjectRequest(
+                        s.Title,
+                        s.TitleEn,
+                        s.Title.ToLower(),
+                        s.Description,
+                        s.DescriptionEn,
+                        s.Topics.Select(t => new CreateTopicRequest(
+                            t.Title,
+                            t.TitleEn,
+                            t.Description,
+                            t.DescriptionEn,
+                            t.Body,
+                            t.BodyEn,
+                            t.CalloutLabel,
+                            t.CalloutLabelEn,
+                            t.CalloutText,
+                            t.CalloutTextEn,
+                            t.Quote,
+                            t.QuoteEn)).ToList()
+                    )).ToList()
+                );
+
+                var statusCode = await ExhibitionService.CreateAsync(request);
+
+                if (statusCode == HttpStatusCode.Created)
+                {
+                    await Dialog.Alert("Udstilling oprettet", "Udstilling oprettelse");
+                    NavigationManager.NavigateTo("/exhibitions");
+                }
+                else
+                {
+                    error = "Fejl opstået ved oprettelse af udstilling. Prøv igen";
+                }
+            }        
         }
         
     }
