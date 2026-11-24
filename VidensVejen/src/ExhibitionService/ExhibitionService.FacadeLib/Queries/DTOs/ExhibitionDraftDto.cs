@@ -10,5 +10,5 @@ namespace ExhibitionService.FacadeLib.Queries.DTOs;
 public record ExhibitionDraftDto(
     Guid? Id,
     string? Name,
-    IReadOnlyList<SubjectDto>? SubjectDrafts,
+    IReadOnlyList<SubjectDraftDto>? SubjectDrafts,
     Guid? ThemeImageId);
