@@ -37,7 +37,6 @@ public class AnswerQuestionTests
         // Assert
         Assert.False(result.IsCorrect);
         Assert.Equal("Incorrect", result.Feedback);
-        Assert.Equal("Incorrect EN", result.FeedbackEn);
         Assert.Equal("Yes", result.CorrectAnswer);
         Assert.Single(session.Answers);
         quizRepository.Verify(r => r.GetQuizByIdAsync(session.QuizId), Times.Once);

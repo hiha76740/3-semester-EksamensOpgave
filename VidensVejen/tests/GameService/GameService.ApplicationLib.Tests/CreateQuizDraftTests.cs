@@ -26,13 +26,6 @@ public class CreateQuizDraftTests
             "Quiz", "Quiz EN", Guid.NewGuid(), "vertical", questions, "Done", "Done EN");
     }
 
-    private static ICreateQuizDraftHandler CreateHandler(Mock<IQuizDraftRepository> repository)
-    {
-        return new CreateQuizDraftHandler(
-            repository.Object,
-            new Mock<ILogger<CreateQuizDraftHandler>>().Object);
-    }
-
     [Fact]
     public async Task Handle_GivenValidCommand_MapsDraftAndSaves()
     {
@@ -42,7 +35,9 @@ public class CreateQuizDraftTests
         QuizDraft? savedDraft = null;
         repository.Setup(r => r.AddAsync(It.IsAny<QuizDraft>()))
             .Callback<QuizDraft>(draft => savedDraft = draft);
-        var handler = CreateHandler(repository);
+        ICreateQuizDraftHandler handler = new CreateQuizDraftHandler(
+            repository.Object,
+            new Mock<ILogger<CreateQuizDraftHandler>>().Object);
 
         // Act
         var id = await handler.HandleAsync(command);
@@ -85,7 +80,9 @@ public class CreateQuizDraftTests
         var command = new CreateQuizCommand(null, null, null, null,
             [new CreateQuestionCommand(null, null, [new CreateChoiceCommand("A", null, true, null, null)])], null, null);
         var repository = new Mock<IQuizDraftRepository>();
-        var handler = CreateHandler(repository);
+        ICreateQuizDraftHandler handler = new CreateQuizDraftHandler(
+            repository.Object,
+            new Mock<ILogger<CreateQuizDraftHandler>>().Object);
 
         // Act
         await handler.HandleAsync(command);
@@ -104,7 +101,9 @@ public class CreateQuizDraftTests
         QuizDraft? savedDraft = null;
         repository.Setup(r => r.AddAsync(It.IsAny<QuizDraft>()))
             .Callback<QuizDraft>(draft => savedDraft = draft);
-        var handler = CreateHandler(repository);
+        ICreateQuizDraftHandler handler = new CreateQuizDraftHandler(
+            repository.Object,
+            new Mock<ILogger<CreateQuizDraftHandler>>().Object);
 
         // Act
         await handler.HandleAsync(command);
@@ -123,7 +122,9 @@ public class CreateQuizDraftTests
         var repository = new Mock<IQuizDraftRepository>();
         var expected = new InvalidOperationException("Write failed");
         repository.Setup(r => r.SaveAsync()).ThrowsAsync(expected);
-        var handler = CreateHandler(repository);
+        ICreateQuizDraftHandler handler = new CreateQuizDraftHandler(
+            repository.Object,
+            new Mock<ILogger<CreateQuizDraftHandler>>().Object);
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(command));

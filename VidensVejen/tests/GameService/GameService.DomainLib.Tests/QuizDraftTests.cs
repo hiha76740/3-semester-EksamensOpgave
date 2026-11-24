@@ -92,7 +92,7 @@ public class QuizDraftTests
         var draft = QuizDraft.Create(null, null, null, null, null, null, null);
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => draft.Publish());
+        Assert.Throws<DomainException>(draft.Publish);
     }
 
     [Fact]
@@ -103,6 +103,6 @@ public class QuizDraftTests
         var draft = QuizDraft.Create("Quiz", null, Guid.NewGuid(), "vertical", null, null, questions);
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => draft.Publish());
+        Assert.Throws<DomainException>(draft.Publish);
     }
 }
