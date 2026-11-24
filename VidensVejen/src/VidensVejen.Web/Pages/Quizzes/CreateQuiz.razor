@@ -1,7 +1,10 @@
 @page "/games/create"
 
+
 @inject IExhibitionService ExhibitionService
 @inject IQuizService QuizService
+@inject DialogService Dialog
+@inject NavigationManager NavigationManager
 
 <PageTitle>Opret quiz</PageTitle>
 
@@ -14,7 +17,7 @@
                    Exhibitions="exhibitions"
                    FormTitle="Opret quiz"
                    SubmitText="Kontrollér kladde"
-                   SubmitCallback="CheckDraft"
+                   SubmitCallback="Create"
                    ResetCallback="ResetForm"
                    Changed="ClearMessages"
                    Message="@message"
@@ -54,28 +57,28 @@
         }
     }
 
-    private void CheckDraft(QuizInputModel submittedModel)
+    private async Task Create(QuizInputModel input)
     {
         ClearMessages();
 
-        if (string.IsNullOrWhiteSpace(submittedModel.Title) || string.IsNullOrWhiteSpace(submittedModel.TitleEn))
+        if (string.IsNullOrWhiteSpace(input.Title) || string.IsNullOrWhiteSpace(input.TitleEn))
         {
             errors.Add("Quizzen skal have en titel på dansk og engelsk.");
         }
 
-        if (string.IsNullOrWhiteSpace(submittedModel.Instruction) || string.IsNullOrWhiteSpace(submittedModel.InstructionEn))
+        if (string.IsNullOrWhiteSpace(input.Instruction) || string.IsNullOrWhiteSpace(input.InstructionEn))
         {
             errors.Add("Quizzen skal have en instruktion på dansk og engelsk.");
         }
 
-        if (!exhibitions.Any(option => option.Id == submittedModel.ExhibitionId))
+        if (!exhibitions.Any(option => option.Id == input.ExhibitionId))
         {
             errors.Add("Vælg en udstilling til quizzen.");
         }
 
-        for (var i = 0; i < submittedModel.Questions.Count; i++)
+        for (var i = 0; i < input.Questions.Count; i++)
         {
-            var question = submittedModel.Questions[i];
+            var question = input.Questions[i];
 
             if (string.IsNullOrWhiteSpace(question.Text) || string.IsNullOrWhiteSpace(question.TextEn))
             {
@@ -103,7 +106,37 @@
 
         if (errors.Count == 0)
         {
-            message = "Quizzen er udfyldt korrekt og har status Kladde. Den er endnu ikke gemt i en database.";
+            var request = new CreateQuizRequest(
+                input.Title,
+                input.TitleEn,
+                input.ExhibitionId.GetValueOrDefault(),
+                input.QuizLayout,
+                input.Questions.Select(q => new CreateQuestionRequest(
+                    q.Text,
+                    q.TextEn,
+                    q.Answers.Select(c => new CreateChoiceRequest(
+                            c.Text,
+                            c.TextEn,
+                            c.IsCorrect,
+                            c.Feedback,
+                            c.FeedbackEn
+                            )).ToList()
+                    )).ToList(),
+                input.EndMessage,
+                input.EndMessageEn
+            );
+
+            var statusCode = await QuizService.CreateAsync(request);
+
+            if (statusCode == HttpStatusCode.Created)
+            {
+                await Dialog.Alert("Quiz oprettet", "Quiz oprettelse");
+                NavigationManager.NavigateTo("/quizzes");
+            }
+            else
+            {
+                await Dialog.Alert("Fejl opstået ved oprettelse af quiz. Prøv igen");
+            }
         }
     }
 
