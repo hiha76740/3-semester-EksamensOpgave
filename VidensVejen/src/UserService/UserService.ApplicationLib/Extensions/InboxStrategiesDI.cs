@@ -17,6 +17,7 @@ public static class InboxStrategiesDI
     {
         services.AddScoped<IInboxMessageStrategy, CreateUserInboxStrategy>();
         services.AddScoped<IInboxMessageStrategy, DeleteUserInboxStrategy>();
+        services.AddScoped<IInboxMessageStrategy, UpdateUserEmailInboxStrategy>();
 
         return services;
     }
