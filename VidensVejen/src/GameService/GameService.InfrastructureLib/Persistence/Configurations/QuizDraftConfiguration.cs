@@ -25,10 +25,16 @@ internal sealed class QuizDraftConfiguration : IEntityTypeConfiguration<QuizDraf
         builder.Property(x => x.Title)
             .HasMaxLength(500);
 
+        builder.Property(x => x.TitleEn)
+            .HasMaxLength(500);
+
         builder.Property(x => x.QuizLayout)
             .HasMaxLength(500);
 
         builder.Property(x => x.EndMessage)
+            .HasMaxLength(500);
+
+        builder.Property(x => x.EndMessageEn)
             .HasMaxLength(500);
 
         builder.HasMany(x => x.Questions)

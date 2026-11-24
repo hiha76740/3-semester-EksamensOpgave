@@ -12,8 +12,15 @@ public class StartSessionTests
 {
     private static Quiz CreateQuiz()
     {
-        return Quiz.Create("Quiz", Guid.NewGuid(), "vertical", "Done",
-            [new NewQuestion("Question", [new Choice("Yes", true), new Choice("No", false)], "Correct", "Incorrect")]);
+        List<Choice> choices =
+        [
+            new Choice("Yes", "Yes EN", true, "Correct", "Correct EN"),
+            new Choice("No", "No EN", false, "Incorrect", "Incorrect EN")
+        ];
+        List<NewQuestion> questions = [new NewQuestion("Question", "Question EN", choices)];
+
+        return Quiz.Create(
+            "Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN", questions);
     }
 
     [Fact]

@@ -23,11 +23,19 @@ public class QuizDraft
     /// <summary>
     /// 
     /// </summary>
+    public string? TitleEn { get; private set; }
+    /// <summary>
+    /// 
+    /// </summary>
     public string? QuizLayout { get; private set; }
     /// <summary>
     /// 
     /// </summary>
     public string? EndMessage { get; private set; }
+    /// <summary>
+    /// 
+    /// </summary>
+    public string? EndMessageEn { get; private set; }
 
     /// <summary>
     /// 
@@ -40,19 +48,21 @@ public class QuizDraft
     /// 
     /// </summary>
     /// <param name="title"></param>
+    /// <param name="titleEn"></param>
     /// <param name="exhibitionId"></param>
     /// <param name="quizLayout"></param>
     /// <param name="endMessage"></param>
+    /// <param name="endMessageEn"></param>
     /// <param name="questions"></param>
     /// <returns></returns>
-    public static QuizDraft Create(string? title, Guid? exhibitionId, string? quizLayout, string? endMessage, List<NewQuestion>? questions)
+    public static QuizDraft Create(string? title, string? titleEn, Guid? exhibitionId, string? quizLayout, string? endMessage, string? endMessageEn, List<NewQuestion>? questions)
     {
         ExhibitionId? exhibitionKey = null;
 
         if (exhibitionId != null && exhibitionId != Guid.Empty)
             exhibitionKey = new ExhibitionId(exhibitionId.Value);
 
-        var draft = new QuizDraft(title, exhibitionKey, quizLayout, endMessage, questions ?? []);
+        var draft = new QuizDraft(title, titleEn, exhibitionKey, quizLayout, endMessage, endMessageEn, questions ?? []);
 
         return draft;
     }
@@ -71,22 +81,24 @@ public class QuizDraft
             questions.Add(question.AsNewQuestion());
         }
 
-        return Quiz.Create(Title, ExhibitionId?.Value, QuizLayout, EndMessage, questions);
+        return Quiz.Create(Title, TitleEn, ExhibitionId?.Value, QuizLayout, EndMessage, EndMessageEn, questions);
     }
 
     private void AddQuestion(NewQuestion newQuestion)
     {
-        var question = new DraftQuestion(newQuestion.Text, newQuestion.Choices, newQuestion.CorrectFeedback, newQuestion.IncorrectFeedback);
+        var question = new DraftQuestion(newQuestion.Text, newQuestion.TextEn, newQuestion.Choices);
         _questions.Add(question);
     }
 
-    private QuizDraft(string? title, ExhibitionId? exhibitionId, string? quizLayout, string? endMessage, List<NewQuestion> questions)
+    private QuizDraft(string? title, string? titleEn, ExhibitionId? exhibitionId, string? quizLayout, string? endMessage, string? endMessageEn, List<NewQuestion> questions)
     {
         Id = new QuizDraftId(Guid.NewGuid());
         Title = title;
+        TitleEn = titleEn;
         ExhibitionId = exhibitionId;
         QuizLayout = quizLayout;
         EndMessage = endMessage;
+        EndMessageEn = endMessageEn;
 
         foreach (var question in questions)
         {

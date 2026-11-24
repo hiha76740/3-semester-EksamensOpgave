@@ -20,6 +20,11 @@ public class Quiz
     /// 
     /// </summary>
     public string Title { get; private set; } = string.Empty;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string? TitleEn { get; private set; }
     /// <summary>
     /// 
     /// </summary>
@@ -32,6 +37,11 @@ public class Quiz
     /// <summary>
     /// 
     /// </summary>
+    public string? EndMessageEn { get; private set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public IReadOnlyList<Question> Questions => _questions.AsReadOnly();
 
     private readonly List<Question> _questions = [];
@@ -40,13 +50,15 @@ public class Quiz
     /// 
     /// </summary>
     /// <param name="title"></param>
+    /// <param name="titleEn"></param>
     /// <param name="exhibitionId"></param>
     /// <param name="quizLayout"></param>
     /// <param name="endMessage"></param>
+    /// <param name="endMessageEn"></param>
     /// <param name="questions"></param>
     /// <returns></returns>
     /// <exception cref="DomainException"></exception>
-    public static Quiz Create(string? title, Guid? exhibitionId, string? quizLayout, string? endMessage, List<NewQuestion>? questions)
+    public static Quiz Create(string? title, string? titleEn, Guid? exhibitionId, string? quizLayout, string? endMessage, string? endMessageEn, List<NewQuestion>? questions)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new DomainException("Title could not be set, no value");
@@ -62,24 +74,26 @@ public class Quiz
 
         var exhibitionKey = new ExhibitionId(exhibitionId.Value);
 
-        var quiz = new Quiz(title, exhibitionKey, quizLayout, endMessage, questions);
+        var quiz = new Quiz(title, titleEn, exhibitionKey, quizLayout, endMessage, endMessageEn, questions);
 
         return quiz;
     }
 
     private void AddQuestion(NewQuestion newQuestion)
     {
-        var question = new Question(newQuestion.Text, newQuestion.Choices, newQuestion.CorrectFeedback, newQuestion.IncorrectFeedback);
+        var question = new Question(newQuestion.Text, newQuestion.TextEn, newQuestion.Choices);
         _questions.Add(question);
     }
 
-    private Quiz(string title, ExhibitionId exhibitionId, string quizLayout, string? endMessage, List<NewQuestion> questions)
+    private Quiz(string title, string? titleEn, ExhibitionId exhibitionId, string quizLayout, string? endMessage, string? endMessageEn, List<NewQuestion> questions)
     {
         Id = new QuizId(Guid.NewGuid());
         Title = title;
+        TitleEn = titleEn;
         ExhibitionId = exhibitionId;
         QuizLayout = quizLayout;
         EndMessage = endMessage;
+        EndMessageEn = endMessageEn;
 
         foreach (var question in questions)
         {

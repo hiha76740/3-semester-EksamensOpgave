@@ -17,11 +17,11 @@ public static class HandlerDI
     public static IServiceCollection AddHandlerDI(this IServiceCollection services)
     {
         services.AddScoped<ICreateQuizDraftHandler, CreateQuizDraftHandler>();
-        services.AddScoped<IPublishQuizHandler, PublishQuizHandler>();
         services.AddScoped<IUpdateQuizHandler, UpdateQuizHandler>();
-        services.AddScoped<IDeleteQuizHandler, DeleteQuizHandler>();
+        services.AddScoped<IPublishQuizHandler, PublishQuizHandler>();
         services.AddScoped<IStartSessionHandler, StartSessionHandler>();
         services.AddScoped<IAnswerQuestionHandler, AnswerQuestionHandler>();
+        services.AddScoped<IDeleteQuizHandler, DeleteQuizHandler>();
 
         return services;
     }

@@ -14,12 +14,15 @@ public class ChoiceTests
         const string Text = "Answer";
 
         // Act
-        var choice = new Choice(Text, isCorrect);
+        var choice = new Choice(Text, "Answer EN", isCorrect, "Incorrect", "Incorrect EN");
 
         // Assert
         Assert.Equal(Text, choice.Text);
+        Assert.Equal("Answer EN", choice.TextEn);
+        Assert.Equal("Incorrect", choice.Feedback);
+        Assert.Equal("Incorrect EN", choice.FeedbackEn);
         Assert.Equal(isCorrect, choice.IsCorrect);
-        Assert.Equal(new Choice(Text, isCorrect), choice);
+        Assert.Equal(new Choice(Text, "Answer EN", isCorrect, "Incorrect", "Incorrect EN"), choice);
     }
 
     [Theory]
@@ -29,6 +32,6 @@ public class ChoiceTests
     public void Constructor_GivenBlankText_ThrowsDomainException(string? text)
     {
         // Act & Assert
-        Assert.Throws<DomainException>(() => new Choice(text!, false));
+        Assert.Throws<DomainException>(() => new Choice(text!, "Answer EN", false, "Incorrect", "Incorrect EN"));
     }
 }

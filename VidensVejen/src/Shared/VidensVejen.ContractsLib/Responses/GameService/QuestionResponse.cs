@@ -5,14 +5,12 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 /// </summary>
 /// <param name="Id"></param>
 /// <param name="Text"></param>
-/// <param name="CorrectFeedback"></param>
-/// <param name="IncorrectFeedback"></param>
+/// <param name="TextEn"></param>
 /// <param name="Choices"></param>
 public record QuestionResponse(
     Guid Id,
     string? Text,
-    string? CorrectFeedback,
-    string? IncorrectFeedback,
+    string? TextEn,
     List<ChoiceResponse> Choices
     )
 {
@@ -22,19 +20,14 @@ public record QuestionResponse(
     public Guid Id { get; init; } = Id;
 
     /// <summary>
-    /// The text of the question.
+    /// The text of the question in Danish.
     /// </summary>
     public string? Text { get; init; } = Text;
 
     /// <summary>
-    /// Feedback shown when the guest answers correctly.
+    /// The text of the question in English.
     /// </summary>
-    public string? CorrectFeedback { get; init; } = CorrectFeedback;
-
-    /// <summary>
-    /// Feedback shown when the guest answers incorrectly.
-    /// </summary>
-    public string? IncorrectFeedback { get; init; } = IncorrectFeedback;
+    public string? TextEn { get; init; } = TextEn;
 
     /// <summary>
     /// A list of the choices associated to the question.

@@ -12,8 +12,15 @@ public class PublishQuizTests
 {
     private static QuizDraft CreateValidDraft()
     {
-        return QuizDraft.Create("Quiz", Guid.NewGuid(), "vertical", "Done",
-            [new NewQuestion("Question", [new Choice("Yes", true), new Choice("No", false)], "Correct", "Incorrect")]);
+        List<Choice> choices =
+        [
+            new Choice("Yes", "Yes EN", true, "Correct", "Correct EN"),
+            new Choice("No", "No EN", false, "Incorrect", "Incorrect EN")
+        ];
+        List<NewQuestion> questions = [new NewQuestion("Question", "Question EN", choices)];
+
+        return QuizDraft.Create(
+            "Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN", questions);
     }
 
     [Fact]
@@ -37,6 +44,8 @@ public class PublishQuizTests
         Assert.NotNull(savedQuiz);
         Assert.Equal(savedQuiz.Id.Value, quizId);
         Assert.Equal("Quiz", savedQuiz.Title);
+        Assert.Equal("Quiz EN", savedQuiz.TitleEn);
+        draftRepository.Verify(r => r.GetDraftByIdAsync(It.Is<QuizDraftId>(id => id.Value == draft.Id.Value)), Times.Once);
         draftRepository.Verify(r => r.Delete(draft), Times.Once);
         draftRepository.Verify(r => r.SaveAsync(), Times.Once);
     }
@@ -62,7 +71,7 @@ public class PublishQuizTests
     public async Task Handle_GivenInvalidDraft_ThrowsDomainExceptionWithoutWriting()
     {
         // Arrange
-        var draft = QuizDraft.Create(null, null, null, null, null);
+        var draft = QuizDraft.Create(null, "Quiz EN", null, null, null, "Done EN", null);
         var draftRepository = new Mock<IQuizDraftRepository>();
         draftRepository.Setup(r => r.GetDraftByIdAsync(It.IsAny<QuizDraftId>()))
             .ReturnsAsync(draft);

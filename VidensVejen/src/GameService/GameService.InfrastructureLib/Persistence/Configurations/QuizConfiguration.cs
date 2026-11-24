@@ -26,11 +26,17 @@ internal sealed class QuizConfiguration : IEntityTypeConfiguration<Quiz>
             .HasMaxLength(500)
             .IsRequired();
 
+        builder.Property(x => x.TitleEn)
+            .HasMaxLength(500);
+
         builder.Property(x => x.QuizLayout)
             .HasMaxLength(500)
             .IsRequired();
 
         builder.Property(x => x.EndMessage)
+            .HasMaxLength(500);
+
+        builder.Property(x => x.EndMessageEn)
             .HasMaxLength(500);
 
         builder.HasIndex(x => x.ExhibitionId);

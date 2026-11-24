@@ -13,8 +13,7 @@ public class AnswerQuestionTests
 {
     private static Quiz CreateQuiz()
     {
-        return Quiz.Create("Quiz", Guid.NewGuid(), "vertical", "Done",
-            [new NewQuestion("Question", [new Choice("Yes", true), new Choice("No", false)], "Correct", "Incorrect")]);
+        return Quiz.Create("Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN", [new NewQuestion("Question", "Question EN", [new Choice("Yes", "Answer EN", true, "Correct", "Correct EN"), new Choice("No", "Answer EN", false, "Incorrect", "Incorrect EN")])]);
     }
 
     [Fact]
@@ -38,6 +37,7 @@ public class AnswerQuestionTests
         // Assert
         Assert.False(result.IsCorrect);
         Assert.Equal("Incorrect", result.Feedback);
+        Assert.Equal("Incorrect EN", result.FeedbackEn);
         Assert.Equal("Yes", result.CorrectAnswer);
         Assert.Single(session.Answers);
         quizRepository.Verify(r => r.GetQuizByIdAsync(session.QuizId), Times.Once);

@@ -8,8 +8,15 @@ public class GameSessionTests
 {
     private static Quiz CreateQuiz()
     {
-        return Quiz.Create("Quiz", Guid.NewGuid(), "vertical", "Done",
-            [new NewQuestion("Question", [new Choice("Yes", true), new Choice("No", false)], "Correct", "Incorrect")]);
+        List<Choice> choices =
+        [
+            new Choice("Yes", "Yes EN", true, "Correct", "Correct EN"),
+            new Choice("No", "No EN", false, "Incorrect", "Incorrect EN")
+        ];
+        List<NewQuestion> questions = [new NewQuestion("Question", "Question EN", choices)];
+
+        return Quiz.Create(
+            "Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN", questions);
     }
 
     [Fact]
@@ -41,6 +48,7 @@ public class GameSessionTests
         // Assert
         Assert.True(result.IsCorrect);
         Assert.Equal("Correct", result.Feedback);
+        Assert.Equal("Correct EN", result.FeedbackEn);
         Assert.Equal("Yes", result.CorrectAnswer);
         var answer = Assert.Single(session.Answers);
         Assert.Equal(questionId, answer.QuestionId);
@@ -62,6 +70,7 @@ public class GameSessionTests
         // Assert
         Assert.False(result.IsCorrect);
         Assert.Equal("Incorrect", result.Feedback);
+        Assert.Equal("Incorrect EN", result.FeedbackEn);
         Assert.Equal("Yes", result.CorrectAnswer);
         Assert.False(Assert.Single(session.Answers).IsCorrect);
     }

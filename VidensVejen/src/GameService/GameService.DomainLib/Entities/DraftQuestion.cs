@@ -18,11 +18,7 @@ public class DraftQuestion
     /// <summary>
     /// 
     /// </summary>
-    public string? CorrectFeedback { get; private set; }
-    /// <summary>
-    /// 
-    /// </summary>
-    public string? IncorrectFeedback { get; private set; }
+    public string? TextEn { get; private set; }
 
     /// <summary>
     /// 
@@ -32,12 +28,11 @@ public class DraftQuestion
     private readonly List<Choice> _choices = [];
 
 
-    internal DraftQuestion(string? text, List<Choice>? choices, string? correctFeedback, string? incorrectFeedback)
+    internal DraftQuestion(string? text, string? textEn, List<Choice>? choices)
     {
         Id = new QuestionId(Guid.NewGuid());
         Text = text;
-        CorrectFeedback = correctFeedback;
-        IncorrectFeedback = incorrectFeedback;
+        TextEn = textEn;
 
         if (choices != null)
             _choices.AddRange(choices);
@@ -45,7 +40,7 @@ public class DraftQuestion
 
     internal NewQuestion AsNewQuestion()
     {
-        return new NewQuestion(Text, [.. _choices], CorrectFeedback, IncorrectFeedback);
+        return new NewQuestion(Text, TextEn, [.. _choices]);
     }
 
     // EF Core constructor
