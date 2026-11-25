@@ -14,28 +14,33 @@ public class UserService(HttpClient httpClient) : IUserService
     private readonly string _baseUrl = "/users-api";
 
 
+    Task<IReadOnlyList<UserResponse>> IUserService.GetAllAsync()
+    {
+        return SendAsync<IReadOnlyList<UserResponse>>(new HttpRequestMessage(HttpMethod.Get, _baseUrl));
+    }
+
     Task<UserResponse> IUserService.GetByIdAsync(Guid id)
     {
-        return SendAsync(new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/{id}"));
+        return SendAsync<UserResponse>(new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/{id}"));
     }
 
     Task<UserResponse> IUserService.UpdateAsync(Guid id, UpdateUserRequest update)
     {
-        return SendAsync(new HttpRequestMessage(HttpMethod.Put, $"{_baseUrl}/{id}")
+        return SendAsync<UserResponse>(new HttpRequestMessage(HttpMethod.Put, $"{_baseUrl}/{id}")
         {
             Content = JsonContent.Create(update)
         });
     }
 
-    private async Task<UserResponse> SendAsync(HttpRequestMessage request)
+    private async Task<TResponse> SendAsync<TResponse>(HttpRequestMessage request) where TResponse : class
     {
         using (request)
         {
             request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
             using var response = await httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<UserResponse>()
-                ?? throw new JsonException("Could not deserialize the user profile.");
+            return await response.Content.ReadFromJsonAsync<TResponse>()
+                ?? throw new JsonException("Could not deserialize the user service response.");
         }
     }
 }

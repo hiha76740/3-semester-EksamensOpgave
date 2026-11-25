@@ -1,0 +1,92 @@
+@inject IAuthUserService AuthUserService
+@inject DialogService Dialog
+
+<AuthorizeView Policy="User.Create">
+    <Authorized>
+        <RadzenStack Gap="1rem">
+            @if (error != null)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
+            }
+            @if (permissions == null)
+            {
+                <RadzenButton Text="Hent rettigheder" Click="LoadPermissionsAsync" IsBusy="@isLoading" />
+            }
+            else
+            {
+                <CreateUserFormComponent Model="model" Permissions="permissions"
+                                         SubmitCallback="CreateAsync" IsSaving="isSaving" />
+            }
+        </RadzenStack>
+    </Authorized>
+    <NotAuthorized>
+        <RadzenText Text="Du har ikke rettighed til at oprette brugere." />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private readonly CreateUserInputModel model = new();
+    private IReadOnlyList<PermissionResponse>? permissions;
+    private string? error;
+    private bool isLoading;
+    private bool isSaving;
+
+    protected override Task OnInitializedAsync() => LoadPermissionsAsync();
+
+    private async Task LoadPermissionsAsync()
+    {
+        isLoading = true;
+        error = null;
+        try
+        {
+            permissions = (await AuthUserService.GetPermissionsAsync()).OrderBy(permission => permission.Name).ToList();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            error = "Rettighederne kunne ikke hentes. Prøv igen.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateAsync(CreateUserInputModel input)
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+        isSaving = true;
+        error = null;
+        try
+        {
+            var request = new RegisterUserRequest(
+                input.Firstname.Trim(),
+                input.Surname.Trim(),
+                input.Email.Trim(),
+                input.Password,
+                input.PermissionIds.Distinct().ToList());
+
+            var status = await AuthUserService.RegisterAsync(request);
+            if (status == HttpStatusCode.Created)
+            {
+                Dialog.Close(true);
+            }
+            else
+            {
+                error = $"Brugeren kunne ikke oprettes (HTTP {(int)status}).";
+            }
+        }
+        catch (Exception exception) when (exception is HttpRequestException or OperationCanceledException)
+        {
+            error = "Oprettelsen kunne ikke bekræftes. Kontrollér, om brugeren er oprettet, før du prøver igen.";
+        }
+        finally
+        {
+            input.Password = string.Empty;
+            isSaving = false;
+        }
+    }
+}

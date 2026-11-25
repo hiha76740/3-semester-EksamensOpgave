@@ -6,6 +6,9 @@ namespace VidensVejen.Web.ServicesInterfaces;
 /// <summary>Provides access to user profile data.</summary>
 public interface IUserService
 {
+    /// <summary>Gets all registered user profiles.</summary>
+    Task<IReadOnlyList<UserResponse>> GetAllAsync();
+
     /// <summary>Gets the profile for the specified user.</summary>
     Task<UserResponse> GetByIdAsync(Guid id);
 

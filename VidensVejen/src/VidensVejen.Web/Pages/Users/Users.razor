@@ -1,0 +1,133 @@
+@page "/users"
+
+@inject IUserService UserService
+@inject DialogService Dialog
+@inject IAuthorizationService Authorization
+
+<PageTitle>Brugere</PageTitle>
+
+<RadzenStack Gap="1rem">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.SpaceBetween" Wrap="FlexWrap.Wrap">
+        <RadzenText TextStyle="TextStyle.H2" Text="Brugere" />
+        <AuthorizeView Policy="User.Create">
+            <RadzenButton Text="Opret bruger" Icon="person_add" Click="OpenCreateUserAsync" />
+        </AuthorizeView>
+    </RadzenStack>
+    @if (userCreated)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">Brugeren er registreret.</RadzenAlert>
+    }
+    <AuthorizeView>
+        <Authorized Context="auth">
+            @if (auth.User.HasClaim(CustomClaimTypes.Permission, "User.Read"))
+            {
+                @if (isLoading)
+                {
+                    <RadzenText role="status" Text="Henter brugere …" />
+                }
+                else if (error != null)
+                {
+                    <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
+                    <RadzenButton Text="Prøv igen" Click="LoadUsersAsync" />
+                }
+                else if (users != null)
+                {
+                    <UserListComponent Users="users" />
+                }
+            }
+            else
+            {
+                <RadzenText Text="Du har ikke rettighed til at se brugerlisten." />
+            }
+        </Authorized>
+        <NotAuthorized>
+            <RadzenLink Path="login" Text="Log ind for at se brugerlisten" />
+        </NotAuthorized>
+        <Authorizing>
+            <RadzenText role="status" Text="Kontrollerer adgang …" />
+        </Authorizing>
+    </AuthorizeView>
+</RadzenStack>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private IReadOnlyList<UserResponse>? users;
+    private string? error;
+    private bool isLoading;
+    private bool userCreated;
+
+    private async Task OpenCreateUserAsync()
+    {
+        if (AuthenticationStateTask == null)
+        {
+            return;
+        }
+
+        var state = await AuthenticationStateTask;
+        var access = await Authorization.AuthorizeAsync(state.User, "User.Create");
+        if (!access.Succeeded)
+        {
+            return;
+        }
+
+        userCreated = false;
+        object? result = await Dialog.OpenAsync<RegisterUserDialogComponent>(
+            "Opret bruger", options: new DialogOptions
+            {
+                Width = "min(92vw, 640px)",
+                CloseDialogOnOverlayClick = false
+            });
+
+        if (result is true)
+        {
+            userCreated = true;
+            if (state.User.HasClaim(CustomClaimTypes.Permission, "User.Read"))
+            {
+                await LoadUsersAsync();
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask != null)
+        {
+            var state = await AuthenticationStateTask;
+            if (state.User.Identity?.IsAuthenticated == true
+                && state.User.HasClaim(CustomClaimTypes.Permission, "User.Read"))
+            {
+                await LoadUsersAsync();
+            }
+        }
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        isLoading = true;
+        error = null;
+        try
+        {
+            users = await UserService.GetAllAsync();
+        }
+        catch (HttpRequestException exception)
+        {
+            error = exception.StatusCode switch
+            {
+                HttpStatusCode.Unauthorized => "Din session er udløbet. Log ind igen.",
+                HttpStatusCode.Forbidden => "Du har ikke rettighed til at se brugerlisten.",
+                _ => "Brugerlisten kunne ikke hentes."
+            };
+        }
+        catch (Exception exception) when (exception is JsonException or OperationCanceledException)
+        {
+            error = "Brugerlisten kunne ikke hentes.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

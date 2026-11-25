@@ -1,0 +1,15 @@
+@using VidensVejen.ContractsLib.Responses.UserService
+
+<RadzenDataGrid TItem="UserResponse" Data="@Users" AllowSorting="true"
+                AllowPaging="true" PageSize="15" EmptyText="Der er ingen brugere at vise.">
+    <Columns>
+        <RadzenDataGridColumn TItem="UserResponse" Property="@nameof(UserResponse.Firstname)" Title="Fornavn" />
+        <RadzenDataGridColumn TItem="UserResponse" Property="@nameof(UserResponse.Surname)" Title="Efternavn" />
+        <RadzenDataGridColumn TItem="UserResponse" Property="@nameof(UserResponse.Email)" Title="E-mail" />
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<UserResponse> Users { get; set; } = [];
+}

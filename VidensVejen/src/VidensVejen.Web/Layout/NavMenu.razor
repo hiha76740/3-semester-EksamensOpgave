@@ -16,10 +16,18 @@
             <RadzenIcon Icon="perm_media" aria-hidden="true" />
             Mediebibliotek
         </NavLink>
-        <NavLink class="vidensvejen-nav-link" href="users/create" Match="NavLinkMatch.All">
-            <RadzenIcon Icon="group" aria-hidden="true" />
-            Brugere
-        </NavLink>
+        <AuthorizeView>
+            <Authorized Context="auth">
+                @if (auth.User.HasClaim(CustomClaimTypes.Permission, "User.Read")
+                    || auth.User.HasClaim(CustomClaimTypes.Permission, "User.Create"))
+                {
+                    <NavLink class="vidensvejen-nav-link" href="users" Match="NavLinkMatch.All">
+                        <RadzenIcon Icon="group" aria-hidden="true" />
+                        Brugere
+                    </NavLink>
+                }
+            </Authorized>
+        </AuthorizeView>
         <span class="vidensvejen-nav-link vidensvejen-nav-disabled" aria-disabled="true">
             <RadzenIcon Icon="settings" aria-hidden="true" />
             Indstillinger

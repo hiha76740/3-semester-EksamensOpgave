@@ -10,7 +10,7 @@ internal static class AdminNavigation
         new("Udstillinger", "layers", "exhibition/create"),
         new("Quizzer", "quiz", "games/create"),
         new("Mediebibliotek", "perm_media", "images"),
-        new("Brugere", "group", "users/create"),
+        new("Brugere", "group", "users"),
         new("Indstillinger", "settings", null)
     ];
 
