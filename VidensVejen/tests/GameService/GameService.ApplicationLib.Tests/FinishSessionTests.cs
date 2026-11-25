@@ -13,7 +13,7 @@ public class FinishSessionTests
 {
     private static Quiz CreateQuiz()
     {
-        return Quiz.Create("Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN", [new NewQuestion("Question", "Question EN", [new Choice("Yes", "Yes EN", true, "Correct", "Correct EN"), new Choice("No", "No EN", false, "Incorrect", "Incorrect EN")])]);
+        return Quiz.Create("Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN", [new NewQuestion("Question", "Question EN", [new Choice("Yes", "Yes EN", true, "Correct", "Correct EN"), new Choice("No", "No EN", false, "Incorrect", "Incorrect EN")])], "Instructions", "Instructions EN");
     }
 
     [Fact]
@@ -75,5 +75,52 @@ public class FinishSessionTests
         // Act & Assert
         await Assert.ThrowsAsync<DomainException>(() => handler.HandleAsync(session.Id.Value));
         sessionRepository.Verify(r => r.SaveAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_GivenUnknownQuiz_ThrowsWithoutReturningResult()
+    {
+        // Arrange
+        var quiz = CreateQuiz();
+        var session = GameSession.Start(quiz);
+        session.Answer(quiz, quiz.Questions[0].Id.Value, 0);
+        var sessionRepository = new Mock<IGameSessionRepository>();
+        sessionRepository.Setup(r => r.GetSessionByIdAsync(session.Id)).ReturnsAsync(session);
+        var quizRepository = new Mock<IQuizRepository>();
+        quizRepository.Setup(r => r.GetQuizByIdAsync(session.QuizId)).ReturnsAsync((Quiz?)null);
+        IFinishSessionHandler handler = new FinishSessionHandler(sessionRepository.Object, quizRepository.Object);
+
+        // Act
+        await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(session.Id.Value));
+
+        // Assert
+        sessionRepository.Verify(r => r.GetSessionByIdAsync(session.Id), Times.Once);
+        quizRepository.Verify(r => r.GetQuizByIdAsync(session.QuizId), Times.Once);
+        sessionRepository.Verify(r => r.SaveAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_GivenSaveFailure_ThrowsWithoutReturningResult()
+    {
+        // Arrange
+        var quiz = CreateQuiz();
+        var session = GameSession.Start(quiz);
+        session.Answer(quiz, quiz.Questions[0].Id.Value, 0);
+        var sessionRepository = new Mock<IGameSessionRepository>();
+        sessionRepository.Setup(r => r.GetSessionByIdAsync(session.Id)).ReturnsAsync(session);
+        var quizRepository = new Mock<IQuizRepository>();
+        quizRepository.Setup(r => r.GetQuizByIdAsync(session.QuizId)).ReturnsAsync(quiz);
+        var expected = new InvalidOperationException("Save failed");
+        sessionRepository.Setup(r => r.SaveAsync()).ThrowsAsync(expected);
+        IFinishSessionHandler handler = new FinishSessionHandler(sessionRepository.Object, quizRepository.Object);
+
+        // Act
+        var actual = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(session.Id.Value));
+
+        // Assert
+        Assert.Same(expected, actual);
+        sessionRepository.Verify(r => r.GetSessionByIdAsync(session.Id), Times.Once);
+        quizRepository.Verify(r => r.GetQuizByIdAsync(session.QuizId), Times.Once);
+        sessionRepository.Verify(r => r.SaveAsync(), Times.Once);
     }
 }

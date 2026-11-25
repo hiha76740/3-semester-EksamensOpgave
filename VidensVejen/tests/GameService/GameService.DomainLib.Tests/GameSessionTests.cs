@@ -1,6 +1,5 @@
 using GameService.DomainLib.Entities.Quizzes;
 using GameService.DomainLib.Entities.Sessions;
-using GameService.DomainLib.ValueObjects;
 using GameService.DomainLib.ValueObjects.Quizzes;
 using VidensVejen.SharedKernelLib.Exceptions;
 
@@ -18,7 +17,7 @@ public class GameSessionTests
         List<NewQuestion> questions = [new NewQuestion("Question", "Question EN", choices)];
 
         return Quiz.Create(
-            "Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN", questions);
+            "Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN", questions, "Instructions", "Instructions EN");
     }
 
     [Fact]
@@ -34,6 +33,7 @@ public class GameSessionTests
         Assert.NotEqual(Guid.Empty, session.Id.Value);
         Assert.Equal(quiz.Id, session.QuizId);
         Assert.Empty(session.Answers);
+        Assert.Null(session.CompletedAt);
     }
 
     [Fact]
@@ -164,17 +164,31 @@ public class GameSessionTests
         Assert.Null(session.CompletedAt);
     }
 
-    [Theory]
-    [InlineData(5, 8, 63)]
-    [InlineData(1, 3, 33)]
-    [InlineData(0, 4, 0)]
-    [InlineData(4, 4, 100)]
-    public void Percentage_GivenScore_RoundsToWholeNumber(int correctCount, int totalCount, int expected)
+
+    [Fact]
+    public void Finish_GivenMixedAnswers_ReturnsScoreAcrossAllQuestions()
     {
+        // Arrange
+        List<Choice> choices =
+        [
+            new Choice("Yes", "Yes EN", true, null, null),
+            new Choice("No", "No EN", false, null, null)
+        ];
+        var quiz = Quiz.Create("Quiz", "Quiz EN", Guid.NewGuid(), "vertical", null, null,
+            [new NewQuestion("First", "First EN", choices), new NewQuestion("Second", "Second EN", choices)], "Instructions", "Instructions EN");
+        var session = GameSession.Start(quiz);
+        session.Answer(quiz, quiz.Questions[0].Id.Value, 0);
+        session.Answer(quiz, quiz.Questions[1].Id.Value, 1);
+        var before = DateTime.UtcNow;
+
         // Act
-        var score = new SessionScore(correctCount, totalCount);
+        var score = session.Finish(quiz);
 
         // Assert
-        Assert.Equal(expected, score.Percentage);
+        Assert.Equal(1, score.CorrectCount);
+        Assert.Equal(2, score.TotalCount);
+        Assert.Equal(50, score.Percentage);
+        Assert.NotNull(session.CompletedAt);
+        Assert.InRange(session.CompletedAt.Value, before, DateTime.UtcNow);
     }
 }
