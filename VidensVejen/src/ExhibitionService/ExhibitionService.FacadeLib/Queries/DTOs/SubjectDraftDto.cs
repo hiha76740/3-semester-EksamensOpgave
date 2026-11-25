@@ -4,13 +4,17 @@ namespace ExhibitionService.FacadeLib.Queries.DTOs;
 /// 
 /// </summary>
 /// <param name="Id"></param>
-/// <param name="Slug"></param>
 /// <param name="Title"></param>
+/// <param name="TitleEn"></param>
+/// <param name="Slug"></param>
 /// <param name="Description"></param>
+/// <param name="DescriptionEn"></param>
 /// <param name="Topics"></param>
 public record SubjectDraftDto(
     Guid? Id,
-    string? Slug,
     string? Title,
+    string? TitleEn,
+    string? Slug,
     string? Description,
-    IReadOnlyList<TopicDraftDto>? Topics);
+    string? DescriptionEn,
+    List<TopicDraftDto> Topics);

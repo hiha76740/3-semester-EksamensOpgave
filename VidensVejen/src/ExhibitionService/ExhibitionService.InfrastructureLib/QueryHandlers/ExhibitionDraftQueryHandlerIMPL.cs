@@ -27,20 +27,29 @@ public class ExhibitionDraftQueryHandlerIMPL(ExhibitionDbContext db) : IExhibiti
                 .Select(ed => new ExhibitionDraftDto(
                     ed.Id.Value,
                     ed.Name,
+                    ed.NameEn,
                     ed.SubjectDrafts
                         .Select(sd => new SubjectDraftDto(
                             sd.Id.Value,
-                            sd.Slug,
                             sd.Title,
+                            sd.TitleEn,
+                            sd.Slug,
                             sd.Description,
+                            sd.DescriptionEn,
                             sd.TopicDrafts
                                 .Select(td => new TopicDraftDto(
                                     td.Title,
+                                    td.TitleEn,
                                     td.Description,
+                                    td.DescriptionEn,
                                     td.Body,
+                                    td.BodyEn,
                                     td.CalloutLabel,
+                                    td.CalloutLabelEn,
                                     td.CalloutText,
-                                    td.Quote))
+                                    td.CalloutTextEn,
+                                    td.Quote,
+                                    td.QuoteEn))
                                 .ToList()))
                         .ToList(),
                     ed.ThemeImageId == null
