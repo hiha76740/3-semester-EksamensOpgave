@@ -3,6 +3,7 @@ namespace VidensVejen.ContractsLib.Requests.ExhibitionService.Drafts;
 /// <summary>
 /// 
 /// </summary>
+/// <param name="Id"></param>
 /// <param name="Title"></param>
 /// <param name="TitleEn"></param>
 /// <param name="Slug"></param>
@@ -10,6 +11,7 @@ namespace VidensVejen.ContractsLib.Requests.ExhibitionService.Drafts;
 /// <param name="DescriptionEn"></param>
 /// <param name="TopicDrafts"></param>
 public record UpdateSubjectDraftRequest(
+    Guid Id,
     string? Title,
     string? TitleEn,
     string? Slug,
@@ -17,7 +19,13 @@ public record UpdateSubjectDraftRequest(
     string? DescriptionEn,
     List<UpdateTopicDraftRequest> TopicDrafts
     )
+
 {
+    /// <summary>
+    /// A unique identifier for the subject draft.
+    /// </summary>
+    public Guid Id { get; init; } = Id;
+
     /// <summary>
     /// The title of the subject draft.
     /// </summary>

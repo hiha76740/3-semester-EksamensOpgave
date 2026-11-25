@@ -4,15 +4,15 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// 
 /// </summary>
 /// <param name="Id"></param>
-/// <param name="ExhibitionName"></param>
-/// <param name="ExhibitionNameEn"></param>
+/// <param name="Name"></param>
+/// <param name="NameEn"></param>
 /// <param name="ThemeImageId"></param>
 /// <param name="SubjectDrafts"></param>
 ///  <example>
 /// {
 ///     "id": "123e4567-e89b-12d3-a456-426614174000",
-///     "exhibitionName": "Vand og hav",
-///     "exhibitionNameEn": "Water and sea"
+///     "name": "Vand og hav",
+///     "nameEn": "Water and sea"
 ///     "themeImageId": "123e4567-e89b-12d3-a456-426614174000",
 ///     "subjects": [
 ///         {
@@ -44,8 +44,8 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// </example>
 public record ExhibitionDraftResponse(
     Guid Id,
-    string? ExhibitionName,
-    string? ExhibitionNameEn,
+    string? Name,
+    string? NameEn,
     Guid? ThemeImageId,
     IReadOnlyList<SubjectDraftResponse> SubjectDrafts
     )
@@ -58,12 +58,12 @@ public record ExhibitionDraftResponse(
     /// <summary>
     /// The name of the exhibition.
     /// </summary>
-    public string? ExhibitionName { get; init; } = ExhibitionName;
+    public string? Name { get; init; } = Name;
 
     /// <summary>
     /// The english name of the exhibition.
     /// </summary>
-    public string? ExhibitionNameEn { get; init; } = ExhibitionNameEn;
+    public string? NameEn { get; init; } = NameEn;
 
     /// <summary>
     /// The url of the theme.

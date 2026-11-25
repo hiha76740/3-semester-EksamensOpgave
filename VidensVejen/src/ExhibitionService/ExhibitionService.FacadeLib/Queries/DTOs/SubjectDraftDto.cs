@@ -11,7 +11,7 @@ namespace ExhibitionService.FacadeLib.Queries.DTOs;
 /// <param name="DescriptionEn"></param>
 /// <param name="Topics"></param>
 public record SubjectDraftDto(
-    Guid? Id,
+    Guid Id,
     string? Title,
     string? TitleEn,
     string? Slug,
