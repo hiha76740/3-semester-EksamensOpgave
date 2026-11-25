@@ -14,7 +14,14 @@ builder.Services.AddReverseProxy()
 
 var app = builder.Build();
 
-app.MapDefaultEndpoints();
+if (app.Environment.IsDevelopment())
+{
+    app.MapDefaultEndpoints();
+}
+else
+{
+    app.MapHealthChecks("/health");
+}
 
 app.UseCors(corsPolicyName);
 
