@@ -11,7 +11,7 @@ public class PermissionsController(
     IPermissionsQueries queries
     ) : ControllerBase
 {
-    [HttpGet()]
+    [HttpGet]
     [EndpointSummary("Get all permissions")]
     [EndpointDescription("Gets a list of all permissions")]
     [ProducesResponseType(StatusCodes.Status200OK, Description = "Returns a list of all permissions")]

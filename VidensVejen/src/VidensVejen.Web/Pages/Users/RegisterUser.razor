@@ -1,0 +1,130 @@
+@page "/users/create"
+
+
+@inject IAuthUserService AuthUserService
+
+<PageTitle>Opret bruger</PageTitle>
+
+<RadzenCard class="rz-mx-auto rz-my-4" Style="max-width: 40rem;">
+    <RadzenStack Gap="1rem">
+        <RadzenText TextStyle="TextStyle.H3" Text="Opret bruger" />
+        <AuthorizeView>
+            <Authorized Context="auth">
+                @if (auth.User.HasClaim(CustomClaimTypes.Permission, "AuthUser.Create"))
+                {
+                    @if (message != null)
+                    {
+                        <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">@message</RadzenAlert>
+                    }
+                    @if (error != null)
+                    {
+                        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
+                    }
+                    @if (permissions == null)
+                    {
+                        <RadzenButton Text="Hent rettigheder" Click="LoadPermissionsAsync" IsBusy="@isLoading" />
+                    }
+                    else
+                    {
+                        <CreateUserFormComponent @key="model" Model="model" Permissions="permissionOrdered"
+                                                 SubmitCallback="CreateAsync" IsSaving="isSaving" />
+                    }
+                }
+                else
+                {
+                    <RadzenText Text="Du har ikke rettighed til at oprette brugere." />
+                }
+            </Authorized>
+            <NotAuthorized>
+                <RadzenLink Text="Log ind" Path="login" />
+            </NotAuthorized>
+        </AuthorizeView>
+    </RadzenStack>
+</RadzenCard>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? CurrentAuthenticationState { get; set; }
+
+    private CreateUserInputModel model = new();
+    private IReadOnlyList<PermissionResponse>? permissionOrdered;
+    private IReadOnlyList<PermissionResponse>? permissions;
+    private string? message;
+    private string? error;
+    private bool isLoading;
+    private bool isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (CurrentAuthenticationState != null)
+        {
+            var state = await CurrentAuthenticationState;
+            if (state.User.HasClaim(CustomClaimTypes.Permission, "AuthUser.Create"))
+            {
+                await LoadPermissionsAsync();
+            }
+        }
+    }
+
+    private async Task LoadPermissionsAsync()
+    {
+        isLoading = true;
+        error = null;
+        try
+        {
+            permissions = await AuthUserService.GetPermissionsAsync();
+
+            if (permissions != null)
+                permissionOrdered = permissions.OrderBy(p => p.Name).ToList();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            error = "Rettighederne kunne ikke hentes. Prøv igen.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateAsync(CreateUserInputModel input)
+    {
+        if (isSaving)
+        {
+            return;
+        }
+
+        isSaving = true;
+        error = null;
+        message = null;
+        try
+        {
+            var request = new RegisterUserRequest(
+                input.Firstname.Trim(),
+                input.Surname.Trim(),
+                input.Email.Trim(),
+                input.Password,
+                input.PermissionIds.Distinct().ToList());
+
+            var status = await AuthUserService.RegisterAsync(request);
+            if (status == HttpStatusCode.Created)
+            {
+                message = "Brugeren er registreret.";
+                model = new CreateUserInputModel();
+            }
+            else
+            {
+                error = $"Brugeren kunne ikke oprettes (HTTP {(int)status}).";
+            }
+        }
+        catch (Exception exception) when (exception is HttpRequestException or OperationCanceledException)
+        {
+            error = "Oprettelsen kunne ikke bekræftes. Kontrollér, om brugeren er oprettet, før du prøver igen.";
+        }
+        finally
+        {
+            input.Password = string.Empty;
+            isSaving = false;
+        }
+    }
+}

@@ -17,6 +17,7 @@ public static class QueriesDI
     public static IServiceCollection AddQueriesDI(this IServiceCollection services)
     {
         services.AddScoped<IAuthUsersQueries, AuthUserQueryHandlerIMPL>();
+        services.AddScoped<IPermissionsQueries, PermissionQueryHandlerIMPL>();
 
         return services;
     }

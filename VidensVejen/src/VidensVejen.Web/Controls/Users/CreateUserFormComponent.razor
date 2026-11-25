@@ -1,0 +1,40 @@
+<RadzenTemplateForm TItem="CreateUserInputModel" Data="@Model" Submit="@SubmitCallback">
+    <DataAnnotationsValidator />
+    <RadzenStack Gap="1rem">
+        <RadzenFormField Text="Fornavn *">
+            <RadzenTextBox Name="Firstname" @bind-Value="Model.Firstname" autocomplete="given-name" />
+        </RadzenFormField>
+        <RadzenFormField Text="Efternavn *">
+            <RadzenTextBox Name="Surname" @bind-Value="Model.Surname" autocomplete="family-name" />
+        </RadzenFormField>
+        <RadzenFormField Text="E-mail *">
+            <RadzenTextBox Name="Email" @bind-Value="Model.Email" autocomplete="email" />
+        </RadzenFormField>
+        <RadzenFormField Text="Adgangskode *">
+            <RadzenPassword Name="Password" @bind-Value="Model.Password" autocomplete="new-password" />
+        </RadzenFormField>
+        <RadzenFormField Text="Rettigheder">
+            <RadzenDropDown TValue="IEnumerable<Guid>" Data="@Permissions" Multiple="true"
+                            TextProperty="@nameof(PermissionResponse.Name)"
+                            ValueProperty="@nameof(PermissionResponse.Id)"
+                            @bind-Value="Model.PermissionIds" Placeholder="Vælg rettigheder" />
+        </RadzenFormField>
+        <ValidationSummary />
+        <RadzenButton Text="Opret bruger" ButtonType="ButtonType.Submit"
+                      IsBusy="@IsSaving" BusyText="Opretter bruger" />
+    </RadzenStack>
+</RadzenTemplateForm>
+
+@code {
+    [Parameter, EditorRequired]
+    public CreateUserInputModel Model { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<PermissionResponse> Permissions { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public EventCallback<CreateUserInputModel> SubmitCallback { get; set; }
+
+    [Parameter]
+    public bool IsSaving { get; set; }
+}
