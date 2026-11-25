@@ -1,0 +1,54 @@
+<RadzenStack Gap="1.25rem">
+    <RadzenFieldset Text="Navn">
+        <RadzenStack Gap="0.75rem">
+            <RadzenFormField Text="Fornavn">
+                <RadzenTextBox @bind-Value="Model.Firstname" Disabled="@IsBusy" autocomplete="given-name" />
+            </RadzenFormField>
+            <RadzenFormField Text="Efternavn">
+                <RadzenTextBox @bind-Value="Model.Surname" Disabled="@IsBusy" autocomplete="family-name" />
+            </RadzenFormField>
+            <RadzenButton Text="Gem navn" Click="@(() => SaveName.InvokeAsync())" Disabled="@IsBusy" />
+        </RadzenStack>
+    </RadzenFieldset>
+
+    <RadzenFieldset Text="E-mail">
+        <RadzenStack Gap="0.75rem">
+            <RadzenFormField Text="E-mailadresse">
+                <RadzenTextBox @bind-Value="Model.Email" Disabled="@IsBusy" autocomplete="email" />
+            </RadzenFormField>
+            <RadzenButton Text="Gem e-mail" Click="@(() => SaveEmail.InvokeAsync())" Disabled="@IsBusy" />
+        </RadzenStack>
+    </RadzenFieldset>
+
+    <RadzenFieldset Text="Skift adgangskode">
+        <RadzenStack Gap="0.75rem">
+            <RadzenFormField Text="Nuværende adgangskode">
+                <RadzenPassword @bind-Value="Model.CurrentPassword" Disabled="@IsBusy" autocomplete="current-password" />
+            </RadzenFormField>
+            <RadzenFormField Text="Ny adgangskode">
+                <RadzenPassword @bind-Value="Model.NewPassword" Disabled="@IsBusy" autocomplete="new-password" />
+            </RadzenFormField>
+            <RadzenFormField Text="Gentag ny adgangskode">
+                <RadzenPassword @bind-Value="Model.ConfirmPassword" Disabled="@IsBusy" autocomplete="new-password" />
+            </RadzenFormField>
+            <RadzenButton Text="Skift adgangskode" Click="@(() => SavePassword.InvokeAsync())" Disabled="@IsBusy" />
+        </RadzenStack>
+    </RadzenFieldset>
+</RadzenStack>
+
+@code {
+    [Parameter, EditorRequired]
+    public UserProfileInputModel Model { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public EventCallback SaveName { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback SaveEmail { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback SavePassword { get; set; }
+
+    [Parameter]
+    public bool IsBusy { get; set; }
+}

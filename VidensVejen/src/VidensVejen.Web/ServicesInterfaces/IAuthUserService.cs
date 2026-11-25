@@ -23,4 +23,10 @@ public interface IAuthUserService
     /// <param name="registration">The account details and assigned permissions.</param>
     /// <returns>The registration response status.</returns>
     Task<HttpStatusCode> RegisterAsync(RegisterUserRequest registration);
+
+    /// <summary>Updates the email address of the specified account.</summary>
+    Task<UserEmailResponse> UpdateEmailAsync(Guid id, UpdateAuthUserEmailRequest update);
+
+    /// <summary>Changes the password after the current password has been verified.</summary>
+    Task UpdatePasswordAsync(Guid id, UpdateAuthUserPasswordRequest update);
 }

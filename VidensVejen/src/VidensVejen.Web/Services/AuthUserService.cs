@@ -55,4 +55,31 @@ public class AuthUserService(HttpClient httpClient) : IAuthUserService
         using var response = await httpClient.SendAsync(request);
         return response.StatusCode;
     }
+
+    async Task<UserEmailResponse> IAuthUserService.UpdateEmailAsync(Guid id, UpdateAuthUserEmailRequest update)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Put, $"{_baseUrl}/{id}/email")
+        {
+            Content = JsonContent.Create(update)
+        };
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<UserEmailResponse>()
+            ?? throw new JsonException("Could not deserialize the updated email.");
+    }
+
+    async Task IAuthUserService.UpdatePasswordAsync(Guid id, UpdateAuthUserPasswordRequest update)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Put, $"{_baseUrl}/{id}/password")
+        {
+            Content = JsonContent.Create(update)
+        };
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+    }
 }

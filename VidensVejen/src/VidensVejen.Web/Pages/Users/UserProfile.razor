@@ -1,21 +1,213 @@
 @page "/user/profile"
 
+@inject IAuthUserService AuthUsers
+@inject IUserService Users
+@inject CustomAuthenticationStateProvider AuthStateProvider
+
 <PageTitle>Min profil</PageTitle>
 
-<RadzenCard Style="max-width: 36rem;">
-    <RadzenStack Gap="0.75rem">
+<RadzenCard class="rz-mx-auto rz-my-4" Style="max-width: 42rem;">
+    <RadzenStack Gap="1rem">
         <RadzenText TextStyle="TextStyle.H2" Text="Min profil" />
         <AuthorizeView>
-            <Authorized Context="auth">
-                <RadzenLabel Text="E-mail" />
-                <RadzenText Text="@auth.User.Identity?.Name" />
+            <Authorized>
+                @if (error != null)
+                {
+                    <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
+                }
+                @if (message != null)
+                {
+                    <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">@message</RadzenAlert>
+                }
+
+                @if (isLoading)
+                {
+                    <RadzenText role="status" Text="Henter profil …" />
+                }
+                else if (profile == null || account == null)
+                {
+                    <RadzenButton Text="Hent profil igen" Click="LoadProfileAsync" />
+                }
+                else
+                {
+                    <UserProfileFormComponent Model="model" IsBusy="isSaving"
+                                              SaveName="SaveNameAsync" SaveEmail="SaveEmailAsync"
+                                              SavePassword="SavePasswordAsync" />
+                    <RadzenButton Text="Genindlæs profil" Variant="Variant.Text"
+                                  Click="LoadProfileAsync" Disabled="@isSaving" />
+                }
             </Authorized>
             <NotAuthorized>
                 <RadzenLink Path="login" Text="Log ind for at se din profil" />
             </NotAuthorized>
             <Authorizing>
-                <RadzenText Text="Henter profil…" />
+                <RadzenText Text="Kontrollerer login …" />
             </Authorizing>
         </AuthorizeView>
     </RadzenStack>
 </RadzenCard>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private UserProfileInputModel model = new();
+    private UserResponse? profile;
+    private AuthUserResponse? account;
+    private string? error;
+    private string? message;
+    private bool isLoading;
+    private bool isSaving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateTask != null
+            && (await AuthenticationStateTask).User.Identity?.IsAuthenticated == true)
+        {
+            await LoadProfileAsync();
+        }
+    }
+
+    private async Task LoadProfileAsync()
+    {
+        isLoading = true;
+        error = null;
+        message = null;
+        try
+        {
+            var currentAccount = await AuthUsers.GetAuthUserAsync();
+            var currentProfile = await Users.GetByIdAsync(currentAccount.Id);
+            account = currentAccount;
+            profile = currentProfile;
+            model = new UserProfileInputModel
+            {
+                Firstname = currentProfile.Firstname,
+                Surname = currentProfile.Surname,
+                Email = currentAccount.Email
+            };
+        }
+        catch (Exception exception) when (IsServiceError(exception))
+        {
+            error = "Profilen kunne ikke hentes.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private Task SaveNameAsync() => SaveAsync(async () =>
+    {
+        var currentProfile = profile;
+        if (currentProfile == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Firstname) || string.IsNullOrWhiteSpace(model.Surname))
+        {
+            error = "Udfyld både fornavn og efternavn.";
+            return;
+        }
+
+        var updated = await Users.UpdateAsync(currentProfile.Id,
+            new UpdateUserRequest(model.Firstname.Trim(), model.Surname.Trim(), currentProfile.RowVersion));
+        profile = updated;
+        model.Firstname = updated.Firstname;
+        model.Surname = updated.Surname;
+        message = "Dit navn er gemt.";
+    });
+
+    private Task SaveEmailAsync() => SaveAsync(async () =>
+    {
+        var currentAccount = account;
+        if (currentAccount == null)
+        {
+            return;
+        }
+
+        var email = model.Email.Trim();
+        if (!new EmailAddressAttribute().IsValid(email) || email.Length == 0)
+        {
+            error = "Indtast en gyldig e-mailadresse.";
+            return;
+        }
+
+        if (string.Equals(email, currentAccount.Email, StringComparison.OrdinalIgnoreCase))
+        {
+            model.Email = currentAccount.Email;
+            message = "E-mailadressen er allerede gemt.";
+            return;
+        }
+
+        var updated = await AuthUsers.UpdateEmailAsync(currentAccount.Id,
+            new UpdateAuthUserEmailRequest(email, currentAccount.RowVersion));
+        account = currentAccount with { Email = updated.Email, RowVersion = updated.RowVersion };
+        model.Email = updated.Email;
+        message = "Din e-mailadresse er gemt.";
+        await AuthStateProvider.RefreshAuthenticationState();
+    });
+
+    private Task SavePasswordAsync() => SaveAsync(async () =>
+    {
+        var currentAccount = account;
+        if (currentAccount == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(model.CurrentPassword) || string.IsNullOrWhiteSpace(model.NewPassword))
+        {
+            error = "Indtast din nuværende adgangskode og en ny adgangskode.";
+            return;
+        }
+
+        if (!string.Equals(model.NewPassword, model.ConfirmPassword, StringComparison.Ordinal))
+        {
+            error = "De to nye adgangskoder skal være ens.";
+            return;
+        }
+
+        await AuthUsers.UpdatePasswordAsync(currentAccount.Id,
+            new UpdateAuthUserPasswordRequest(model.NewPassword, model.CurrentPassword, currentAccount.RowVersion));
+
+        model.CurrentPassword = string.Empty;
+        model.NewPassword = string.Empty;
+        model.ConfirmPassword = string.Empty;
+        message = "Din adgangskode er ændret.";
+
+        account = null;
+        account = await AuthUsers.GetAuthUserAsync();
+    });
+
+    private async Task SaveAsync(Func<Task> save)
+    {
+        if (isSaving || isLoading)
+        {
+            return;
+        }
+
+        isSaving = true;
+        error = null;
+        message = null;
+        try
+        {
+            await save();
+        }
+        catch (Exception exception) when (IsServiceError(exception))
+        {
+            error = "Profilen kunne ikke opdateres. Kontrollér oplysningerne, eller genindlæs profilen og prøv igen.";
+            if (message != null)
+            {
+                error = "Ændringen er gemt, men profilen kunne ikke opdateres i visningen. Genindlæs profilen.";
+            }
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private static bool IsServiceError(Exception exception) =>
+        exception is HttpRequestException or JsonException or InvalidOperationException or OperationCanceledException;
+}
