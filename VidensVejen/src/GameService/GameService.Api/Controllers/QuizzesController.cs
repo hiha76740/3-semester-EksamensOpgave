@@ -14,7 +14,6 @@ namespace GameService.Api.Controllers;
 [ApiController]
 public class QuizzesController(
     IPublishQuizHandler publish,
-    IUpdateQuizHandler update,
     IDeleteQuizHandler delete,
     IQuizQueries queries
     ) : ControllerBase
@@ -91,34 +90,8 @@ public class QuizzesController(
         }
     }
 
-    [HttpPut("{id:guid}")]
-    [EndpointSummary("Update a quiz")]
-    [EndpointDescription("Updates the details of the requested quiz")]
-    [ProducesResponseType<QuizResponse>(StatusCodes.Status200OK, "Application/json", Description = "Returns the updated quiz")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to update the requested quiz")]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Quiz was not found")]
-    public async Task<ActionResult<QuizResponse>> UpdateQuiz(
-        [Required][Description("A unique identifier for a quiz")] Guid id,
-        [Required][Description("Object needed to update a quiz")] UpdateQuizRequest request)
-    {
-        try
-        {
-            var dto = await update.HandleAsync(request.AsUpdateCommand(id));
-
-            return Ok(dto.AsResponse());
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-
     [HttpDelete("{id:guid}")]
-    [EndpointSummary("Deletes a quiz")]
+    [EndpointSummary("Delete a quiz")]
     [EndpointDescription("Deletes a single instance of a quiz")]
     [ProducesResponseType(StatusCodes.Status204NoContent, Description = "Quiz was deleted successfully")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to delete the requested quiz")]

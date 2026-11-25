@@ -32,15 +32,4 @@ internal static class ChoiceMapper
 
         return output;
     }
-
-    internal static UpdateChoiceCommand AsUpdateCommand(this UpdateChoiceRequest request)
-    {
-        var output = new UpdateChoiceCommand(
-            request.Id,
-            request.Text,
-            request.CorrectAnswer
-            );
-
-        return output;
-    }
 }

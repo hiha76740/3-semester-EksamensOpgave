@@ -43,20 +43,4 @@ internal static class QuizMapper
 
         return output;
     }
-
-    internal static UpdateQuizCommand AsUpdateCommand(this UpdateQuizRequest request, Guid id)
-    {
-        var output = new UpdateQuizCommand(
-            id,
-            request.Title,
-            request.ExhibitionId,
-            request.QuizLayout,
-            request.Questions
-            .Select(
-                q => q.AsUpdateCommand())
-            .ToList()
-            );
-
-        return output;
-    }
 }

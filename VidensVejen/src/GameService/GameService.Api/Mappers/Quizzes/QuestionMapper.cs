@@ -35,18 +35,4 @@ internal static class QuestionMapper
 
         return output;
     }
-
-    internal static UpdateQuestionCommand AsUpdateCommand(this UpdateQuestionRequest request)
-    {
-        var output = new UpdateQuestionCommand(
-            request.Id,
-            request.Text,
-            request.Choices
-            .Select(
-                q => q.AsUpdateCommand())
-            .ToList()
-            );
-
-        return output;
-    }
 }
