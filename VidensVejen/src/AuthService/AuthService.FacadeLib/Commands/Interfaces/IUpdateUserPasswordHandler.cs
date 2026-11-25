@@ -13,4 +13,7 @@ public interface IUpdateUserPasswordHandler
     /// <param name="command"></param>
     /// <returns></returns>
     Task HandleAsync(UpdateAuthUserPasswordCommand command);
+
+    /// <summary>Resets the password of an account selected by an authorized administrator.</summary>
+    Task ResetAsync(Guid id, string password, byte[] rowVersion);
 }

@@ -170,6 +170,31 @@ public class UsersController(
         }
     }
 
+    [HttpPut("{id:guid}/password/reset")]
+    //[Authorize(Policy = "User.Edit")]
+    [EndpointSummary("Resets a user's password")]
+    [EndpointDescription("Reset the password of a single instance of a user")]
+    [ProducesResponseType(StatusCodes.Status204NoContent, Description = "Password was reset successfully")]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Description = "User not found")]
+    [ProducesResponseType(StatusCodes.Status409Conflict, Description = "The user changed after it was loaded")]
+
+    public async Task<ActionResult> ResetPassword(Guid id, ResetUserPasswordRequest request)
+    {
+        try
+        {
+            await updateUserPassword.ResetAsync(id, request.Password, request.RowVersion);
+            return NoContent();
+        }
+        catch (NotFoundException)
+        {
+            return NotFound();
+        }
+        catch (ConcurrencyConflictException)
+        {
+            return Conflict();
+        }
+    }
+
     [HttpGet("Me")]
     [EndpointSummary("This endpoint will get current user information")]
     [EndpointDescription("Get current user information, like username, firstname and lastname")]

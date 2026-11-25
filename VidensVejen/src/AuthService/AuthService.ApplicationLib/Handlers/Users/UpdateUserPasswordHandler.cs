@@ -17,7 +17,17 @@ public class UpdateUserPasswordHandler(
     ILogger<UpdateUserPasswordHandler> logger
     ) : IUpdateUserPasswordHandler
 {
-    async Task IUpdateUserPasswordHandler.HandleAsync(UpdateAuthUserPasswordCommand command)
+    Task IUpdateUserPasswordHandler.HandleAsync(UpdateAuthUserPasswordCommand command)
+    {
+        return UpdateAsync(command, verifyCurrentPassword: true);
+    }
+
+    Task IUpdateUserPasswordHandler.ResetAsync(Guid id, string password, byte[] rowVersion)
+    {
+        return UpdateAsync(new UpdateAuthUserPasswordCommand(id, password, string.Empty, rowVersion), verifyCurrentPassword: false);
+    }
+
+    private async Task UpdateAsync(UpdateAuthUserPasswordCommand command, bool verifyCurrentPassword)
     {
         try
         {
@@ -29,7 +39,7 @@ public class UpdateUserPasswordHandler(
             var authUser = await authUserRepo.GetAuthUserByIdAsync(authUserId)
                 ?? throw new NotFoundException("User was not found");
 
-            if (passwordHashService.Verify(command.OldPassword, authUser.PasswordHash) == false)
+            if (verifyCurrentPassword && passwordHashService.Verify(command.OldPassword, authUser.PasswordHash) == false)
                 throw new InvalidOperationException("Old password was incorrect");
 
             if (logger.IsEnabled(LogLevel.Information))
