@@ -15,7 +15,7 @@ namespace GameService.Api.Controllers;
 public class QuizDraftsController(
     ICreateQuizDraftHandler create,
     IUpdateQuizDraftHandler update,
-    IQuizQueries queries
+    IQuizDraftQueries queries
     ) : ControllerBase
 {
     [HttpPost]

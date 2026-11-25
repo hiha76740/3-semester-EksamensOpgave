@@ -18,66 +18,18 @@ public class QuizQueryHandlerIMPL(GameDbContext db) : IQuizQueries
     {
         var quizKey = new QuizId(id);
 
-        var quiz = await db.Quizzes
+        return await db.Quizzes
             .AsNoTracking()
-            .Include(q => q.Questions)
-            .FirstOrDefaultAsync(q => q.Id == quizKey);
-
-        if (quiz == null)
-            return null;
-
-        return AsDto(quiz);
-    }
-
-    async Task<List<QuizDto>> IQuizQueries.GetQuizzesByExhibitionAsync(Guid exhibitionId)
-    {
-        var exhibitionKey = new ExhibitionId(exhibitionId);
-
-        var quizzes = await db.Quizzes
-            .AsNoTracking()
-            .Include(q => q.Questions)
-            .Where(q => q.ExhibitionId == exhibitionKey)
-            .ToListAsync();
-
-        return quizzes.Select(AsDto).ToList();
-    }
-
-    async Task<QuizDraftDto?> IQuizQueries.GetQuizDraftByIdAsync(Guid id)
-    {
-        var draftKey = new QuizDraftId(id);
-
-        var draft = await db.QuizDrafts
-            .AsNoTracking()
-            .Include(d => d.Questions)
-            .FirstOrDefaultAsync(d => d.Id == draftKey);
-
-        if (draft == null)
-            return null;
-
-        return AsDraftDto(draft);
-    }
-
-    async Task<List<QuizDraftDto>> IQuizQueries.GetQuizDraftsAsync()
-    {
-        var drafts = await db.QuizDrafts
-            .AsNoTracking()
-            .Include(d => d.Questions)
-            .ToListAsync();
-
-        return drafts.Select(AsDraftDto).ToList();
-    }
-
-    private static QuizDto AsDto(Quiz quiz)
-    {
-        return new QuizDto(
-            quiz.Id.Value,
-            quiz.Title,
-            quiz.TitleEn,
-            quiz.ExhibitionId.Value,
-            quiz.QuizLayout,
-            quiz.EndMessage,
-            quiz.EndMessageEn,
-            quiz.Questions
+            .Where(q => q.Id == quizKey)
+            .Select(q => new QuizDto(
+            q.Id.Value,
+            q.Title,
+            q.TitleEn,
+            q.ExhibitionId.Value,
+            q.QuizLayout,
+            q.EndMessage,
+            q.EndMessageEn,
+            q.Questions
             .Select(
                 q => new QuestionDto(
                     q.Id.Value,
@@ -93,36 +45,46 @@ public class QuizQueryHandlerIMPL(GameDbContext db) : IQuizQueries
                             c.FeedbackEn))
                     .ToList()))
             .ToList(),
-            quiz.Instruction,
-            quiz.InstructionEn
-            );
+            q.Instruction,
+            q.InstructionEn
+            ))
+            .FirstOrDefaultAsync();
     }
 
-    private static QuizDraftDto AsDraftDto(QuizDraft draft)
+    async Task<List<QuizDto>> IQuizQueries.GetQuizzesByExhibitionAsync(Guid exhibitionId)
     {
-        return new QuizDraftDto(
-            draft.Id.Value,
-            draft.Title,
-            draft.TitleEn,
-            draft.ExhibitionId?.Value,
-            draft.QuizLayout,
-            draft.EndMessage,
-            draft.EndMessageEn,
-            draft.Questions
+        var exhibitionKey = new ExhibitionId(exhibitionId);
+
+        return await db.Quizzes
+            .AsNoTracking()
+            .Where(q => q.ExhibitionId == exhibitionKey)
+            .Select(q => new QuizDto(
+            q.Id.Value,
+            q.Title,
+            q.TitleEn,
+            q.ExhibitionId.Value,
+            q.QuizLayout,
+            q.EndMessage,
+            q.EndMessageEn,
+            q.Questions
             .Select(
-                q => new DraftQuestionDto(
+                q => new QuestionDto(
                     q.Id.Value,
                     q.Text,
                     q.TextEn,
                     q.Choices
                     .Select(
-                        c => new ChoiceDraftDto(
+                        c => new ChoiceDto(
                             c.Text,
                             c.TextEn,
                             c.IsCorrect,
                             c.Feedback,
                             c.FeedbackEn))
                     .ToList()))
-            .ToList());
+            .ToList(),
+            q.Instruction,
+            q.InstructionEn
+            ))
+            .ToListAsync();
     }
 }
