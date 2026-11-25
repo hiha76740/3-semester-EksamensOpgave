@@ -40,6 +40,16 @@ public class QuizDraft
     /// <summary>
     /// 
     /// </summary>
+    public string? Instruction { get; private set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string? InstructionEn { get; private set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public IReadOnlyList<QuestionDraft> Questions => _questions.AsReadOnly();
 
     private readonly List<QuestionDraft> _questions = [];
@@ -64,7 +74,19 @@ public class QuizDraft
     /// <param name="endMessage"></param>
     /// <param name="endMessageEn"></param>
     /// <param name="questions"></param>
-    public void Update(string? title, string? titleEn, Guid? exhibitionId, string? quizLayout, string? endMessage, string? endMessageEn, List<NewQuestionDraft>? questions)
+    /// <param name="instruction"></param>
+    /// <param name="instructionEn"></param>
+    public void Update(
+        string? title,
+        string? titleEn,
+        Guid? exhibitionId,
+        string? quizLayout,
+        string? endMessage,
+        string? endMessageEn,
+        List<NewQuestionDraft>? questions,
+        string? instruction,
+        string? instructionEn
+        )
     {
         ExhibitionId = null;
 
@@ -76,6 +98,8 @@ public class QuizDraft
         QuizLayout = quizLayout;
         EndMessage = endMessage;
         EndMessageEn = endMessageEn;
+        Instruction = instruction;
+        InstructionEn = instructionEn;
 
         _questions.Clear();
 

@@ -46,7 +46,9 @@ public class CreateQuizHandler(
                 command.QuizLayout,
                 command.EndMessage,
                 command.EndMessageEn,
-                command.Questions.AsNewQuestions());
+                command.Questions.AsNewQuestions(),
+                command.Instruction,
+                command.InstructionEn);
 
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Quiz created with id: {QuizId}", quiz.Id.Value);

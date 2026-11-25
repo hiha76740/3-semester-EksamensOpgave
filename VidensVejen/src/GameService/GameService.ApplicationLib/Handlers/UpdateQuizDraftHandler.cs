@@ -37,7 +37,9 @@ public class UpdateQuizDraftHandler(
                 command.QuizLayout,
                 command.EndMessage,
                 command.EndMessageEn,
-                command.Questions.AsNewDraftQuestions());
+                command.Questions.AsNewDraftQuestions(),
+                command.Instruction,
+                command.InstructionEn);
 
             await draftRepo.SaveAsync();
 
