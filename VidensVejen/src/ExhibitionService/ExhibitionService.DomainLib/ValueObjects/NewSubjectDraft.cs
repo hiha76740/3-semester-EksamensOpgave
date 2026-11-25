@@ -15,4 +15,4 @@ public record NewSubjectDraft(
     string? Slug,
     string? Description,
     string? DescriptionEn,
-    List<NewTopicDraft>? Topics);
+    List<NewTopicDraft> Topics);
