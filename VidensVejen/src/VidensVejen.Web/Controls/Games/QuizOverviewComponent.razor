@@ -1,0 +1,75 @@
+@using VidensVejen.ContractsLib.Responses.GameService
+@inject NavigationManager Navigation
+
+@if (ShowDrafts)
+{
+    <RadzenText TextStyle="TextStyle.H3" Text="Kladder" />
+    <RadzenDataGrid TItem="QuizDraftResponse" Data="@Drafts" AllowPaging="true" PageSize="15"
+                    EmptyText="Der er ingen quizkladder.">
+        <Columns>
+            <RadzenDataGridColumn TItem="QuizDraftResponse" Title="Titel" Property="@nameof(QuizDraftResponse.Title)">
+                <Template Context="draft">@(string.IsNullOrWhiteSpace(draft.Title) ? "Kladde uden titel" : draft.Title)</Template>
+            </RadzenDataGridColumn>
+            @if (CanEdit || CanPublish)
+            {
+                <RadzenDataGridColumn TItem="QuizDraftResponse" Title="Handlinger">
+                    <Template Context="draft">
+                        <RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap">
+                            @if (CanEdit)
+                            {
+                                <RadzenButton Text="Ændre" Icon="edit" Variant="Variant.Outlined"
+                                              Click="@(() => Navigation.NavigateTo($"games/drafts/{draft.Id:D}"))" />
+                                <RadzenButton Text="Slet" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Outlined"
+                                              Disabled="@IsDeleting" Click="@(() => DeleteDraft.InvokeAsync(draft))" />
+                            }
+                            @if (CanPublish)
+                            {
+                                <RadzenButton Text="Publicér" Icon="publish" Variant="Variant.Outlined"
+                                              Click="@(() => Navigation.NavigateTo($"games/drafts/{draft.Id:D}"))" />
+                            }
+                        </RadzenStack>
+                    </Template>
+                </RadzenDataGridColumn>
+            }
+        </Columns>
+    </RadzenDataGrid>
+}
+
+<RadzenText TextStyle="TextStyle.H3" Text="Publicerede quizzer" />
+<RadzenDataGrid TItem="QuizResponse" Data="@Published" AllowPaging="true" PageSize="15"
+                EmptyText="Der er ingen publicerede quizzer.">
+    <Columns>
+        <RadzenDataGridColumn TItem="QuizResponse" Title="Titel" Property="@nameof(QuizResponse.Title)" />
+        @if (CanEdit || CanDeletePublished)
+        {
+            <RadzenDataGridColumn TItem="QuizResponse" Title="Handlinger">
+                <Template Context="quiz">
+                    <RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap">
+                        @if (CanEdit)
+                        {
+                            <RadzenButton Text="Ændre som kladde" Icon="edit" Variant="Variant.Outlined"
+                                          Click="@(() => Navigation.NavigateTo($"games/{quiz.Id:D}/edit"))" />
+                        }
+                        @if (CanDeletePublished)
+                        {
+                            <RadzenButton Text="Slet" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Outlined"
+                                          Disabled="@IsDeleting" Click="@(() => DeletePublished.InvokeAsync(quiz))" />
+                        }
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+        }
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Parameter] public IReadOnlyList<QuizDraftResponse> Drafts { get; set; } = [];
+    [Parameter] public IReadOnlyList<QuizResponse> Published { get; set; } = [];
+    [Parameter] public bool ShowDrafts { get; set; }
+    [Parameter] public bool CanEdit { get; set; }
+    [Parameter] public bool CanPublish { get; set; }
+    [Parameter] public bool CanDeletePublished { get; set; }
+    [Parameter] public bool IsDeleting { get; set; }
+    [Parameter] public EventCallback<QuizDraftResponse> DeleteDraft { get; set; }
+    [Parameter] public EventCallback<QuizResponse> DeletePublished { get; set; }
+}

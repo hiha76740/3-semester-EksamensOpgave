@@ -1,0 +1,130 @@
+@page "/games"
+
+@inject IQuizService QuizService
+@inject DialogService Dialog
+@inject NavigationManager Navigation
+
+<PageTitle>Quizzer</PageTitle>
+
+<RadzenStack Gap="1rem">
+    <RadzenText TextStyle="TextStyle.H2" Text="Quizzer" />
+    @if (canEdit)
+    {
+        <RadzenButton Text="Opret quiz" Icon="add" Style="align-self: flex-start;" Click="@(() => Navigation.NavigateTo("games/create"))" />
+    }
+    @if (error != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
+    }
+    @if (isLoading)
+    {
+        <RadzenText role="status" Text="Henter quizzer …" />
+    }
+    else if (canAccess)
+    {
+        <QuizOverviewComponent Drafts="drafts" Published="published" ShowDrafts="showDrafts"
+                               CanEdit="canEdit" CanPublish="canPublish" CanDeletePublished="canDelete"
+                               DeleteDraft="DeleteDraftAsync" DeletePublished="DeletePublishedAsync"
+                               IsDeleting="isDeleting" />
+    }
+    else
+    {
+        <RadzenText Text="Du har ikke adgang til quizoversigten." />
+    }
+</RadzenStack>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private IReadOnlyList<QuizDraftResponse> drafts = [];
+    private IReadOnlyList<QuizResponse> published = [];
+    private bool canAccess;
+    private bool canEdit;
+    private bool canPublish;
+    private bool canDelete;
+    private bool showDrafts;
+    private bool isLoading = true;
+    private bool isDeleting;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (AuthenticationStateTask == null)
+            {
+                return;
+            }
+
+            var state = await AuthenticationStateTask;
+            var user = state.User;
+            canEdit = HasPermission(user, "Game.Edit");
+            canPublish = HasPermission(user, "Game.Create");
+            canDelete = HasPermission(user, "Game.Delete");
+            showDrafts = canEdit || canPublish || HasPermission(user, "Game.Read");
+            canAccess = showDrafts || canDelete;
+            if (canAccess)
+            {
+                published = await QuizService.GetPublishedAsync();
+            }
+
+            if (showDrafts)
+            {
+                drafts = await QuizService.GetDraftsAsync();
+            }
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            error = "Quizoversigten kunne ikke hentes.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private Task DeleteDraftAsync(QuizDraftResponse draft) =>
+        ConfirmDeletionAsync(canEdit, "kladde", draft.Title ?? "Kladde uden titel", async () =>
+        {
+            await QuizService.DeleteDraftAsync(draft.Id);
+            drafts = drafts.Where(item => item.Id != draft.Id).ToArray();
+        });
+
+    private Task DeletePublishedAsync(QuizResponse quiz) =>
+        ConfirmDeletionAsync(canDelete, "publiceret quiz", quiz.Title, async () =>
+        {
+            await QuizService.DeletePublishedAsync(quiz.Id);
+            published = published.Where(item => item.Id != quiz.Id).ToArray();
+        });
+
+    private async Task ConfirmDeletionAsync(bool allowed, string type, string title, Func<Task> delete)
+    {
+        if (!allowed || isDeleting)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        error = null;
+        try
+        {
+            if (await Dialog.Confirm($"Vil du slette denne {type}: {title}?", "Bekræft sletning",
+                new ConfirmOptions { OkButtonText = "Slet", CancelButtonText = "Annullér" }) == true)
+            {
+                await delete();
+            }
+        }
+        catch (Exception exception) when (exception is HttpRequestException or OperationCanceledException)
+        {
+            error = "Sletningen kunne ikke bekræftes. Genindlæs oversigten for at se den aktuelle status.";
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+
+    private static bool HasPermission(ClaimsPrincipal user, string permission) =>
+        user.Identity?.IsAuthenticated == true && user.HasClaim(CustomClaimTypes.Permission, permission);
+}

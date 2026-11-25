@@ -59,4 +59,52 @@ public class QuizService(HttpClient httpClient) : IQuizService
         using var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
     }
+
+    Task<IReadOnlyList<QuizDraftResponse>> IQuizService.GetDraftsAsync()
+    {
+        return GetAsync<IReadOnlyList<QuizDraftResponse>>(DraftUrl);
+    }
+
+    Task<IReadOnlyList<QuizResponse>> IQuizService.GetPublishedAsync()
+    {
+        return GetAsync<IReadOnlyList<QuizResponse>>($"{BaseUrl}/admin");
+    }
+
+    Task<QuizDraftResponse> IQuizService.GetDraftAsync(Guid id)
+    {
+        return GetAsync<QuizDraftResponse>($"{DraftUrl}/{id:D}");
+    }
+
+    Task<QuizResponse> IQuizService.GetPublishedAsync(Guid id)
+    {
+        return GetAsync<QuizResponse>($"{BaseUrl}/{id:D}");
+    }
+
+    Task IQuizService.DeleteDraftAsync(Guid id)
+    {
+        return DeleteAsync($"{DraftUrl}/{id:D}");
+    }
+
+    Task IQuizService.DeletePublishedAsync(Guid id)
+    {
+        return DeleteAsync($"{BaseUrl}/{id:D}");
+    }
+
+    private async Task<T> GetAsync<T>(string url) where T : class
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, url);
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<T>()
+            ?? throw new JsonException("The quiz response was empty.");
+    }
+
+    private async Task DeleteAsync(string url)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Delete, url);
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+    }
 }

@@ -50,7 +50,10 @@
                         <RadzenButton Text="Gem kladde" ButtonType="ButtonType.Button" Variant="Variant.Outlined"
                                       Click="@(() => SaveDraftCallback.InvokeAsync(Model))" Disabled="@IsBusy" />
                     }
-                    <RadzenButton Text="@SubmitText" ButtonType="ButtonType.Submit" Disabled="@IsBusy" />
+                    @if (CanSubmit)
+                    {
+                        <RadzenButton Text="@SubmitText" ButtonType="ButtonType.Submit" Disabled="@IsBusy" />
+                    }
                 </RadzenStack>
             </RadzenStack>
         </RadzenCard>
@@ -99,7 +102,11 @@
     [Parameter]
     public bool IsBusy { get; set; }
 
-    private Task HandleSubmit(QuizInputModel submittedModel) => SubmitCallback.InvokeAsync(submittedModel);
+    [Parameter]
+    public bool CanSubmit { get; set; } = true;
+
+    private Task HandleSubmit(QuizInputModel submittedModel) =>
+        CanSubmit && !IsBusy ? SubmitCallback.InvokeAsync(submittedModel) : Task.CompletedTask;
 
     private async Task AddQuestion()
     {
