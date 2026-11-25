@@ -1,3 +1,4 @@
+using VidensVejen.ContractsLib.Responses.GameService;
 using System.Net;
 using VidensVejen.ContractsLib.Requests.GameService.Drafts;
 using VidensVejen.ContractsLib.Requests.GameService.Quizzes;
@@ -22,4 +23,22 @@ public interface IQuizService
 
     /// <summary>Replaces the editable contents of a quiz draft.</summary>
     Task SaveDraftAsync(Guid draftId, UpdateQuizDraftRequest quiz);
+
+    /// <summary>Gets the drafts available to the current user.</summary>
+    Task<IReadOnlyList<QuizDraftResponse>> GetDraftsAsync();
+
+    /// <summary>Gets the published quizzes available for administration.</summary>
+    Task<IReadOnlyList<QuizResponse>> GetPublishedAsync();
+
+    /// <summary>Gets the contents of an existing draft.</summary>
+    Task<QuizDraftResponse> GetDraftAsync(Guid id);
+
+    /// <summary>Gets the contents of a published quiz.</summary>
+    Task<QuizResponse> GetPublishedAsync(Guid id);
+
+    /// <summary>Deletes an unpublished draft.</summary>
+    Task DeleteDraftAsync(Guid id);
+
+    /// <summary>Deletes a published quiz.</summary>
+    Task DeletePublishedAsync(Guid id);
 }

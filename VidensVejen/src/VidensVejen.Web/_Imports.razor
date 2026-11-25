@@ -3,6 +3,7 @@
 @using System.Net.Http.Json
 @using System.Text.Json
 @using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Routing
@@ -27,9 +28,12 @@
 @using VidensVejen.ContractsLib.Responses.ExhibitionService
 @using VidensVejen.ContractsLib.Responses.ImageService
 @using VidensVejen.ContractsLib.Responses.UserService
+@using VidensVejen.ContractsLib.Responses.GameService
 @using VidensVejen.ContractsLib.Requests.AuthService
 @using VidensVejen.ContractsLib.Requests.ExhibitionService.Exhibitions
 @using VidensVejen.ContractsLib.Requests.ExhibitionService.Drafts
+@using VidensVejen.ContractsLib.Requests.GameService.Drafts
+@using VidensVejen.ContractsLib.Requests.GameService.Quizzes
 @using VidensVejen.ContractsLib.Requests.GameService
 @using VidensVejen.ContractsLib.Requests.ImageService
 @using VidensVejen.ContractsLib.Requests.UserService

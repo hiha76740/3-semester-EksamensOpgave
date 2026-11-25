@@ -8,10 +8,20 @@
             <RadzenIcon Icon="layers" aria-hidden="true" />
             Udstillinger
         </NavLink>
-        <NavLink class="vidensvejen-nav-link" href="games/create" Match="NavLinkMatch.All">
-            <RadzenIcon Icon="quiz" aria-hidden="true" />
-            Quizzer
-        </NavLink>
+        <AuthorizeView>
+            <Authorized Context="auth">
+                @if (auth.User.HasClaim(CustomClaimTypes.Permission, "Game.Read")
+                    || auth.User.HasClaim(CustomClaimTypes.Permission, "Game.Edit")
+                    || auth.User.HasClaim(CustomClaimTypes.Permission, "Game.Create")
+                    || auth.User.HasClaim(CustomClaimTypes.Permission, "Game.Delete"))
+                {
+                    <NavLink class="vidensvejen-nav-link" href="games" Match="NavLinkMatch.Prefix">
+                        <RadzenIcon Icon="quiz" aria-hidden="true" />
+                        Quizzer
+                    </NavLink>
+                }
+            </Authorized>
+        </AuthorizeView>
         <NavLink class="vidensvejen-nav-link" href="images" Match="NavLinkMatch.All">
             <RadzenIcon Icon="perm_media" aria-hidden="true" />
             Mediebibliotek

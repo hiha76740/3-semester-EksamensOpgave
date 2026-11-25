@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controls\Games\" />
     <Folder Include="Controls\Exhibitions\" />
     <Folder Include="Models\Exhibitions\" />
     <Folder Include="Pages\Exhibitions\" />
