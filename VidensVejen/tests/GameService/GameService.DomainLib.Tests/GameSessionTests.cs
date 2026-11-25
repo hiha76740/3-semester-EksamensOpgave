@@ -117,15 +117,62 @@ public class GameSessionTests
     }
 
     [Fact]
-    public void Answer_GivenOtherQuiz_ThrowsDomainException()
+    public void Finish_GivenAllQuestionsAnswered_ReturnsScoreAndCompletesSession()
     {
         // Arrange
         var quiz = CreateQuiz();
-        var otherQuiz = CreateQuiz();
         var session = GameSession.Start(quiz);
-        var questionId = otherQuiz.Questions[0].Id.Value;
+        session.Answer(quiz, quiz.Questions[0].Id.Value, 0);
+
+        // Act
+        var score = session.Finish(quiz);
+
+        // Assert
+        Assert.Equal(1, score.CorrectCount);
+        Assert.Equal(1, score.TotalCount);
+        Assert.Equal(100, score.Percentage);
+        Assert.NotNull(session.CompletedAt);
+    }
+
+    [Fact]
+    public void Finish_GivenWrongAnswer_ReturnsZeroCorrect()
+    {
+        // Arrange
+        var quiz = CreateQuiz();
+        var session = GameSession.Start(quiz);
+        session.Answer(quiz, quiz.Questions[0].Id.Value, 1);
+
+        // Act
+        var score = session.Finish(quiz);
+
+        // Assert
+        Assert.Equal(0, score.CorrectCount);
+        Assert.Equal(0, score.Percentage);
+    }
+
+    [Fact]
+    public void Finish_GivenUnansweredQuestions_ThrowsDomainException()
+    {
+        // Arrange
+        var quiz = CreateQuiz();
+        var session = GameSession.Start(quiz);
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => session.Answer(otherQuiz, questionId, 0));
+        Assert.Throws<DomainException>(() => session.Finish(quiz));
+        Assert.Null(session.CompletedAt);
+    }
+
+    [Theory]
+    [InlineData(5, 8, 63)]
+    [InlineData(1, 3, 33)]
+    [InlineData(0, 4, 0)]
+    [InlineData(4, 4, 100)]
+    public void Percentage_GivenScore_RoundsToWholeNumber(int correctCount, int totalCount, int expected)
+    {
+        // Act
+        var score = new SessionScore(correctCount, totalCount);
+
+        // Assert
+        Assert.Equal(expected, score.Percentage);
     }
 }

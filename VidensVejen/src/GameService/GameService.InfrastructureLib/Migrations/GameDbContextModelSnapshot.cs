@@ -50,6 +50,9 @@ namespace GameService.InfrastructureLib.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("QuizId")
                         .HasColumnType("uniqueidentifier");
 

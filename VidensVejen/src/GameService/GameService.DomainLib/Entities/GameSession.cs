@@ -20,6 +20,11 @@ public class GameSession
     /// <summary>
     /// 
     /// </summary>
+    public DateTime? CompletedAt { get; private set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public IReadOnlyList<SessionAnswer> Answers => _answers.AsReadOnly();
 
     private readonly List<SessionAnswer> _answers = [];
@@ -47,9 +52,6 @@ public class GameSession
     /// <exception cref="NotFoundException"></exception>
     public AnswerResult Answer(Quiz quiz, Guid questionId, int choiceIndex)
     {
-        if (quiz.Id != QuizId)
-            throw new DomainException("The quiz does not belong to this session");
-
         var question = quiz.Questions.FirstOrDefault(q => q.Id.Value == questionId)
             ?? throw new NotFoundException("Question was not found in the quiz");
 
@@ -69,6 +71,24 @@ public class GameSession
         var feedbackEn = question.Choices[choiceIndex].FeedbackEn;
 
         return new AnswerResult(isCorrect, feedback, feedbackEn, correctChoice.Text, correctChoice.TextEn);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="quiz"></param>
+    /// <returns></returns>
+    /// <exception cref="DomainException"></exception>
+    public SessionScore Finish(Quiz quiz)
+    {
+        if (_answers.Count != quiz.Questions.Count)
+            throw new DomainException("All questions must be answered before the session can be finished");
+
+        CompletedAt = DateTime.UtcNow;
+
+        var correctCount = _answers.Count(a => a.IsCorrect);
+
+        return new SessionScore(correctCount, quiz.Questions.Count);
     }
 
     private GameSession(QuizId quizId)

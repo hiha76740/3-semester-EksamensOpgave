@@ -84,4 +84,15 @@ internal static class SessionMapper
 
         return output;
     }
+
+    internal static SessionScoreResponse AsResponse(this SessionScoreDto dto)
+    {
+        var output = new SessionScoreResponse(
+            dto.CorrectCount,
+            dto.TotalCount,
+            dto.Percentage
+            );
+
+        return output;
+    }
 }
