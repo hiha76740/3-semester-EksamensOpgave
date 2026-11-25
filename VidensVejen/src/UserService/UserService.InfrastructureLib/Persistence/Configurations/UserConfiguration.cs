@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using UserService.DomainLib.Entities;
 using UserService.DomainLib.ValueObjects;
+using VidensVejen.ContractsLib;
 
 namespace UserService.InfrastructureLib.Persistence.Configurations;
 
@@ -28,5 +29,17 @@ internal sealed class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Property(x => x.RowVersion)
             .IsRowVersion();
+    }
+
+    internal static void SeedAdmin(UserDbContext context, string email)
+    {
+        var id = new UserId(BootstrapAdmin.Id);
+        if (context.Users.Any(user => user.Id == id))
+        {
+            return;
+        }
+
+        context.Users.Add(User.Create(id, "Admin", "VidensVejen", email));
+        context.SaveChanges();
     }
 }

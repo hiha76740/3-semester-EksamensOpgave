@@ -56,7 +56,28 @@ public class AuthUser
     /// <param name="permissions"></param>
     /// <returns></returns>
     /// <exception cref="DomainException"></exception>
-    public static AuthUser Create(string emailAddress, string passwordHash, List<AccessPermission> permissions)
+    public static AuthUser Create(
+        string emailAddress,
+        string passwordHash,
+        List<AccessPermission> permissions
+        )
+    {
+        return Create(emailAddress, passwordHash, permissions, new AuthUserId(Guid.NewGuid()));
+    }
+
+    /// <summary>
+    /// Creates a pending authentication user with a supplied identifier.
+    /// </summary>
+    /// <param name="emailAddress">The email address used to sign in.</param>
+    /// <param name="passwordHash">The hashed sign-in password.</param>
+    /// <param name="permissions">The user's permissions.</param>
+    /// <param name="id">The identifier shared with the user profile.</param>
+    /// <returns>The new authentication user.</returns>
+    public static AuthUser Create(
+        string emailAddress,
+        string passwordHash,
+        List<AccessPermission> permissions,
+        AuthUserId id)
     {
         if (string.IsNullOrWhiteSpace(emailAddress))
             throw new DomainException("Email could not be set, no value");
@@ -66,7 +87,7 @@ public class AuthUser
 
         var email = new Email(emailAddress);
 
-        var user = new AuthUser(email, passwordHash, permissions);
+        var user = new AuthUser(email, passwordHash, permissions) { Id = id };
 
         return user;
     }
@@ -170,7 +191,6 @@ public class AuthUser
 
     private AuthUser(Email email, string passwordHash, List<AccessPermission> permissions)
     {
-        Id = new AuthUserId(Guid.NewGuid());
         Email = email;
         PasswordHash = passwordHash;
         Status = AuthUserStatus.Pending;

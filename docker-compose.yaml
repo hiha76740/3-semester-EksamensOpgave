@@ -101,6 +101,7 @@ services:
     environment:
         ASPNETCORE_URLS: "http://+:8080"
         ConnectionStrings__UserDb: "${USER_DB_CONNECTION_STRING:?Connection string mangler}"
+        BootstrapAdmin__Email: "${BOOTSTRAP_ADMIN_EMAIL:-}"
         Jwt__Key: "${JWT_KEY}"
         Jwt__Issuer: "${JWT_ISSUER}"
         Jwt__Audience: "${JWT_AUDIENCE}"
@@ -173,6 +174,8 @@ services:
     environment:
         ASPNETCORE_URLS: "http://+:8080"
         ConnectionStrings__AuthUserDb: "${AUTHUSER_DB_CONNECTION_STRING:?Connection string mangler}"
+        BootstrapAdmin__Email: "${BOOTSTRAP_ADMIN_EMAIL:-}"
+        BootstrapAdmin__Password: "${BOOTSTRAP_ADMIN_PASSWORD:-}"
         Jwt__Key: "${JWT_KEY}"
         Jwt__Issuer: "${JWT_ISSUER}"
         Jwt__Audience: "${JWT_AUDIENCE}"
