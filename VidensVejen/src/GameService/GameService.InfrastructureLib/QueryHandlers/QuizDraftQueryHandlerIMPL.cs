@@ -6,7 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GameService.InfrastructureLib.QueryHandlers;
 
-internal class QuizDraftHandlerIMPL(GameDbContext db) : IQuizDraftQueries
+/// <summary>
+/// 
+/// </summary>
+/// <param name="db"></param>
+public class QuizDraftQueryHandlerIMPL(GameDbContext db) : IQuizDraftQueries
 {
     async Task<QuizDraftDto?> IQuizDraftQueries.GetQuizDraftByIdAsync(Guid id)
     {
