@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
-using VidensVejen.ContractsLib.Authentication;
 using VidensVejen.Web.Authentication;
+using VidensVejen.ContractsLib.Authentication;
 
 namespace VidensVejen.Web.Extensions;
 
@@ -18,13 +18,16 @@ public static class AuthenticationDI
     {
         services.AddAuthorizationCore(options =>
         {
+            options.AddPolicy("User.Edit", policy => policy.RequireAuthenticatedUser()
+                .RequireClaim(CustomClaimTypes.Permission, "User.Edit"));
+            options.AddPolicy("User.Delete", policy => policy.RequireAuthenticatedUser()
+                .RequireClaim(CustomClaimTypes.Permission, "User.Delete"));
             options.AddPolicy("User.Create", policy =>
             {
                 policy.RequireAuthenticatedUser();
                 policy.RequireClaim(CustomClaimTypes.Permission, "User.Create");
             });
         });
-
         services.AddCascadingAuthenticationState();
 
         services.AddScoped<CustomAuthenticationStateProvider>();

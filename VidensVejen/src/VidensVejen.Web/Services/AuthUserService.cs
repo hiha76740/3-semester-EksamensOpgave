@@ -82,4 +82,32 @@ public class AuthUserService(HttpClient httpClient) : IAuthUserService
         using var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
     }
+
+    async Task<AuthUserResponse> IAuthUserService.GetByIdAsync(Guid id)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/{id}");
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<AuthUserResponse>()
+            ?? throw new JsonException("Could not deserialize the user account.");
+    }
+
+    Task IAuthUserService.ResetPasswordAsync(Guid id, ResetUserPasswordRequest request)
+    {
+        return SendAccountChangeAsync(HttpMethod.Put, $"{_baseUrl}/{id}/password/reset", request);
+    }
+
+    Task IAuthUserService.DeleteAsync(Guid id, DeleteUserRequest request)
+    {
+        return SendAccountChangeAsync(HttpMethod.Delete, $"{_baseUrl}/{id}", request);
+    }
+
+    private async Task SendAccountChangeAsync<TRequest>(HttpMethod method, string path, TRequest body)
+    {
+        using var request = new HttpRequestMessage(method, path) { Content = JsonContent.Create(body) };
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+    }
 }

@@ -1,4 +1,5 @@
 @using VidensVejen.ContractsLib.Responses.UserService
+@inject NavigationManager Navigation
 
 <RadzenDataGrid TItem="UserResponse" Data="@Users" AllowSorting="true"
                 AllowPaging="true" PageSize="15" EmptyText="Der er ingen brugere at vise.">
@@ -6,10 +7,35 @@
         <RadzenDataGridColumn TItem="UserResponse" Property="@nameof(UserResponse.Firstname)" Title="Fornavn" />
         <RadzenDataGridColumn TItem="UserResponse" Property="@nameof(UserResponse.Surname)" Title="Efternavn" />
         <RadzenDataGridColumn TItem="UserResponse" Property="@nameof(UserResponse.Email)" Title="E-mail" />
+        <AuthorizeView Policy="User.Edit">
+            <RadzenDataGridColumn TItem="UserResponse" Title="Ændre" Sortable="false">
+                <Template Context="user">
+                    <RadzenButton Text="Ændre" Icon="edit" Variant="Variant.Outlined"
+                                  Click="@(() => EditUser(user.Id))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </AuthorizeView>
+        <AuthorizeView Policy="User.Delete">
+            <RadzenDataGridColumn TItem="UserResponse" Title="Slet" Sortable="false">
+                <Template Context="user">
+                    <RadzenButton Text="Slet" Icon="delete" ButtonStyle="ButtonStyle.Danger"
+                                  Variant="Variant.Outlined" Disabled="@IsDeleting"
+                                  Click="@(() => DeleteRequested.InvokeAsync(user))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </AuthorizeView>
     </Columns>
 </RadzenDataGrid>
 
 @code {
     [Parameter, EditorRequired]
     public IReadOnlyList<UserResponse> Users { get; set; } = [];
+
+    [Parameter]
+    public EventCallback<UserResponse> DeleteRequested { get; set; }
+
+    [Parameter]
+    public bool IsDeleting { get; set; }
+
+    private void EditUser(Guid id) => Navigation.NavigateTo($"users/{id}/edit");
 }

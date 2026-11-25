@@ -1,6 +1,7 @@
 @page "/users"
-
+@using VidensVejen.ContractsLib.Responses.UserService
 @inject IUserService UserService
+@inject IAuthUserService AuthUsers
 @inject DialogService Dialog
 @inject IAuthorizationService Authorization
 
@@ -18,6 +19,14 @@
     {
         <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">Brugeren er registreret.</RadzenAlert>
     }
+    @if (deleteError != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@deleteError</RadzenAlert>
+    }
+    @if (userDeleted)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">Brugeren er slettet.</RadzenAlert>
+    }
     <AuthorizeView>
         <Authorized Context="auth">
             @if (auth.User.HasClaim(CustomClaimTypes.Permission, "User.Read"))
@@ -33,7 +42,7 @@
                 }
                 else if (users != null)
                 {
-                    <UserListComponent Users="users" />
+                    <UserListComponent Users="users" DeleteRequested="DeleteUserAsync" IsDeleting="isDeleting" />
                 }
             }
             else
@@ -58,6 +67,54 @@
     private string? error;
     private bool isLoading;
     private bool userCreated;
+
+    private bool isDeleting;
+    private bool userDeleted;
+    private string? deleteError;
+
+    private async Task DeleteUserAsync(UserResponse user)
+    {
+        if (isDeleting || AuthenticationStateTask == null)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        userDeleted = false;
+        userCreated = false;
+        deleteError = null;
+        try
+        {
+            var state = await AuthenticationStateTask;
+            if (!(await Authorization.AuthorizeAsync(state.User, "User.Delete")).Succeeded)
+            {
+                return;
+            }
+
+            var account = await AuthUsers.GetByIdAsync(user.Id);
+            var confirmed = await Dialog.Confirm(
+                $"Vil du slette {user.Firstname} {user.Surname} ({account.Email})?",
+                "Slet bruger",
+                new ConfirmOptions { OkButtonText = "Slet", CancelButtonText = "Annullér" });
+
+            if (confirmed != true)
+            {
+                return;
+            }
+
+            await AuthUsers.DeleteAsync(user.Id, new DeleteUserRequest(account.RowVersion));
+            users = users?.Where(item => item.Id != user.Id).ToArray();
+            userDeleted = true;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            deleteError = "Sletningen kunne ikke bekræftes. Kontrollér brugerlisten, før du prøver igen.";
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
 
     private async Task OpenCreateUserAsync()
     {

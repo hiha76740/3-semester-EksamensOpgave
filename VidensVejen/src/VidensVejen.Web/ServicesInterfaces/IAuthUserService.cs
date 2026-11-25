@@ -29,4 +29,13 @@ public interface IAuthUserService
 
     /// <summary>Changes the password after the current password has been verified.</summary>
     Task UpdatePasswordAsync(Guid id, UpdateAuthUserPasswordRequest update);
+
+    /// <summary>Gets the selected account and its current row version.</summary>
+    Task<AuthUserResponse> GetByIdAsync(Guid id);
+
+    /// <summary>Resets the selected account password as an administrator.</summary>
+    Task ResetPasswordAsync(Guid id, ResetUserPasswordRequest request);
+
+    /// <summary>Deletes the selected account using its current row version.</summary>
+    Task DeleteAsync(Guid id, DeleteUserRequest request);
 }

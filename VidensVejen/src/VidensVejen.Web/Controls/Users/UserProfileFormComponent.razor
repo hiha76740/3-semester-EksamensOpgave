@@ -22,9 +22,12 @@
 
     <RadzenFieldset Text="Skift adgangskode">
         <RadzenStack Gap="0.75rem">
-            <RadzenFormField Text="Nuværende adgangskode">
-                <RadzenPassword @bind-Value="Model.CurrentPassword" Disabled="@IsBusy" autocomplete="current-password" />
-            </RadzenFormField>
+            @if (RequireCurrentPassword)
+            {
+                <RadzenFormField Text="Nuværende adgangskode">
+                    <RadzenPassword @bind-Value="Model.CurrentPassword" Disabled="@IsBusy" autocomplete="current-password" />
+                </RadzenFormField>
+            }
             <RadzenFormField Text="Ny adgangskode">
                 <RadzenPassword @bind-Value="Model.NewPassword" Disabled="@IsBusy" autocomplete="new-password" />
             </RadzenFormField>
@@ -51,4 +54,7 @@
 
     [Parameter]
     public bool IsBusy { get; set; }
+
+    [Parameter]
+    public bool RequireCurrentPassword { get; set; } = true;
 }
