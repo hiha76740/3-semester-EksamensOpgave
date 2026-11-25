@@ -10,6 +10,12 @@ public interface IQuizQueries
     /// <summary>
     /// 
     /// </summary>
+    /// <returns></returns>
+    Task<IReadOnlyList<QuizDto>> GetAllPublishedQuizzes();
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
     Task<QuizDto?> GetQuizByIdAsync(Guid id);

@@ -88,6 +88,32 @@ public class QuizzesController(
         }
     }
 
+    [HttpGet("admin")]
+    [EndpointSummary("Get quizzes")]
+    [EndpointDescription("Gets all instances of published quizzes.")]
+    [ProducesResponseType<List<QuizResponse>>(StatusCodes.Status200OK, "Application/json", Description = "Returns all published quizzes")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to get all quizzes")]
+    public async Task<ActionResult<List<QuizResponse>>> GetAllPublishedQuizzes()
+    {
+        try
+        {
+            var list = await queries.GetAllPublishedQuizzes();
+
+            var response = new List<QuizResponse>();
+
+            foreach (var dto in list)
+            {
+                response.Add(dto.AsResponse());
+            }
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpDelete("{id:guid}")]
     [EndpointSummary("Delete a quiz")]
     [EndpointDescription("Deletes a single instance of a quiz")]

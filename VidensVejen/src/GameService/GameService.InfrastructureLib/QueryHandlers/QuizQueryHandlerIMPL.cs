@@ -13,6 +13,40 @@ namespace GameService.InfrastructureLib.QueryHandlers;
 /// <param name="db"></param>
 public class QuizQueryHandlerIMPL(GameDbContext db) : IQuizQueries
 {
+    async Task<IReadOnlyList<QuizDto>> IQuizQueries.GetAllPublishedQuizzes()
+    {
+        return await db.Quizzes
+            .AsNoTracking()
+            .Select(q => new QuizDto(
+            q.Id.Value,
+            q.Title,
+            q.TitleEn,
+            q.ExhibitionId.Value,
+            q.QuizLayout,
+            q.EndMessage,
+            q.EndMessageEn,
+            q.Questions
+            .Select(
+                q => new QuestionDto(
+                    q.Id.Value,
+                    q.Text,
+                    q.TextEn,
+                    q.Choices
+                    .Select(
+                        c => new ChoiceDto(
+                            c.Text,
+                            c.TextEn,
+                            c.IsCorrect,
+                            c.Feedback,
+                            c.FeedbackEn))
+                    .ToList()))
+            .ToList(),
+            q.Instruction,
+            q.InstructionEn
+            ))
+            .ToListAsync();
+    }
+
     async Task<QuizDto?> IQuizQueries.GetQuizByIdAsync(Guid id)
     {
         var quizKey = new QuizId(id);
