@@ -44,6 +44,26 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     b.ToTable("Exhibitions");
                 });
 
+            modelBuilder.Entity("ExhibitionService.DomainLib.Entities.ExhibitionDraft", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NameEn")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ThemeImageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExhibitionDrafts");
+                });
+
             modelBuilder.Entity("ExhibitionService.DomainLib.Entities.Subject", b =>
                 {
                     b.Property<Guid>("Id")
@@ -79,6 +99,38 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     b.HasIndex("ExhibitionId");
 
                     b.ToTable("Subjects");
+                });
+
+            modelBuilder.Entity("ExhibitionService.DomainLib.Entities.SubjectDraft", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(700)
+                        .HasColumnType("nvarchar(700)");
+
+                    b.Property<string>("DescriptionEn")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ExhibitionDraftId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Slug")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TitleEn")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExhibitionDraftId");
+
+                    b.ToTable("SubjectDrafts");
                 });
 
             modelBuilder.Entity("ExhibitionService.DomainLib.Entities.Subject", b =>
@@ -145,9 +197,67 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     b.Navigation("Topics");
                 });
 
+            modelBuilder.Entity("ExhibitionService.DomainLib.Entities.SubjectDraft", b =>
+                {
+                    b.HasOne("ExhibitionService.DomainLib.Entities.ExhibitionDraft", null)
+                        .WithMany("SubjectDrafts")
+                        .HasForeignKey("ExhibitionDraftId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.OwnsMany("ExhibitionService.DomainLib.ValueObjects.TopicDraft", "TopicDrafts", b1 =>
+                        {
+                            b1.Property<Guid>("SubjectDraftId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<string>("Body");
+
+                            b1.Property<string>("BodyEn");
+
+                            b1.Property<string>("CalloutLabel");
+
+                            b1.Property<string>("CalloutLabelEn");
+
+                            b1.Property<string>("CalloutText");
+
+                            b1.Property<string>("CalloutTextEn");
+
+                            b1.Property<string>("Description");
+
+                            b1.Property<string>("DescriptionEn");
+
+                            b1.Property<string>("Quote");
+
+                            b1.Property<string>("QuoteEn");
+
+                            b1.Property<string>("Title");
+
+                            b1.Property<string>("TitleEn");
+
+                            b1.HasKey("SubjectDraftId", "__synthesizedOrdinal");
+
+                            b1.ToTable("SubjectDrafts");
+
+                            b1
+                                .ToJson("TopicDrafts")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.WithOwner()
+                                .HasForeignKey("SubjectDraftId");
+                        });
+
+                    b.Navigation("TopicDrafts");
+                });
+
             modelBuilder.Entity("ExhibitionService.DomainLib.Entities.Exhibition", b =>
                 {
                     b.Navigation("Subjects");
+                });
+
+            modelBuilder.Entity("ExhibitionService.DomainLib.Entities.ExhibitionDraft", b =>
+                {
+                    b.Navigation("SubjectDrafts");
                 });
 #pragma warning restore 612, 618
         }
