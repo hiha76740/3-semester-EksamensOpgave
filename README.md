@@ -24,7 +24,9 @@ VidensVejen er vores eksamensprojekt på 3. semester. Løsningen er udviklet til
 
 5. Åbn [adminfrontenden](https://localhost:8091/login) og [kioskfrontenden](https://localhost:8191/). Ved kørsel på en anden maskine skal du bruge dens værtsnavn.
 
-Opstartsseedingen dækker AuthService og UserService. På en tom installation skal databaser til de øvrige funktioner, du vil afprøve, også klargøres med deres migrationer, hvor de findes.
+AuthService, UserService, ExhibitionService, GameService og ImageService anvender automatisk deres manglende EF Core-migrationer ved opstart. Hver service skal kunne oprette forbindelse til sin SQL Server med en bruger, der har rettigheder til at anvende migrationerne. StatisticsService har endnu ingen EF Core-database eller migrationer.
+
+Tag backup før første opstart mod eksisterende databaser, hvis der ligger data, I skal bevare. Nogle af de eksisterende GameService-migrationer fjerner blandt andet de tidligere kolonner til quizfeedback.
 
 ### Lokal udvikling med Aspire
 
@@ -112,9 +114,9 @@ Sæt disse variabler i `.env` ved siden af `docker-compose.yaml` for at aktivere
 | `BOOTSTRAP_ADMIN_EMAIL` | Mailadresse til adminlogin og brugerprofil. Vælg en adresse, der er ledig i begge databaser. |
 | `BOOTSTRAP_ADMIN_PASSWORD` | Startadgangskode til adminkontoen. AuthService kræver den, når kontoen oprettes, og gemmer kun dens hash. |
 
-Når adminmailen er sat, anvender AuthService og UserService hver deres manglende EF Core-migrationer ved opstart. AuthService opretter den aktive adminkonto og tildeler alle permissions fra sin database. UserService opretter profilen **Admin VidensVejen** med samme bruger-ID og mailadresse.
+Når adminmailen er sat, opretter AuthService den aktive adminkonto efter migrationerne og tildeler alle permissions fra sin database. UserService opretter profilen **Admin VidensVejen** med samme bruger-ID og mailadresse.
 
-Ved senere opstarter beholder kontoen sin eksisterende adgangskode, og AuthService tilføjer eventuelle manglende permissions. Hvis adminmailen er tom eller udeladt, springer begge services denne opstartsrutine over.
+Ved senere opstarter beholder kontoen sin eksisterende adgangskode, og AuthService tilføjer eventuelle manglende permissions. Hvis adminmailen er tom eller udeladt, kører migrationerne stadig, og begge services springer admin-seedingen over.
 
 ## Portmapping
 
