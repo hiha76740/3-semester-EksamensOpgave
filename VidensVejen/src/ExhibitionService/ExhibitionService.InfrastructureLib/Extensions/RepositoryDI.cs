@@ -17,6 +17,7 @@ public static class RepositoryDI
     public static IServiceCollection AddRepositoryDI(this IServiceCollection services)
     {
         services.AddScoped<IExhibitionRepository, ExhibitionRepository>();
+        services.AddScoped<IExhibitionDraftRepository, ExhibitionDraftRepository>();
 
         return services;
     }
