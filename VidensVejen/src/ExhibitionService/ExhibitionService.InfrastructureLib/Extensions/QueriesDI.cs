@@ -17,6 +17,7 @@ public static class QueriesDI
     public static IServiceCollection AddQueriesDI(this IServiceCollection services)
     {
         services.AddScoped<IExhibitionQueries, ExhibitionQueryHandlerIMPL>();
+        services.AddScoped<IExhibitionDraftQueries, ExhibitionDraftQueryHandlerIMPL>();
 
         return services;
     }
