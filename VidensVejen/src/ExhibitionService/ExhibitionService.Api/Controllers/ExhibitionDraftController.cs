@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ExhibitionService.Api.Controllers;
 
-[Route("v1/exhibitions-draft")]
+[Route("v1/exhibitions-drafts")]
 [ApiController]
 public class ExhibitionDraftController : ControllerBase
 {
@@ -14,15 +14,15 @@ public class ExhibitionDraftController : ControllerBase
         [HttpPost]
         [EndpointSummary("Create an exhibition draft")]
         [EndpointDescription("Creates a new instance of ExhibitionDraft")]
-        [ProducesResponseType(StatusCodes.Status201Created, Description = "Exhibition draft created successfully")]
+        [ProducesResponseType(StatusCodes.Status200OK, Description = "Exhibition draft created successfully")]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to create exhibition draft")]
-        public async Task<ActionResult> CreateExhibitionDraft()
+        public async Task<ActionResult<Guid>> CreateExhibitionDraft()
         {
             try
             {
-                await create.HandleAsync();
+                var id = await create.HandleAsync();
 
-                return Created();
+                return Ok(id);
             }
             catch (Exception ex)
             {
