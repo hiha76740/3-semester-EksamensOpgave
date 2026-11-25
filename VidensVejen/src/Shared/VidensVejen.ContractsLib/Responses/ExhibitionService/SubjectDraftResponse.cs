@@ -9,7 +9,7 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// <param name="Description"></param>
 /// <param name="TopicDrafts"></param>
 public record SubjectDraftResponse(
-    Guid Id,
+    Guid? Id,
     string? Slug,
     string? Title,
     string? Description,
@@ -19,7 +19,7 @@ public record SubjectDraftResponse(
     /// <summary>
     /// A unique identifier for the subject draft.
     /// </summary>
-    public Guid Id { get; init; } = Id;
+    public Guid? Id { get; init; } = Id;
 
     /// <summary>
     /// The slug of the subject draft.
