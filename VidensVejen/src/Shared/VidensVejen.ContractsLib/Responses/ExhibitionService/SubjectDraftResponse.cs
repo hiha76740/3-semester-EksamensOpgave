@@ -1,30 +1,30 @@
 namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 
+
 /// <summary>
 /// 
 /// </summary>
 /// <param name="Id"></param>
-/// <param name="Slug"></param>
 /// <param name="Title"></param>
+/// <param name="TitleEn"></param>
+/// <param name="Slug"></param>
 /// <param name="Description"></param>
+/// <param name="DescriptionEn"></param>
 /// <param name="TopicDrafts"></param>
 public record SubjectDraftResponse(
-    Guid? Id,
-    string? Slug,
+    Guid Id,
     string? Title,
+    string? TitleEn,
+    string? Slug,
     string? Description,
-    IReadOnlyList<TopicDraftResponse>? TopicDrafts
+    string? DescriptionEn,
+    List<TopicDraftResponse> TopicDrafts
     )
 {
     /// <summary>
-    /// A unique identifier for the subject draft.
+    /// A unique identifier for the Subject draft.
     /// </summary>
-    public Guid? Id { get; init; } = Id;
-
-    /// <summary>
-    /// The slug of the subject draft.
-    /// </summary>
-    public string? Slug { get; init; } = Slug;
+    public Guid Id { get; init; } = Id;
 
     /// <summary>
     /// The title of the subject draft.
@@ -32,12 +32,27 @@ public record SubjectDraftResponse(
     public string? Title { get; init; } = Title;
 
     /// <summary>
+    /// The english title of the subject draft.
+    /// </summary>
+    public string? TitleEn { get; init; } = TitleEn;
+
+    /// <summary>
+    /// The slug of the subject draft.
+    /// </summary>
+    public string? Slug { get; init; } = Slug;
+
+    /// <summary>
     /// The description of the subject draft.
     /// </summary>
     public string? Description { get; init; } = Description;
 
     /// <summary>
-    /// A list of topics the subject draft has associated.
+    /// The description of the subject draft.
     /// </summary>
-    public IReadOnlyList<TopicDraftResponse>? TopicDrafts { get; init; } = TopicDrafts;
+    public string? DescriptionEn { get; init; } = DescriptionEn;
+
+    /// <summary>
+    /// The list of topic drafts you want under the subject draft.
+    /// </summary>
+    public List<TopicDraftResponse> TopicDrafts { get; init; } = TopicDrafts;
 }
