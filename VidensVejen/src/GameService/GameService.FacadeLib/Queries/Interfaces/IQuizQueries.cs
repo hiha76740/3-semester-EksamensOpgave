@@ -10,6 +10,12 @@ public interface IQuizQueries
     /// <summary>
     /// 
     /// </summary>
+    /// <returns></returns>
+    Task<IReadOnlyList<QuizDto>> GetAllPublishedQuizzes();
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
     Task<QuizDto?> GetQuizByIdAsync(Guid id);
@@ -20,17 +26,4 @@ public interface IQuizQueries
     /// <param name="exhibitionId"></param>
     /// <returns></returns>
     Task<List<QuizDto>> GetQuizzesByExhibitionAsync(Guid exhibitionId);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    Task<QuizDraftDto?> GetQuizDraftByIdAsync(Guid id);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    Task<List<QuizDraftDto>> GetQuizDraftsAsync();
 }

@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <None Include="Mappers\QuestionDraftMapper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Shared\VidensVejen.BuildingBlocksLib\VidensVejen.BuildingBlocksLib.csproj" />
     <ProjectReference Include="..\GameService.DomainLib\GameService.DomainLib.csproj" />
     <ProjectReference Include="..\GameService.FacadeLib\GameService.FacadeLib.csproj" />
     <ProjectReference Include="..\..\Shared\VidensVejen.SharedKernelLib\VidensVejen.SharedKernelLib.csproj" />

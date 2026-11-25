@@ -13,6 +13,7 @@ builder.Services.AddDatabaseDI(builder.Configuration);
 builder.Services.AddHandlerDI();
 builder.Services.AddRepositoryDI();
 builder.Services.AddQueryDI();
+builder.Services.AddUnitOfWorkDI();
 
 builder.Services.AddControllers();
 

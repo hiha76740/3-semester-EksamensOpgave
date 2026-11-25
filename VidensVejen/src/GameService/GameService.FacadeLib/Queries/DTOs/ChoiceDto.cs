@@ -10,7 +10,7 @@ namespace GameService.FacadeLib.Queries.DTOs;
 /// <param name="FeedbackEn"></param>
 public record ChoiceDto(
     string Text,
-    string? TextEn,
+    string TextEn,
     bool CorrectAnswer,
     string? Feedback,
     string? FeedbackEn

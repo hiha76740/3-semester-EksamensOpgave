@@ -17,6 +17,7 @@ public static class QueryDI
     public static IServiceCollection AddQueryDI(this IServiceCollection services)
     {
         services.AddScoped<IQuizQueries, QuizQueryHandlerIMPL>();
+        services.AddScoped<IQuizDraftQueries, QuizDraftQueryHandlerIMPL>();
 
         return services;
     }

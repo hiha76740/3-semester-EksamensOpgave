@@ -10,8 +10,7 @@ public interface IUpdateQuizDraftHandler
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="draftId"></param>
     /// <param name="command"></param>
     /// <returns></returns>
-    Task HandleAsync(Guid draftId, CreateQuizCommand command);
+    Task HandleAsync(UpdateQuizDraftCommand command);
 }

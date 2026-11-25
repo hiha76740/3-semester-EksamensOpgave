@@ -15,6 +15,16 @@
             <RadzenTextArea @bind-Value="Model.InstructionEn" @bind-Value:after="NotifyChanged" Rows="3"
                             Placeholder="Skriv en kort instruktion til gæsten." />
         </RadzenFormField>
+        <RadzenFormField Text="Quizlayout *">
+            <RadzenDropDown TValue="string" Data="@Layouts" @bind-Value="Model.QuizLayout"
+                            @bind-Value:after="NotifyChanged" Placeholder="Vælg quizlayout" />
+        </RadzenFormField>
+        <RadzenFormField Text="Afsluttende besked (DA)">
+            <RadzenTextArea @bind-Value="Model.EndMessage" @bind-Value:after="NotifyChanged" Rows="2" />
+        </RadzenFormField>
+        <RadzenFormField Text="Afsluttende besked (EN)">
+            <RadzenTextArea @bind-Value="Model.EndMessageEn" @bind-Value:after="NotifyChanged" Rows="2" />
+        </RadzenFormField>
         @if (LockedExhibitionName != null)
         {
             <RadzenFormField Text="Udstilling">
@@ -23,14 +33,14 @@
         }
         else
         {
-        <RadzenFormField Text="Udstilling *">
-            <RadzenDropDown TValue="Guid?" Data="@Exhibitions"
-                            TextProperty="@nameof(ExhibitionNameResponse.Name)"
-                            ValueProperty="@nameof(ExhibitionNameResponse.Id)"
-                            @bind-Value="Model.ExhibitionId" @bind-Value:after="NotifyChanged"
-                            Placeholder="Vælg en udstilling" AllowFiltering="true"
-                            Disabled="@(Exhibitions.Count == 0)" />
-        </RadzenFormField>
+            <RadzenFormField Text="Udstilling *">
+                <RadzenDropDown TValue="Guid?" Data="@Exhibitions"
+                                TextProperty="@nameof(ExhibitionNameResponse.Name)"
+                                ValueProperty="@nameof(ExhibitionNameResponse.Id)"
+                                @bind-Value="Model.ExhibitionId" @bind-Value:after="NotifyChanged"
+                                Placeholder="Vælg en udstilling" AllowFiltering="true"
+                                Disabled="@(Exhibitions.Count == 0)" />
+            </RadzenFormField>
         }
     </RadzenStack>
 </RadzenCard>
@@ -47,6 +57,8 @@
 
     [Parameter]
     public string? LockedExhibitionName { get; set; }
+
+    private static readonly string[] Layouts = ["Vertikalt", "Horisontalt"];
 
     private Task NotifyChanged() => Changed.InvokeAsync();
 }

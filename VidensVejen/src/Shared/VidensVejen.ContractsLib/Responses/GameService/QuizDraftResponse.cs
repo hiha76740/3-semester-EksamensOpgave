@@ -11,6 +11,8 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 /// <param name="EndMessage"></param>
 /// <param name="EndMessageEn"></param>
 /// <param name="Questions"></param>
+/// <param name="Instruction"></param>
+/// <param name="InstructionEn"></param>
 public record QuizDraftResponse(
     Guid Id,
     string? Title,
@@ -19,7 +21,9 @@ public record QuizDraftResponse(
     string? QuizLayout,
     string? EndMessage,
     string? EndMessageEn,
-    List<DraftQuestionResponse> Questions
+    List<DraftQuestionResponse> Questions,
+    string? Instruction,
+    string? InstructionEn
     )
 {
     /// <summary>
@@ -61,4 +65,14 @@ public record QuizDraftResponse(
     /// The questions saved in the draft.
     /// </summary>
     public List<DraftQuestionResponse> Questions { get; init; } = Questions;
+
+    /// <summary>
+    /// Instruction shown in Danish.
+    /// </summary>
+    public string? Instruction { get; init; } = Instruction;
+
+    /// <summary>
+    /// Instruction shown in English.
+    /// </summary>
+    public string? InstructionEn { get; init; } = InstructionEn;
 }

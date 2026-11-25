@@ -1,6 +1,6 @@
 using GameService.FacadeLib.Commands.DTOs;
 using GameService.FacadeLib.Queries.DTOs;
-using VidensVejen.ContractsLib.Requests.GameService;
+using VidensVejen.ContractsLib.Requests.GameService.Quizzes;
 using VidensVejen.ContractsLib.Responses.GameService;
 
 namespace GameService.Api.Mappers.Quizzes;
@@ -12,7 +12,7 @@ internal static class QuestionMapper
         var output = new CreateQuestionCommand(
             request.Text,
             request.TextEn,
-            request.Choices?
+            request.Choices
             .Select(
                 q => q.AsCreateCommand())
             .ToList()

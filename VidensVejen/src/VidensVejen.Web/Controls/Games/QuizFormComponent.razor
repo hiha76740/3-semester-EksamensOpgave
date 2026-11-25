@@ -38,14 +38,19 @@
                 {
                     var question = Model.Questions[index];
                     <QuizQuestionComponent @key="question.Id" Question="question" Number="@(index + 1)"
-                                        CanRemove="@(Model.Questions.Count > 1)" Changed="Changed"
-                                        Remove="@(() => RemoveQuestion(question))" />
+                                           CanRemove="@(Model.Questions.Count > 1)" Changed="Changed"
+                                           Remove="@(() => RemoveQuestion(question))" />
                 }
 
                 <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End"
                              Wrap="FlexWrap.Wrap">
-                    <RadzenButton Text="@ResetText" Variant="Variant.Outlined" ButtonType="ButtonType.Button" Click="@(() => ResetCallback.InvokeAsync())" />
-                    <RadzenButton Text="@SubmitText" ButtonType="ButtonType.Submit" />
+                    <RadzenButton Text="@ResetText" Disabled="@IsBusy" Variant="Variant.Outlined" ButtonType="ButtonType.Button" Click="@(() => ResetCallback.InvokeAsync())" />
+                    @if (SaveDraftCallback.HasDelegate)
+                    {
+                        <RadzenButton Text="Gem kladde" ButtonType="ButtonType.Button" Variant="Variant.Outlined"
+                                      Click="@(() => SaveDraftCallback.InvokeAsync(Model))" Disabled="@IsBusy" />
+                    }
+                    <RadzenButton Text="@SubmitText" ButtonType="ButtonType.Submit" Disabled="@IsBusy" />
                 </RadzenStack>
             </RadzenStack>
         </RadzenCard>
@@ -87,6 +92,12 @@
 
     [Parameter]
     public string? LockedExhibitionName { get; set; }
+
+    [Parameter]
+    public EventCallback<QuizInputModel> SaveDraftCallback { get; set; }
+
+    [Parameter]
+    public bool IsBusy { get; set; }
 
     private Task HandleSubmit(QuizInputModel submittedModel) => SubmitCallback.InvokeAsync(submittedModel);
 

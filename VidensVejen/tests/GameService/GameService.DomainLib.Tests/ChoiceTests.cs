@@ -1,4 +1,4 @@
-using GameService.DomainLib.ValueObjects;
+using GameService.DomainLib.ValueObjects.Quizzes;
 using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.DomainLib.Tests;
@@ -33,5 +33,16 @@ public class ChoiceTests
     {
         // Act & Assert
         Assert.Throws<DomainException>(() => new Choice(text!, "Answer EN", false, "Incorrect", "Incorrect EN"));
+    }
+
+    [Fact]
+    public void Constructor_GivenNoFeedback_PreservesNullValues()
+    {
+        // Act
+        var choice = new Choice("Answer", "Answer EN", false, null, null);
+
+        // Assert
+        Assert.Null(choice.Feedback);
+        Assert.Null(choice.FeedbackEn);
     }
 }
