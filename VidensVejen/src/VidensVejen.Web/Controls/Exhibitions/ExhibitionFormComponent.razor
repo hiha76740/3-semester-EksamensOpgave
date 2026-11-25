@@ -1,7 +1,16 @@
 <RadzenCard class="rz-my-4 rz-mx-auto rz-p-4" Style="max-width: 900px;">
     <RadzenTemplateForm TItem="ExhibitionInputModel" Data="@Model" Submit="HandleSubmit">
         <RadzenStack Gap="1rem">
-            <RadzenText TextStyle="TextStyle.H2" Text="@Model.ExhibitionName" />
+            <RadzenFormField Text="Udstillingsnavn (DA)">
+                <RadzenTextBox @bind-Value="Model.ExhibitionName" />
+            </RadzenFormField>
+            <RadzenFormField Text="Udstillingsnavn (EN)">
+                <RadzenTextBox @bind-Value="Model.ExhibitionNameEn" />
+            </RadzenFormField>
+            @if (Message != null)
+            {
+                <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">@Message</RadzenAlert>
+            }
             @if (Error != null)
             {
                 <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@Error</RadzenAlert>
@@ -32,7 +41,10 @@
             </RadzenAccordion>
 
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
-                <RadzenButton ButtonType="ButtonType.Submit" Text="@SubmitButtonText" />
+                <RadzenButton ButtonType="ButtonType.Button" Text="Gem kladde" Variant="Variant.Outlined"
+                              Click="@(() => SaveDraftCallback.InvokeAsync(Model))"
+                              Disabled="@IsBusy" />
+                <RadzenButton ButtonType="ButtonType.Submit" Text="@SubmitButtonText" Disabled="@IsBusy" />
             </RadzenStack>
         </RadzenStack>
     </RadzenTemplateForm>
@@ -50,6 +62,15 @@
 
     [Parameter]
     public string? Error { get; set; }
+
+    [Parameter]
+    public EventCallback<ExhibitionInputModel> SaveDraftCallback { get; set; }
+
+    [Parameter]
+    public string? Message { get; set; }
+
+    [Parameter]
+    public bool IsBusy { get; set; }
 
     private bool[] expandedSubjects = [];
     private string? themeError;

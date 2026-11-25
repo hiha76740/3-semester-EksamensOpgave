@@ -2,7 +2,8 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
-using VidensVejen.ContractsLib.Requests.ExhibitionService;
+using VidensVejen.ContractsLib.Requests.ExhibitionService.Drafts;
+using VidensVejen.ContractsLib.Requests.ExhibitionService.Exhibitions;
 using VidensVejen.ContractsLib.Responses.ExhibitionService;
 using VidensVejen.Web.ServicesInterfaces;
 
@@ -44,5 +45,32 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
         using var response = await httpClient.SendAsync(request);
 
         return response.StatusCode;
+    }
+
+    async Task<Guid> IExhibitionService.CreateDraftAsync()
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/draft");
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var id = await response.Content.ReadFromJsonAsync<Guid>();
+        if (id == Guid.Empty)
+        {
+            throw new JsonException("The draft identifier was empty.");
+        }
+
+        return id;
+    }
+
+    async Task IExhibitionService.SaveDraftAsync(Guid draftId, SaveExhibitionDraftRequest draft)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Put, $"{BaseUrl}/draft/{draftId}")
+        {
+            Content = JsonContent.Create(draft)
+        };
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
     }
 }

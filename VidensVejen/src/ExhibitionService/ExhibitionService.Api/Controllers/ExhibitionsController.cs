@@ -4,7 +4,7 @@ using ExhibitionService.Api.Mappers;
 using ExhibitionService.FacadeLib.Commands.Interfaces;
 using ExhibitionService.FacadeLib.Queries.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using VidensVejen.ContractsLib.Requests.ExhibitionService;
+using VidensVejen.ContractsLib.Requests.ExhibitionService.Exhibitions;
 using VidensVejen.ContractsLib.Responses.ExhibitionService;
 using VidensVejen.SharedKernelLib.Exceptions;
 

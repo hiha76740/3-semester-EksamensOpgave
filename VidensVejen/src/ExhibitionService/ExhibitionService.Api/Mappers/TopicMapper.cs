@@ -1,6 +1,6 @@
 using ExhibitionService.FacadeLib.Commands.DTOs;
 using ExhibitionService.FacadeLib.Queries.DTOs;
-using VidensVejen.ContractsLib.Requests.ExhibitionService;
+using VidensVejen.ContractsLib.Requests.ExhibitionService.Exhibitions;
 using VidensVejen.ContractsLib.Responses.ExhibitionService;
 
 namespace ExhibitionService.Api.Mappers;

@@ -1,4 +1,4 @@
-namespace VidensVejen.ContractsLib.Requests.ExhibitionService;
+namespace VidensVejen.ContractsLib.Requests.ExhibitionService.Exhibitions;
 
 /// <summary>
 /// 

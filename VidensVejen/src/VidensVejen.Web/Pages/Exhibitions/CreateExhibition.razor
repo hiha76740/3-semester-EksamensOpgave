@@ -1,4 +1,6 @@
 @page "/exhibition/create"
+@using System.Text.Json
+@using Microsoft.AspNetCore.Components.Forms
 
 @inject IImageService ImageService
 @inject IExhibitionService ExhibitionService
@@ -9,120 +11,193 @@
 
 @if (model != null)
 {
-    <ExhibitionFormComponent Model="model"
-                             SubmitCallback="Create"
-                             Error="@error"
-                             SubmitButtonText="@submitButtonText" />
+    <ExhibitionFormComponent Model="model" SubmitCallback="Create" SubmitButtonText="Publicér"
+                             SaveDraftCallback="SaveDraftAsync" IsBusy="isBusy"
+                             Error="@error" Message="@message" />
 }
 else
 {
-    <RadzenButton Text="Opret udstilling" Icon="add" Click="NameExhibitionAsync" />
+    @if (error != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
+    }
+    <RadzenButton Text="Opret udstilling" Icon="add" Click="StartDraftAsync" IsBusy="@isBusy" />
 }
 
 @code {
-    private string submitButtonText = "Opret";
-
+    private static readonly JsonSerializerOptions DraftJsonOptions = new(JsonSerializerDefaults.Web);
     private ExhibitionInputModel? model;
+    private Guid? draftId;
+    private IBrowserFile? uploadedThemeFile;
+    private Guid? uploadedThemeId;
+    private bool isBusy;
     private string? error;
+    private string? message;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private Task StartDraftAsync() => RunAsync(async () =>
     {
-        if (firstRender)
+        draftId = await ExhibitionService.CreateDraftAsync();
+        model = new ExhibitionInputModel();
+    }, "Kladden kunne ikke oprettes.");
+
+    private Task SaveDraftAsync(ExhibitionInputModel input) => RunAsync(async () =>
+    {
+        if (draftId is Guid id)
         {
-            await NameExhibitionAsync();
-            StateHasChanged();
+            var imageId = await ResolveThemeIdAsync(input.ThemeFile);
+            var request = new SaveExhibitionDraftRequest(
+                input.ExhibitionName, input.ExhibitionNameEn, imageId,
+                input.Subjects.Select(subject => new SaveSubjectDraftRequest(
+                    subject.Title, subject.TitleEn, subject.Title.ToLowerInvariant(),
+                    subject.Description, subject.DescriptionEn,
+                    subject.Topics.Select(topic => new SaveTopicDraftRequest(
+                        topic.Title, topic.TitleEn, topic.Description, topic.DescriptionEn,
+                        topic.Body, topic.BodyEn, topic.CalloutLabel, topic.CalloutLabelEn,
+                        topic.CalloutText, topic.CalloutTextEn, topic.Quote, topic.QuoteEn)).ToList(),
+                    subject.IsQuiz, subject.QuizId,
+                    subject.NewQuiz == null ? null : JsonSerializer.SerializeToElement(subject.NewQuiz, DraftJsonOptions))).ToList());
+
+            await ExhibitionService.SaveDraftAsync(id, request);
+            message = "Kladden er gemt.";
+        }
+    }, "Kladden kunne ikke gemmes.");
+
+    public Task Create(ExhibitionInputModel input) => RunAsync(async () =>
+    {
+        error = ValidatePublication(input);
+        if (error != null)
+        {
+            return;
+        }
+
+        var imageId = await ResolveThemeIdAsync(input.ThemeFile);
+        if (!imageId.HasValue)
+        {
+            error = "Vælg et temabillede.";
+            return;
+        }
+
+        var request = new CreateExhibitionRequest(
+            input.ExhibitionName,
+            input.ExhibitionNameEn,
+            imageId.Value,
+            input.Subjects.Select(s => new CreateSubjectRequest(
+                s.Title,
+                s.TitleEn,
+                s.Title.ToLowerInvariant(),
+                s.Description,
+                s.DescriptionEn,
+                s.Topics.Select(t => new CreateTopicRequest(
+                    t.Title,
+                    t.TitleEn,
+                    t.Description,
+                    t.DescriptionEn,
+                    t.Body,
+                    t.BodyEn,
+                    t.CalloutLabel,
+                    t.CalloutLabelEn,
+                    t.CalloutText,
+                    t.CalloutTextEn,
+                    t.Quote,
+                    t.QuoteEn)).ToList()
+            )).ToList()
+        );
+
+        var status = await ExhibitionService.CreateAsync(request);
+        if (status != HttpStatusCode.Created)
+        {
+            error = "Udstillingen kunne ikke publiceres.";
+            return;
+        }
+
+        await Dialog.Alert("Udstillingen er publiceret.", "Publicér udstilling");
+        NavigationManager.NavigateTo("/exhibitions");
+    }, "Publiceringen kunne ikke bekræftes. Kontrollér udstillingslisten, før du prøver igen.");
+
+    private async Task<Guid?> ResolveThemeIdAsync(IBrowserFile? file)
+    {
+        if (file == null)
+        {
+            return null;
+        }
+
+        if (ReferenceEquals(file, uploadedThemeFile))
+        {
+            return uploadedThemeId;
+        }
+
+        var image = await ImageService.UploadImage(file, ExhibitionInputModel.MaxThemeFileSize);
+        uploadedThemeFile = file;
+        uploadedThemeId = image.ImageId;
+        return uploadedThemeId;
+    }
+
+    private async Task RunAsync(Func<Task> action, string failureMessage)
+    {
+        if (isBusy)
+        {
+            return;
+        }
+
+        isBusy = true;
+        error = null;
+        message = null;
+        try
+        {
+            await action();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException
+            or InvalidOperationException or IOException or OperationCanceledException)
+        {
+            error = failureMessage;
+        }
+        finally
+        {
+            isBusy = false;
         }
     }
 
-    private async Task NameExhibitionAsync()
+    private static string? ValidatePublication(ExhibitionInputModel input)
     {
-        object? result = await Dialog.OpenAsync<ExhibitionNameDialogComponent>(
-            "Opret udstilling",
-            options: new DialogOptions { Width = "min(92vw, 420px)", CloseDialogOnOverlayClick = false });
-
-        if (result is ExhibitionInputModel exhibition)
+        if (string.IsNullOrWhiteSpace(input.ExhibitionName) || string.IsNullOrWhiteSpace(input.ExhibitionNameEn))
         {
-            model = exhibition;
-            error = null;
+            return "Udfyld udstillingsnavnet på dansk og engelsk.";
         }
-    }
 
-    public async Task Create(ExhibitionInputModel input)
-    {
         if (input.ThemeFile == null)
         {
-            error = "Venligst tilføj tema billede fil";
+            return "Vælg et temabillede.";
         }
-        else
+
+        for (var i = 0; i < input.Subjects.Count; i++)
         {
-            error = null;
-
-            for (var i = 0; i < input.Subjects.Count; i++)
+            var subject = input.Subjects[i];
+            if (string.IsNullOrWhiteSpace(subject.Title) || string.IsNullOrWhiteSpace(subject.TitleEn)
+                || string.IsNullOrWhiteSpace(subject.Description) || string.IsNullOrWhiteSpace(subject.DescriptionEn))
             {
-                var subject = input.Subjects[i];
-                if (string.IsNullOrWhiteSpace(subject.Title) || string.IsNullOrWhiteSpace(subject.TitleEn)
-                    || string.IsNullOrWhiteSpace(subject.Description) || string.IsNullOrWhiteSpace(subject.DescriptionEn))
-                {
-                    error = $"Udfyld titel og beskrivelse på begge sprog for subject {i + 1}.";
-                    return;
-                }
-
-                if (subject.IsQuiz && subject.QuizId == null && subject.NewQuiz == null)
-                {
-                    error = $"Vælg eller opret en quiz for subject {i + 1}.";
-                    return;
-                }
-
-                if (!subject.IsQuiz && subject.Topics.Count == 0)
-                {
-                    error = $"Tilføj mindst ét emne til subject {i + 1}.";
-                    return;
-                }
+                return $"Udfyld titel og beskrivelse på begge sprog for subject {i + 1}.";
             }
 
-            if (error == null)
+            if (subject.IsQuiz)
             {
-                var imageResponse = await ImageService.UploadImage(input.ThemeFile, ExhibitionInputModel.MaxThemeFileSize);
+                return $"Subject {i + 1} er en quiz. Quizvalg kan gemmes i kladden, men publicering understøtter endnu kun subjects med emner.";
+            }
 
-                var request = new CreateExhibitionRequest(
-                    input.ExhibitionName,
-                    input.ExhibitionNameEn,
-                    imageResponse.ImageId,
-                    input.Subjects.Select(s => new CreateSubjectRequest(
-                        s.Title,
-                        s.TitleEn,
-                        s.Title.ToLower(),
-                        s.Description,
-                        s.DescriptionEn,
-                        s.Topics.Select(t => new CreateTopicRequest(
-                            t.Title,
-                            t.TitleEn,
-                            t.Description,
-                            t.DescriptionEn,
-                            t.Body,
-                            t.BodyEn,
-                            t.CalloutLabel,
-                            t.CalloutLabelEn,
-                            t.CalloutText,
-                            t.CalloutTextEn,
-                            t.Quote,
-                            t.QuoteEn)).ToList()
-                    )).ToList()
-                );
+            if (subject.Topics.Count == 0)
+            {
+                return $"Tilføj mindst ét emne til subject {i + 1}.";
+            }
 
-                var statusCode = await ExhibitionService.CreateAsync(request);
-
-                if (statusCode == HttpStatusCode.Created)
+            if (subject.Topics.Any(topic => new[]
                 {
-                    await Dialog.Alert("Udstilling oprettet", "Udstilling oprettelse");
-                    NavigationManager.NavigateTo("/exhibitions");
-                }
-                else
-                {
-                    error = "Fejl opstået ved oprettelse af udstilling. Prøv igen";
-                }
-            }        
+                    topic.Title, topic.TitleEn, topic.Description, topic.DescriptionEn, topic.Body,
+                    topic.BodyEn, topic.CalloutLabel, topic.CalloutLabelEn, topic.CalloutText, topic.CalloutTextEn
+                }.Any(string.IsNullOrWhiteSpace)))
+            {
+                return $"Udfyld titel, beskrivelse, brødtekst og fremhævet boks på begge sprog for emnerne i subject {i + 1}.";
+            }
         }
-        
+
+        return null;
     }
 }

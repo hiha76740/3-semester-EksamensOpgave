@@ -6,10 +6,6 @@
         {
             <RadzenText TextStyle="TextStyle.Subtitle1" Text="@SubjectTitle" />
         }
-        @if (showError)
-        {
-            <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">Udfyld alle felter markeret med *.</RadzenAlert>
-        }
         <RadzenFormField Text="Titel * (DA)">
             <RadzenTextBox @bind-Value="Model.Title" />
         </RadzenFormField>
@@ -60,24 +56,5 @@
     [Parameter]
     public string SubjectTitle { get; set; } = string.Empty;
 
-    private bool showError;
-
-    private void Save(ExhibitionTopicInputModel topic)
-    {
-        showError = string.IsNullOrWhiteSpace(topic.Title)
-            || string.IsNullOrWhiteSpace(topic.Description)
-            || string.IsNullOrWhiteSpace(topic.Body)
-            || string.IsNullOrWhiteSpace(topic.CalloutLabel)
-            || string.IsNullOrWhiteSpace(topic.CalloutText)
-            || string.IsNullOrWhiteSpace(topic.TitleEn)
-            || string.IsNullOrWhiteSpace(topic.DescriptionEn)
-            || string.IsNullOrWhiteSpace(topic.BodyEn)
-            || string.IsNullOrWhiteSpace(topic.CalloutLabelEn)
-            || string.IsNullOrWhiteSpace(topic.CalloutTextEn);
-
-        if (!showError)
-        {
-            Dialog.Close(topic);
-        }
-    }
+    private void Save(ExhibitionTopicInputModel topic) => Dialog.Close(topic);
 }
