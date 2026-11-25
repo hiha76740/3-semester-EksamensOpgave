@@ -92,7 +92,10 @@ public class QuizQueryHandlerIMPL(GameDbContext db) : IQuizQueries
                             c.Feedback,
                             c.FeedbackEn))
                     .ToList()))
-            .ToList());
+            .ToList(),
+            quiz.Instruction,
+            quiz.InstructionEn
+            );
     }
 
     private static QuizDraftDto AsDraftDto(QuizDraft draft)

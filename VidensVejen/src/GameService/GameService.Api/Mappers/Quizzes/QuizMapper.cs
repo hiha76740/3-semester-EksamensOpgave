@@ -41,7 +41,9 @@ internal static class QuizMapper
             dto.Questions
             .Select(
                 q => q.AsResponse())
-            .ToList()
+            .ToList(),
+            dto.Instruction,
+            dto.InstructionEn
             );
 
         return output;

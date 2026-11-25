@@ -11,6 +11,8 @@ namespace GameService.FacadeLib.Queries.DTOs;
 /// <param name="EndMessage"></param>
 /// <param name="EndMessageEn"></param>
 /// <param name="Questions"></param>
+/// <param name="Instruction"></param>
+/// <param name="InstructionEn"></param>
 public record QuizDto(
     Guid Id,
     string Title,
@@ -19,5 +21,7 @@ public record QuizDto(
     string QuizLayout,
     string? EndMessage,
     string? EndMessageEn,
-    List<QuestionDto> Questions
+    List<QuestionDto> Questions,
+    string Instruction,
+    string InstructionEn
     );
