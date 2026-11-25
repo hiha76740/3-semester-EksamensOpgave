@@ -35,6 +35,7 @@ var gameDatabaseSqlServer = builder.AddSqlServer("gameSqlServer")
 var gameDb = gameDatabaseSqlServer.AddDatabase("GameDb");
 
 var gameService = builder.AddProject<Projects.GameService_Api>("gameservice-api")
+    .WithDaprSidecar()
     .WithReference(gameDb)
     .WaitFor(gameDb);
 
@@ -52,7 +53,17 @@ var imageService = builder.AddProject<Projects.ImageService_Api>("imageservice-a
     .WaitFor(imageDb);
 
 
-var statisticsService = builder.AddProject<Projects.StatisticsService_Api>("statisticsservice-api");
+var statisticsDatabaseSqlServer = builder.AddSqlServer("statisticsSqlServer")
+    .WithContainerName("vidensvejen-statistics-sqlserver-dev")
+    .WithDataVolume("vidensvejen-statistics-data-dev")
+    .WithLifetime(ContainerLifetime.Persistent);
+
+var statisticsDb = statisticsDatabaseSqlServer.AddDatabase("StatisticsDb");
+
+var statisticsService = builder.AddProject<Projects.StatisticsService_Api>("statisticsservice-api")
+    .WithDaprSidecar()
+    .WithReference(statisticsDb)
+    .WaitFor(statisticsDb);
 
 
 var userDatabaseSqlServer = builder.AddSqlServer("userSqlServer")

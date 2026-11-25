@@ -1,38 +1,160 @@
 @page "/games/create"
+@page "/games/drafts/{ExistingDraftId:guid}"
+@page "/games/{PublishedQuizId:guid}/edit"
 
 
 @inject IExhibitionService ExhibitionService
 @inject IQuizService QuizService
-@inject DialogService Dialog
-@inject NavigationManager NavigationManager
+@inject NavigationManager Navigation
 
-<PageTitle>Opret quiz</PageTitle>
+<PageTitle>@FormTitle</PageTitle>
+<RadzenLink Text="Tilbage til quizzer" Icon="arrow_back" Path="games" />
 
 @if (exhibitionsError != null)
 {
     <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">@exhibitionsError</RadzenAlert>
 }
 
-<QuizFormComponent @key="model" Model="model"
-                   Exhibitions="exhibitions"
-                   FormTitle="Opret quiz"
-                   SubmitText="Kontrollér kladde"
-                   SubmitCallback="Create"
-                   ResetCallback="ResetForm"
-                   Changed="ClearMessages"
-                   Message="@message"
-                   Errors="errors" />
+@if (accessDenied)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">Du har ikke adgang til denne handling.</RadzenAlert>
+}
+else if (model is { } readOnlyModel && !canEdit)
+{
+    <RadzenStack Gap="1rem">
+        <RadzenText TextStyle="TextStyle.H2" Text="@readOnlyModel.Title" />
+        <RadzenText Text="@readOnlyModel.Instruction" />
+        @foreach (var question in readOnlyModel.Questions)
+        {
+            <RadzenCard>
+                <RadzenText Text="@question.Text" />
+                @foreach (var answer in question.Answers)
+                {
+                    <RadzenText Text="@answer.Text" />
+                }
+            </RadzenCard>
+        }
+        @foreach (var error in errors)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
+        }
+        <RadzenButton Text="Publicér" Click="@(() => Create(readOnlyModel))" IsBusy="@isBusy" />
+    </RadzenStack>
+}
+else if (model != null)
+{
+    <QuizFormComponent @key="model" Model="model"
+                       Exhibitions="exhibitions"
+                       FormTitle="@FormTitle" CanSubmit="@canPublish"
+                       SubmitText="Publicér"
+                       SaveDraftCallback="SaveDraftAsync" IsBusy="isBusy"
+                       SubmitCallback="Create"
+                       ResetCallback="ResetForm" ResetText="@ResetText"
+                       Changed="ClearMessages"
+                       Message="@message"
+                       Errors="errors" />
+}
+else
+{
+    @if (message != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">@message</RadzenAlert>
+    }
+    @if (errors.Count > 0)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@errors[0]</RadzenAlert>
+    }
+    @if (canEdit && !ExistingDraftId.HasValue && !PublishedQuizId.HasValue)
+    {
+        if (isBusy)
+        {
+            <RadzenText role="status" Text="Opretter quizkladde …" />
+        }
+        else if (errors.Count > 0)
+        {
+            <RadzenButton Text="Prøv igen" Click="StartDraftAsync" />
+        }
+    }
+}
 
 @code {
-    private QuizInputModel model = new();
+    [Parameter] public Guid? ExistingDraftId { get; set; }
+    [Parameter] public Guid? PublishedQuizId { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private bool canEdit;
+    private bool canPublish;
+    private bool accessDenied;
+    private string FormTitle => PublishedQuizId.HasValue ? "Ny kladde fra publiceret quiz"
+        : ExistingDraftId.HasValue ? "Quizkladde" : "Opret quiz";
+
+    private string ResetText => ExistingDraftId.HasValue || PublishedQuizId.HasValue ? "Luk" : "Nulstil";
+
+    private QuizInputModel? model;
+    private Guid? draftId;
+    private bool isBusy;
     private readonly List<string> errors = [];
     private string? message;
 
     private IReadOnlyList<ExhibitionNameResponse> exhibitions = [];
     private string? exhibitionsError;
 
-    protected override async Task OnInitializedAsync()
+    private (Guid? DraftId, Guid? PublishedId)? loadedRoute;
+
+    protected override async Task OnParametersSetAsync()
     {
+        var route = (ExistingDraftId, PublishedQuizId);
+        if (loadedRoute == route)
+        {
+            return;
+        }
+
+        model = null;
+        draftId = null;
+        ClearMessages();
+
+        var authentication = AuthenticationStateTask;
+        if (authentication == null)
+        {
+            accessDenied = true;
+            return;
+        }
+
+        var user = (await authentication).User;
+        canEdit = user.Identity?.IsAuthenticated == true && user.HasClaim(CustomClaimTypes.Permission, "Game.Edit");
+        canPublish = user.Identity?.IsAuthenticated == true && user.HasClaim(CustomClaimTypes.Permission, "Game.Create");
+        accessDenied = !canEdit && !(canPublish && ExistingDraftId.HasValue);
+        if (accessDenied)
+        {
+            return;
+        }
+
+        loadedRoute = route;
+
+        if (ExistingDraftId is Guid id)
+        {
+            await RunAsync(async () =>
+            {
+                var draft = await QuizService.GetDraftAsync(id);
+                draftId = draft.Id;
+                model = QuizEditorMapper.FromDraft(draft);
+            }, "Quizkladden kunne ikke hentes.");
+        }
+        else if (PublishedQuizId is Guid quizId)
+        {
+            await RunAsync(async () =>
+            {
+                model = QuizEditorMapper.FromPublished(await QuizService.GetPublishedAsync(quizId));
+                message = "Gem en kladde for at arbejde videre med en ny version af quizzen.";
+            }, "Quizzen kunne ikke hentes.");
+        }
+        else
+        {
+            await StartDraftAsync();
+        }
+
         try
         {
             var options = await ExhibitionService.GetAllNamesAsync();
@@ -57,9 +179,35 @@
         }
     }
 
-    private async Task Create(QuizInputModel input)
+    private Task StartDraftAsync() => RunAsync(async () =>
     {
-        ClearMessages();
+        if (!canEdit)
+        {
+            return;
+        }
+
+        draftId = await QuizService.CreateDraftAsync();
+        model = new QuizInputModel();
+    }, "Quizkladden kunne ikke oprettes.");
+
+    private Task SaveDraftAsync(QuizInputModel input) => RunAsync(async () =>
+    {
+        if (!canEdit)
+        {
+            return;
+        }
+
+        var id = draftId ??= await QuizService.CreateDraftAsync();
+        await QuizService.SaveDraftAsync(id, BuildDraftRequest(input));
+        message = "Quizkladden er gemt.";
+    }, "Quizkladden kunne ikke gemmes.");
+
+    private Task Create(QuizInputModel input) => RunAsync(async () =>
+    {
+        if (!canPublish)
+        {
+            return;
+        }
 
         if (string.IsNullOrWhiteSpace(input.Title) || string.IsNullOrWhiteSpace(input.TitleEn))
         {
@@ -71,9 +219,14 @@
             errors.Add("Quizzen skal have en instruktion på dansk og engelsk.");
         }
 
-        if (!exhibitions.Any(option => option.Id == input.ExhibitionId))
+        if (input.ExhibitionId == null || input.ExhibitionId == Guid.Empty)
         {
             errors.Add("Vælg en udstilling til quizzen.");
+        }
+
+        if (string.IsNullOrWhiteSpace(input.QuizLayout))
+        {
+            errors.Add("Vælg et layout til quizzen.");
         }
 
         for (var i = 0; i < input.Questions.Count; i++)
@@ -104,44 +257,75 @@
             }
         }
 
-        if (errors.Count == 0)
+        if (errors.Count != 0)
         {
-            var request = new CreateQuizRequest(
-                input.Title,
-                input.TitleEn,
-                input.ExhibitionId.GetValueOrDefault(),
-                input.QuizLayout,
-                input.Questions.Select(q => new CreateQuestionRequest(
-                    q.Text,
-                    q.TextEn,
-                    q.Answers.Select(c => new CreateChoiceRequest(
-                            c.Text,
-                            c.TextEn,
-                            c.IsCorrect,
-                            c.Feedback,
-                            c.FeedbackEn
-                            )).ToList()
-                    )).ToList(),
-                input.EndMessage,
-                input.EndMessageEn
-            );
+            return;
+        }
 
-            var statusCode = await QuizService.CreateAsync(request);
+        var id = draftId ??= await QuizService.CreateDraftAsync();
+        var status = await QuizService.PublishAsync(id, BuildRequest(input) with { DraftId = id });
+        if (status == HttpStatusCode.OK || status == HttpStatusCode.Created)
+        {
+            draftId = null;
+            model = null;
+            message = "Quizzen er publiceret.";
+        }
+        else
+        {
+            errors.Add($"Quizzen kunne ikke publiceres (HTTP {(int)status}).");
+        }
+    }, "Publiceringen kunne ikke bekræftes.");
 
-            if (statusCode == HttpStatusCode.Created)
-            {
-                await Dialog.Alert("Quiz oprettet", "Quiz oprettelse");
-                NavigationManager.NavigateTo("/quizzes");
-            }
-            else
-            {
-                await Dialog.Alert("Fejl opstået ved oprettelse af quiz. Prøv igen");
-            }
+    private static CreateQuizRequest BuildRequest(QuizInputModel input) =>
+        new(input.DraftId, input.Title, input.TitleEn, input.ExhibitionId.GetValueOrDefault(), input.QuizLayout,
+            input.Questions.Select(question => new CreateQuestionRequest(
+                question.Text, question.TextEn,
+                question.Answers.Select(answer => new CreateChoiceRequest(
+                    answer.Text, answer.TextEn, answer.IsCorrect,
+                    answer.Feedback, answer.FeedbackEn)).ToList())).ToList(),
+            input.EndMessage, input.EndMessageEn, input.Instruction, input.InstructionEn);
+
+    private static UpdateQuizDraftRequest BuildDraftRequest(QuizInputModel input) =>
+        new(input.Title, input.TitleEn, input.ExhibitionId, input.QuizLayout,
+            input.Questions.Select(question => new UpdateQuestionDraftRequest(
+                question.Text, question.TextEn,
+                question.Answers.Select(answer => new UpdateChoiceDraftRequest(
+                    answer.Text, answer.TextEn, answer.IsCorrect,
+                    answer.Feedback, answer.FeedbackEn)).ToList())).ToList(),
+            input.EndMessage, input.EndMessageEn, input.Instruction, input.InstructionEn);
+
+    private async Task RunAsync(Func<Task> action, string failureMessage)
+    {
+        if (isBusy)
+        {
+            return;
+        }
+
+        isBusy = true;
+        ClearMessages();
+        try
+        {
+            await action();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or System.Text.Json.JsonException
+            or OperationCanceledException)
+        {
+            errors.Add(failureMessage);
+        }
+        finally
+        {
+            isBusy = false;
         }
     }
 
     private void ResetForm()
     {
+        if (ExistingDraftId.HasValue || PublishedQuizId.HasValue)
+        {
+            Navigation.NavigateTo("games");
+            return;
+        }
+
         model = new QuizInputModel();
         ClearMessages();
     }

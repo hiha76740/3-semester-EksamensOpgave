@@ -4,7 +4,7 @@ using GameService.Api.Mappers.Quizzes;
 using GameService.FacadeLib.Commands.Interfaces;
 using GameService.FacadeLib.Queries.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using VidensVejen.ContractsLib.Requests.GameService;
+using VidensVejen.ContractsLib.Requests.GameService.Quizzes;
 using VidensVejen.ContractsLib.Responses.GameService;
 using VidensVejen.SharedKernelLib.Exceptions;
 
@@ -13,28 +13,26 @@ namespace GameService.Api.Controllers;
 [Route("/v1/games/quizzes")]
 [ApiController]
 public class QuizzesController(
-    IPublishQuizHandler publish,
+    ICreateQuizHandler publish,
     IDeleteQuizHandler delete,
     IQuizQueries queries
     ) : ControllerBase
 {
     [HttpPost]
-    [EndpointSummary("Publish a quiz")]
-    [EndpointDescription("Creates a quiz from the request and deletes the quiz draft in the same transaction")]
-    [ProducesResponseType<QuizIdResponse>(StatusCodes.Status201Created, "Application/json", Description = "Returns the id of the published quiz")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "The quiz does not meet the rules for publishing")]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Quiz draft was not found")]
-    public async Task<ActionResult<QuizIdResponse>> PublishQuiz(
+    [EndpointSummary("Creates a quiz.")]
+    [EndpointDescription("Creates a quiz from the request and deletes the quiz draft in the same transaction.")]
+    [ProducesResponseType(StatusCodes.Status201Created, Description = "Quiz created successfully.")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "The quiz does not meet the rules for publishing.")]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Quiz draft was not found.")]
+    public async Task<ActionResult> PublishQuiz(
         [Required][FromQuery][Description("A unique identifier for the quiz draft that is published")] Guid quizDraftId,
         [Required][Description("Object used to publish a quiz")] CreateQuizRequest request)
     {
         try
         {
-            var id = await publish.HandleAsync(quizDraftId, request.AsCreateCommand());
+            await publish.HandleAsync(request.AsCreateCommand(quizDraftId));
 
-            var response = new QuizIdResponse(id);
-
-            return Created($"/v1/games/quizzes/{id}", response);
+            return Ok();
         }
         catch (NotFoundException ex)
         {
@@ -83,6 +81,32 @@ public class QuizzesController(
             var dtos = await queries.GetQuizzesByExhibitionAsync(exhibitionId);
 
             return Ok(dtos.Select(d => d.AsResponse()).ToList());
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("admin")]
+    [EndpointSummary("Get quizzes")]
+    [EndpointDescription("Gets all instances of published quizzes.")]
+    [ProducesResponseType<List<QuizResponse>>(StatusCodes.Status200OK, "Application/json", Description = "Returns all published quizzes")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to get all quizzes")]
+    public async Task<ActionResult<List<QuizResponse>>> GetAllPublishedQuizzes()
+    {
+        try
+        {
+            var list = await queries.GetAllPublishedQuizzes();
+
+            var response = new List<QuizResponse>();
+
+            foreach (var dto in list)
+            {
+                response.Add(dto.AsResponse());
+            }
+
+            return Ok(response);
         }
         catch (Exception ex)
         {

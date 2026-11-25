@@ -11,6 +11,8 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 /// <param name="EndMessage"></param>
 /// <param name="EndMessageEn"></param>
 /// <param name="Questions"></param>
+/// <param name="Instruction"></param>
+/// <param name="InstructionEn"></param>
 /// <example>
 /// {
 ///     "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -36,6 +38,8 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 ///             ]
 ///         }
 ///     ]
+///     "instruction": "Tryk på bedste løsning",
+///     "instructionEn": "Press the best solution"
 /// }
 /// </example>
 public record QuizResponse(
@@ -46,7 +50,9 @@ public record QuizResponse(
     string QuizLayout,
     string? EndMessage,
     string? EndMessageEn,
-    List<QuestionResponse> Questions
+    List<QuestionResponse> Questions,
+    string Instruction,
+    string InstructionEn
     )
 {
     /// <summary>
@@ -88,4 +94,14 @@ public record QuizResponse(
     /// A list of the questions assoicated to the quiz.
     /// </summary>
     public List<QuestionResponse> Questions { get; init; } = Questions;
+
+    /// <summary>
+    /// Instruction shown in Danish
+    /// </summary>
+    public string Instruction { get; init; } = Instruction;
+
+    /// <summary>
+    /// Instruction shown in English
+    /// </summary>
+    public string InstructionEn { get; init; } = InstructionEn;
 }

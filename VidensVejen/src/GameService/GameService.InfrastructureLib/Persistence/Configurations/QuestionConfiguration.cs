@@ -1,4 +1,4 @@
-using GameService.DomainLib.Entities;
+using GameService.DomainLib.Entities.Quizzes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

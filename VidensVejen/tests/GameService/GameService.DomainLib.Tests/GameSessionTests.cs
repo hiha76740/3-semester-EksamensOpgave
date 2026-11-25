@@ -1,5 +1,6 @@
-using GameService.DomainLib.Entities;
-using GameService.DomainLib.ValueObjects;
+using GameService.DomainLib.Entities.Quizzes;
+using GameService.DomainLib.Entities.Sessions;
+using GameService.DomainLib.ValueObjects.Quizzes;
 using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.DomainLib.Tests;
@@ -16,7 +17,7 @@ public class GameSessionTests
         List<NewQuestion> questions = [new NewQuestion("Question", "Question EN", choices)];
 
         return Quiz.Create(
-            "Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN", questions);
+            "Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN", questions, "Instructions", "Instructions EN");
     }
 
     [Fact]
@@ -32,6 +33,7 @@ public class GameSessionTests
         Assert.NotEqual(Guid.Empty, session.Id.Value);
         Assert.Equal(quiz.Id, session.QuizId);
         Assert.Empty(session.Answers);
+        Assert.Null(session.CompletedAt);
     }
 
     [Fact]
@@ -117,15 +119,76 @@ public class GameSessionTests
     }
 
     [Fact]
-    public void Answer_GivenOtherQuiz_ThrowsDomainException()
+    public void Finish_GivenAllQuestionsAnswered_ReturnsScoreAndCompletesSession()
     {
         // Arrange
         var quiz = CreateQuiz();
-        var otherQuiz = CreateQuiz();
         var session = GameSession.Start(quiz);
-        var questionId = otherQuiz.Questions[0].Id.Value;
+        session.Answer(quiz, quiz.Questions[0].Id.Value, 0);
+
+        // Act
+        var score = session.Finish(quiz);
+
+        // Assert
+        Assert.Equal(1, score.CorrectCount);
+        Assert.Equal(1, score.TotalCount);
+        Assert.Equal(100, score.Percentage);
+        Assert.NotNull(session.CompletedAt);
+    }
+
+    [Fact]
+    public void Finish_GivenWrongAnswer_ReturnsZeroCorrect()
+    {
+        // Arrange
+        var quiz = CreateQuiz();
+        var session = GameSession.Start(quiz);
+        session.Answer(quiz, quiz.Questions[0].Id.Value, 1);
+
+        // Act
+        var score = session.Finish(quiz);
+
+        // Assert
+        Assert.Equal(0, score.CorrectCount);
+        Assert.Equal(0, score.Percentage);
+    }
+
+    [Fact]
+    public void Finish_GivenUnansweredQuestions_ThrowsDomainException()
+    {
+        // Arrange
+        var quiz = CreateQuiz();
+        var session = GameSession.Start(quiz);
 
         // Act & Assert
-        Assert.Throws<DomainException>(() => session.Answer(otherQuiz, questionId, 0));
+        Assert.Throws<DomainException>(() => session.Finish(quiz));
+        Assert.Null(session.CompletedAt);
+    }
+
+
+    [Fact]
+    public void Finish_GivenMixedAnswers_ReturnsScoreAcrossAllQuestions()
+    {
+        // Arrange
+        List<Choice> choices =
+        [
+            new Choice("Yes", "Yes EN", true, null, null),
+            new Choice("No", "No EN", false, null, null)
+        ];
+        var quiz = Quiz.Create("Quiz", "Quiz EN", Guid.NewGuid(), "vertical", null, null,
+            [new NewQuestion("First", "First EN", choices), new NewQuestion("Second", "Second EN", choices)], "Instructions", "Instructions EN");
+        var session = GameSession.Start(quiz);
+        session.Answer(quiz, quiz.Questions[0].Id.Value, 0);
+        session.Answer(quiz, quiz.Questions[1].Id.Value, 1);
+        var before = DateTime.UtcNow;
+
+        // Act
+        var score = session.Finish(quiz);
+
+        // Assert
+        Assert.Equal(1, score.CorrectCount);
+        Assert.Equal(2, score.TotalCount);
+        Assert.Equal(50, score.Percentage);
+        Assert.NotNull(session.CompletedAt);
+        Assert.InRange(session.CompletedAt.Value, before, DateTime.UtcNow);
     }
 }

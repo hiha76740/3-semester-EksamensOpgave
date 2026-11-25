@@ -6,6 +6,11 @@ namespace VidensVejen.Web.Models.Games;
 public sealed class QuizInputModel
 {
     /// <summary>
+    /// Gets or sets the identifier of the draft.
+    /// </summary>
+    public Guid DraftId { get; set; }
+
+    /// <summary>
     /// Gets or sets the title in Danish.
     /// </summary>
     public string Title { get; set; } = string.Empty;

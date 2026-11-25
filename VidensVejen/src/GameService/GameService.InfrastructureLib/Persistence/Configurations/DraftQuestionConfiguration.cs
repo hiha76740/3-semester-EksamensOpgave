@@ -1,19 +1,19 @@
-using GameService.DomainLib.Entities;
+using GameService.DomainLib.Entities.Drafts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace GameService.InfrastructureLib.Persistence.Configurations;
 
-internal sealed class DraftQuestionConfiguration : IEntityTypeConfiguration<DraftQuestion>
+internal sealed class DraftQuestionConfiguration : IEntityTypeConfiguration<QuestionDraft>
 {
-    void IEntityTypeConfiguration<DraftQuestion>.Configure(EntityTypeBuilder<DraftQuestion> builder)
+    void IEntityTypeConfiguration<QuestionDraft>.Configure(EntityTypeBuilder<QuestionDraft> builder)
     {
         builder.HasKey(x => x.Id);
 
         builder.Property(x => x.Id)
             .HasConversion(
             id => id.Value,
-            value => new QuestionId(value));
+            value => new QuestionDraftId(value));
 
         builder.Property<QuizDraftId>("QuizDraftId")
             .HasConversion(

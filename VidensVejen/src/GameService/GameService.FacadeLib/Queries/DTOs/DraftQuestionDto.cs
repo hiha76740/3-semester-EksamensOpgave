@@ -11,5 +11,5 @@ public record DraftQuestionDto(
     Guid Id,
     string? Text,
     string? TextEn,
-    List<ChoiceDto> Choices
+    List<ChoiceDraftDto> Choices
     );

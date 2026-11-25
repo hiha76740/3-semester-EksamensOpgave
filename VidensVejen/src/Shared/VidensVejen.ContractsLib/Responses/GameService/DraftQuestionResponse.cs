@@ -11,7 +11,7 @@ public record DraftQuestionResponse(
     Guid Id,
     string? Text,
     string? TextEn,
-    List<ChoiceResponse> Choices
+    List<ChoiceDraftResponse> Choices
     )
 {
     /// <summary>
@@ -32,5 +32,5 @@ public record DraftQuestionResponse(
     /// <summary>
     /// The choices saved in the draft.
     /// </summary>
-    public List<ChoiceResponse> Choices { get; init; } = Choices;
+    public List<ChoiceDraftResponse> Choices { get; init; } = Choices;
 }

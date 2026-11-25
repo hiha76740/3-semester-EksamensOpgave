@@ -8,7 +8,7 @@ internal static class AdminNavigation
     [
         new("Forside", "home", ""),
         new("Udstillinger", "layers", "exhibition/create"),
-        new("Quizzer", "quiz", "games/create"),
+        new("Quizzer", "quiz", "games"),
         new("Mediebibliotek", "perm_media", "images"),
         new("Brugere", "group", "users"),
         new("Indstillinger", "settings", null)

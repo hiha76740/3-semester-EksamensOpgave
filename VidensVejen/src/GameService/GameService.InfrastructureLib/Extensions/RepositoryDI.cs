@@ -1,6 +1,7 @@
 using GameService.ApplicationLib.Repositories;
 using GameService.InfrastructureLib.Repositories;
 using Microsoft.Extensions.DependencyInjection;
+using VidensVejen.BuildingBlocksLib.Messaging.Outbox;
 
 namespace GameService.InfrastructureLib.Extensions;
 
@@ -19,6 +20,7 @@ public static class RepositoryDI
         services.AddScoped<IQuizRepository, QuizRepository>();
         services.AddScoped<IQuizDraftRepository, QuizDraftRepository>();
         services.AddScoped<IGameSessionRepository, GameSessionRepository>();
+        services.AddScoped<IOutboxRepository, OutboxRepository>();
 
         return services;
     }
