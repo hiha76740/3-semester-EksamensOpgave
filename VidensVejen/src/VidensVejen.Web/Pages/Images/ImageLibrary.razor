@@ -1,5 +1,6 @@
 @page "/images"
 
+@inject DialogService Dialog
 @inject IImageService ImageService
 
 <PageTitle>Mediebibliotek</PageTitle>
@@ -18,7 +19,11 @@
     }
     else
     {
-        <ImageListComponent Images="images" />
+        @if (deleteMessage != null)
+        {
+            <RadzenAlert AlertStyle="@deleteMessageStyle" AllowClose="false">@deleteMessage</RadzenAlert>
+        }
+        <ImageListComponent Images="images" DeleteRequested="DeleteImageAsync" IsDeleting="isDeleting" />
     }
 </RadzenStack>
 
@@ -26,6 +31,9 @@
     private IReadOnlyList<ImageResponse> images = [];
     private string? error;
     private bool isLoading;
+    private bool isDeleting;
+    private string? deleteMessage;
+    private AlertStyle deleteMessageStyle;
 
     protected override Task OnInitializedAsync() => LoadImagesAsync();
 
@@ -44,6 +52,58 @@
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task DeleteImageAsync(ImageResponse image)
+    {
+        if (isDeleting)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        try
+        {
+            var confirmed = await Dialog.Confirm("Vil du slette billedet permanent?", "Slet billede",
+                new ConfirmOptions { OkButtonText = "Slet", CancelButtonText = "Annullér" });
+            if (confirmed != true)
+            {
+                return;
+            }
+
+            deleteMessageStyle = AlertStyle.Warning;
+            var (status, inUse) = await ImageService.DeleteAsync(image.Id, new DeleteImageRequest(image.RowVersion));
+            switch (status)
+            {
+                case HttpStatusCode.NoContent:
+                    images = images.Where(item => item.Id != image.Id).ToArray();
+                    deleteMessage = "Billedet er slettet.";
+                    deleteMessageStyle = AlertStyle.Success;
+                    break;
+                case HttpStatusCode.NotFound:
+                    images = images.Where(item => item.Id != image.Id).ToArray();
+                    deleteMessage = "Billedet findes ikke længere.";
+                    break;
+                case HttpStatusCode.Conflict:
+                    deleteMessage = "Billedet er ændret siden listen blev hentet. Vælg billedet igen, hvis du stadig vil slette det.";
+                    await LoadImagesAsync();
+                    break;
+                default:
+                    deleteMessage = inUse
+                        ? "Billedet kan ikke slettes, fordi det bruges af en udstilling."
+                        : $"Sletningen kunne ikke bekræftes (HTTP {(int)status}).";
+                    break;
+            }
+        }
+        catch (Exception exception) when (exception is HttpRequestException or OperationCanceledException)
+        {
+            deleteMessageStyle = AlertStyle.Warning;
+            deleteMessage = "Sletningen kunne ikke bekræftes. Genindlæs listen for at se den aktuelle status.";
+        }
+        finally
+        {
+            isDeleting = false;
         }
     }
 }

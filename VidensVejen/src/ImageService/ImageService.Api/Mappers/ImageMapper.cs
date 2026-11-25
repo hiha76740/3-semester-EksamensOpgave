@@ -24,6 +24,7 @@ internal static class ImageMapper
             dto.Id,
             dto.StorageKey,
             dto.Extension,
+            dto.RowVersion,
             url
             );
 

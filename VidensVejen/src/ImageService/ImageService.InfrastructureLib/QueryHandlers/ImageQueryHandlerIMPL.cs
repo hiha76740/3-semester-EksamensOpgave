@@ -26,7 +26,8 @@ public class ImageQueryHandlerIMPL(ImageDbContext db) : IImageQueries
             .Select(i => new ImageDto(
                 i.Id.Value,
                 i.StorageKey,
-                i.Extension
+                i.Extension,
+                i.RowVersion
                 ))
             .ToListAsync();
     }

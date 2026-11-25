@@ -53,27 +53,26 @@ public class DeleteImageTests
     }
 
     [Fact]
-    public async Task Handle_GivenStorageFailure_DoesNotDeleteMetadata()
+    public async Task Handle_GivenConcurrencyConflict_DoesNotDeleteFile()
     {
         // Arrange
         var image = Image.Create(".png");
         var repository = new Mock<IImageRepository>();
         var storage = new Mock<IImageStorage>();
         var exhibitions = new Mock<IExhibitionService>();
-        var expected = new IOException("File deletion failed");
+        var expected = new ConcurrencyConflictException("The image was changed", new InvalidOperationException());
         repository.Setup(r => r.GetImageByIdAsync(image.Id)).ReturnsAsync(image);
         exhibitions.Setup(s => s.ImageInUseAsync(image.Id)).ReturnsAsync(false);
-        storage.Setup(s => s.DeleteAsync(image.StorageKey, image.Extension)).ThrowsAsync(expected);
+        repository.Setup(r => r.SaveAsync()).ThrowsAsync(expected);
         IDeleteImageHandler handler = new DeleteImageHandler(
             storage.Object, repository.Object, exhibitions.Object,
             new Mock<ILogger<DeleteImageHandler>>().Object);
         var command = new DeleteImageCommand(image.Id.Value, [1, 2, 3]);
 
         // Act & Assert
-        var actual = await Assert.ThrowsAsync<IOException>(() => handler.HandleAsync(command));
+        var actual = await Assert.ThrowsAsync<ConcurrencyConflictException>(() => handler.HandleAsync(command));
 
         Assert.Same(expected, actual);
-        repository.Verify(r => r.Delete(It.IsAny<Image>()), Times.Never);
-        repository.Verify(r => r.SaveAsync(), Times.Never);
+        storage.Verify(s => s.DeleteAsync(image.StorageKey, image.Extension), Times.Never);
     }
 }

@@ -1,6 +1,8 @@
+using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
+using VidensVejen.ContractsLib.Requests.ImageService;
 using VidensVejen.ContractsLib.Responses.ImageService;
 using VidensVejen.Web.ServicesInterfaces;
 
@@ -13,6 +15,22 @@ namespace VidensVejen.Web.Services;
 public class ImageService(HttpClient httpClient) : IImageService
 {
     private readonly string _baseUrl = "/images-api";
+
+    async Task<(HttpStatusCode Status, bool InUse)> IImageService.DeleteAsync(Guid id, DeleteImageRequest deletion)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Delete, $"{_baseUrl}/{id}")
+        {
+            Content = JsonContent.Create(deletion)
+        };
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+        using var response = await httpClient.SendAsync(request);
+        var inUse = response.StatusCode == HttpStatusCode.BadRequest
+            && (await response.Content.ReadAsStringAsync()).Trim().Trim('"')
+                == "Can not delete image that is still in use";
+
+        return (response.StatusCode, inUse);
+    }
 
     async Task<IReadOnlyList<ImageResponse>> IImageService.GetAllAsync()
     {

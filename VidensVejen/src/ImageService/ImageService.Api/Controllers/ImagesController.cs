@@ -56,6 +56,7 @@ public class ImagesController(
     [EndpointDescription("Deletes the requested image")]
     [ProducesResponseType(StatusCodes.Status204NoContent, Description = "Deletion of requested image completed successfully")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to delete the requested image")]
+    [ProducesResponseType(StatusCodes.Status409Conflict, Description = "The image changed after it was loaded")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Image was not found")]
     public async Task<ActionResult> DeleteImage(
         [Required][Description("The id of the image you want to get url for")] Guid id,
@@ -71,6 +72,10 @@ public class ImagesController(
         catch (NotFoundException ex)
         {
             return NotFound(ex.Message);
+        }
+        catch (ConcurrencyConflictException ex)
+        {
+            return Conflict(ex.Message);
         }
         catch (Exception ex)
         {

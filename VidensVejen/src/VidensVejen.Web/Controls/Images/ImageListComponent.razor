@@ -1,7 +1,7 @@
 @using VidensVejen.ContractsLib.Responses.ImageService
 
 <RadzenDataGrid TItem="ImageResponse" Data="@Images"
-AllowPaging="true" PageSize="15" AllowSorting="true"
+                AllowPaging="true" PageSize="15" AllowSorting="true"
                 EmptyText="Der er endnu ingen billeder i mediebiblioteket.">
     <Columns>
         <RadzenDataGridColumn TItem="ImageResponse" Title="Forhåndsvisning" Sortable="false">
@@ -14,10 +14,23 @@ AllowPaging="true" PageSize="15" AllowSorting="true"
                               Property="@nameof(ImageResponse.Extension)" />
         <RadzenDataGridColumn TItem="ImageResponse" Title="Billed-ID"
                               Property="@nameof(ImageResponse.Id)" />
+        <RadzenDataGridColumn TItem="ImageResponse" Title="Handling" Sortable="false">
+            <Template Context="image">
+                <RadzenButton Text="Slet" Icon="delete" ButtonStyle="ButtonStyle.Danger"
+                              Variant="Variant.Outlined" Disabled="@(IsDeleting || image.RowVersion == null || image.RowVersion.Length == 0)"
+                              Click="@(() => DeleteRequested.InvokeAsync(image))" />
+            </Template>
+        </RadzenDataGridColumn>
     </Columns>
 </RadzenDataGrid>
 
 @code {
     [Parameter, EditorRequired]
     public IReadOnlyList<ImageResponse> Images { get; set; } = [];
+
+    [Parameter]
+    public EventCallback<ImageResponse> DeleteRequested { get; set; }
+
+    [Parameter]
+    public bool IsDeleting { get; set; }
 }

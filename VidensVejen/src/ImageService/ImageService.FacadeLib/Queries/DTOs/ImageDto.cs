@@ -6,8 +6,10 @@ namespace ImageService.FacadeLib.Queries.DTOs;
 /// <param name="Id"></param>
 /// <param name="StorageKey"></param>
 /// <param name="Extension"></param>
+/// <param name="RowVersion"></param>
 public record ImageDto(
     Guid Id,
     string StorageKey,
-    string Extension
+    string Extension,
+    byte[] RowVersion
     );

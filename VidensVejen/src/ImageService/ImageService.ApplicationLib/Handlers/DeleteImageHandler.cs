@@ -46,11 +46,11 @@ public class DeleteImageHandler(
 
             imageRepo.SetOriginalRowVersion(image, command.RowVersion);
 
-            await imageStorage.DeleteAsync(image.StorageKey, image.Extension);
-
             imageRepo.Delete(image);
 
             await imageRepo.SaveAsync();
+
+            await imageStorage.DeleteAsync(image.StorageKey, image.Extension);
         }
         catch (Exception ex)
         {
