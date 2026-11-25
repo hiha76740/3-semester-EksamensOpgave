@@ -1,4 +1,5 @@
 using GameService.ApplicationLib.Handlers;
+using GameService.ApplicationLib.Messaging.Outbox;
 using GameService.FacadeLib.Commands.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,6 +24,7 @@ public static class HandlerDI
         services.AddScoped<IAnswerQuestionHandler, AnswerQuestionHandler>();
         services.AddScoped<IFinishSessionHandler, FinishSessionHandler>();
         services.AddScoped<IDeleteQuizHandler, DeleteQuizHandler>();
+        services.AddScoped<PublishOutboxMessageHandler>();
 
         return services;
     }

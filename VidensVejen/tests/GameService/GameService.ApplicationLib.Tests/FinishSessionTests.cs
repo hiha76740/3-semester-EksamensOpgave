@@ -5,6 +5,8 @@ using GameService.DomainLib.Entities.Sessions;
 using GameService.DomainLib.ValueObjects.Quizzes;
 using GameService.FacadeLib.Commands.Interfaces;
 using Moq;
+using VidensVejen.BuildingBlocksLib.Messaging.Outbox;
+using VidensVejen.ContractsLib.Events;
 using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.ApplicationLib.Tests;
@@ -29,7 +31,8 @@ public class FinishSessionTests
         var quizRepository = new Mock<IQuizRepository>();
         quizRepository.Setup(r => r.GetQuizByIdAsync(It.IsAny<QuizId>()))
             .ReturnsAsync(quiz);
-        IFinishSessionHandler handler = new FinishSessionHandler(sessionRepository.Object, quizRepository.Object);
+        var outbox = new Mock<IOutboxRepository>();
+        IFinishSessionHandler handler = new FinishSessionHandler(sessionRepository.Object, quizRepository.Object, outbox.Object);
 
         // Act
         var result = await handler.HandleAsync(session.Id.Value);
@@ -39,6 +42,9 @@ public class FinishSessionTests
         Assert.Equal(1, result.TotalCount);
         Assert.Equal(100, result.Percentage);
         Assert.NotNull(session.CompletedAt);
+        outbox.Verify(o => o.AddAsync(It.Is<OutboxMessage>(m =>
+            m.Topic == "game-completed" &&
+            m.Type == typeof(GameCompletedIntegrationEvent).FullName)), Times.Once);
         sessionRepository.Verify(r => r.SaveAsync(), Times.Once);
     }
 
@@ -50,10 +56,12 @@ public class FinishSessionTests
         sessionRepository.Setup(r => r.GetSessionByIdAsync(It.IsAny<GameSessionId>()))
             .ReturnsAsync((GameSession?)null);
         var quizRepository = new Mock<IQuizRepository>();
-        IFinishSessionHandler handler = new FinishSessionHandler(sessionRepository.Object, quizRepository.Object);
+        var outbox = new Mock<IOutboxRepository>();
+        IFinishSessionHandler handler = new FinishSessionHandler(sessionRepository.Object, quizRepository.Object, outbox.Object);
 
         // Act & Assert
         await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(Guid.NewGuid()));
+        outbox.VerifyNoOtherCalls();
         sessionRepository.Verify(r => r.SaveAsync(), Times.Never);
         quizRepository.VerifyNoOtherCalls();
     }
@@ -70,10 +78,12 @@ public class FinishSessionTests
         var quizRepository = new Mock<IQuizRepository>();
         quizRepository.Setup(r => r.GetQuizByIdAsync(It.IsAny<QuizId>()))
             .ReturnsAsync(quiz);
-        IFinishSessionHandler handler = new FinishSessionHandler(sessionRepository.Object, quizRepository.Object);
+        var outbox = new Mock<IOutboxRepository>();
+        IFinishSessionHandler handler = new FinishSessionHandler(sessionRepository.Object, quizRepository.Object, outbox.Object);
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainException>(() => handler.HandleAsync(session.Id.Value));
+        outbox.VerifyNoOtherCalls();
         sessionRepository.Verify(r => r.SaveAsync(), Times.Never);
     }
 
@@ -88,7 +98,8 @@ public class FinishSessionTests
         sessionRepository.Setup(r => r.GetSessionByIdAsync(session.Id)).ReturnsAsync(session);
         var quizRepository = new Mock<IQuizRepository>();
         quizRepository.Setup(r => r.GetQuizByIdAsync(session.QuizId)).ReturnsAsync((Quiz?)null);
-        IFinishSessionHandler handler = new FinishSessionHandler(sessionRepository.Object, quizRepository.Object);
+        var outbox = new Mock<IOutboxRepository>();
+        IFinishSessionHandler handler = new FinishSessionHandler(sessionRepository.Object, quizRepository.Object, outbox.Object);
 
         // Act
         await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(session.Id.Value));
@@ -112,7 +123,8 @@ public class FinishSessionTests
         quizRepository.Setup(r => r.GetQuizByIdAsync(session.QuizId)).ReturnsAsync(quiz);
         var expected = new InvalidOperationException("Save failed");
         sessionRepository.Setup(r => r.SaveAsync()).ThrowsAsync(expected);
-        IFinishSessionHandler handler = new FinishSessionHandler(sessionRepository.Object, quizRepository.Object);
+        var outbox = new Mock<IOutboxRepository>();
+        IFinishSessionHandler handler = new FinishSessionHandler(sessionRepository.Object, quizRepository.Object, outbox.Object);
 
         // Act
         var actual = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(session.Id.Value));

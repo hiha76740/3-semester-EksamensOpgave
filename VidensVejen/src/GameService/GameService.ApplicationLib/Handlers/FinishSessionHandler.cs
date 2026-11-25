@@ -1,7 +1,10 @@
+using System.Text.Json;
 using GameService.ApplicationLib.Repositories;
 using GameService.DomainLib.Entities.Sessions;
 using GameService.FacadeLib.Commands.Interfaces;
 using GameService.FacadeLib.Queries.DTOs;
+using VidensVejen.BuildingBlocksLib.Messaging.Outbox;
+using VidensVejen.ContractsLib.Events;
 using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.ApplicationLib.Handlers;
@@ -11,7 +14,8 @@ namespace GameService.ApplicationLib.Handlers;
 /// </summary>
 /// <param name="sessionRepo"></param>
 /// <param name="quizRepo"></param>
-public class FinishSessionHandler(IGameSessionRepository sessionRepo, IQuizRepository quizRepo) : IFinishSessionHandler
+/// <param name="outbox"></param>
+public class FinishSessionHandler(IGameSessionRepository sessionRepo, IQuizRepository quizRepo, IOutboxRepository outbox) : IFinishSessionHandler
 {
     async Task<SessionScoreDto> IFinishSessionHandler.HandleAsync(Guid sessionId)
     {
@@ -22,6 +26,29 @@ public class FinishSessionHandler(IGameSessionRepository sessionRepo, IQuizRepos
             ?? throw new NotFoundException("Quiz was not found");
 
         var score = session.Finish(quiz);
+
+        var integrationEvent = new GameCompletedIntegrationEvent(
+            Guid.NewGuid(),
+            "game-completed",
+            session.Id.Value,
+            quiz.Id.Value,
+            quiz.Title,
+            quiz.ExhibitionId.Value,
+            score.CorrectCount,
+            score.TotalCount,
+            session.CompletedAt!.Value
+            );
+
+        var outboxMessage = new OutboxMessage
+        {
+            Id = integrationEvent.EventId,
+            Type = integrationEvent.GetType().FullName!,
+            Topic = integrationEvent.EventTopic,
+            Content = JsonSerializer.Serialize(integrationEvent),
+            CreatedAtUtc = DateTime.UtcNow
+        };
+
+        await outbox.AddAsync(outboxMessage);
 
         await sessionRepo.SaveAsync();
 
