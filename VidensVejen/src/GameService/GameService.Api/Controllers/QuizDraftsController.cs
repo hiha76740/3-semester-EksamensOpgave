@@ -15,6 +15,7 @@ namespace GameService.Api.Controllers;
 public class QuizDraftsController(
     ICreateQuizDraftHandler create,
     IUpdateQuizDraftHandler update,
+    IDeleteDraftHandler delete,
     IQuizDraftQueries queries
     ) : ControllerBase
 {
@@ -107,4 +108,31 @@ public class QuizDraftsController(
             return BadRequest(ex.Message);
         }
     }
+
+    [HttpDelete("{id:guid}")]
+    [EndpointSummary("Delete a quiz draft")]
+    [EndpointDescription("Delete a single quiz draft so it can be opened and edited again")]
+    [ProducesResponseType(StatusCodes.Status204NoContent, Description = "Draft was deleted successfully")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to delete the quiz draft")]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Quiz draft was not found")]
+    public async Task<ActionResult<QuizDraftResponse>> DeleteQuizDraft(
+        [Required][Description("A unique identifier for a quiz draft")] Guid id,
+        [Required][Description("The object used to delete a quiz draft")] DeleteQuizDraftRequest request)
+    {
+        try
+        {
+            await delete.HandleAsync(request.AsDeleteCommand(id));
+
+            return NoContent();
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
 }

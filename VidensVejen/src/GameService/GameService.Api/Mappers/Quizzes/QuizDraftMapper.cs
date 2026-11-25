@@ -73,4 +73,14 @@ internal static class QuizDraftMapper
 
         return output;
     }
+
+    internal static DeleteDraftCommand AsDeleteCommand(this DeleteQuizDraftRequest request, Guid draftId)
+    {
+        var output = new DeleteDraftCommand(
+            draftId,
+            request.RowVersion
+            );
+
+        return output;
+    }
 }
