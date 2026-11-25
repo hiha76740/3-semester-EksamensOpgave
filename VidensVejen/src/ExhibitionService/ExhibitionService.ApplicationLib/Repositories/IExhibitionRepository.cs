@@ -1,4 +1,5 @@
 using ExhibitionService.DomainLib.Entities;
+using ExhibitionService.DomainLib.ValueObjects;
 
 namespace ExhibitionService.ApplicationLib.Repositories;
 
@@ -17,6 +18,21 @@ public interface IExhibitionRepository
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    Task<Exhibition?> GetExhibitionById(ExhibitionId id);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="exhibition"></param>
+    void Delete(Exhibition exhibition);
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <returns></returns>
     Task SaveAsync();
+
+
 }
