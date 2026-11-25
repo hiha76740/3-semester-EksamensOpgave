@@ -1,4 +1,4 @@
-namespace VidensVejen.ContractsLib.Requests.GameService;
+namespace VidensVejen.ContractsLib.Requests.GameService.Drafts;
 
 /// <summary>
 /// 
@@ -10,6 +10,8 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 /// <param name="Questions"></param>
 /// <param name="EndMessage"></param>
 /// <param name="EndMessageEn"></param>
+/// <param name="Instruction"></param>
+/// <param name="InstructionEn"></param>
 /// <example>
 /// {
 ///     "title": "Affaldshierakiet",
@@ -32,17 +34,21 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 ///         }
 ///     ],
 ///     "endMessage": "Godt klaret!",
-///     "endMessageEn": "Well done!"
+///     "endMessageEn": "Well done!",
+///     "instruction": "Tryk på den bedste løsning",
+///     "instructionEn": "Press on the best solution"
 /// }
 /// </example>
-public record CreateQuizRequest(
+public record UpdateQuizDraftRequest(
     string? Title,
     string? TitleEn,
     Guid? ExhibitionId,
     string? QuizLayout,
-    List<CreateQuestionRequest>? Questions,
+    List<UpdateQuestionDraftRequest>? Questions,
     string? EndMessage,
-    string? EndMessageEn
+    string? EndMessageEn,
+    string? Instruction,
+    string? InstructionEn
     )
 {
     /// <summary>
@@ -68,15 +74,25 @@ public record CreateQuizRequest(
     /// <summary>
     /// A list of the questions you want the quiz to have.
     /// </summary>
-    public List<CreateQuestionRequest>? Questions { get; init; } = Questions;
+    public List<UpdateQuestionDraftRequest>? Questions { get; init; } = Questions;
 
     /// <summary>
-    /// Message from Otto shown in Danish when the quiz is finished. Optional.
+    /// Message shown in Danish when the quiz is finished. Optional.
     /// </summary>
     public string? EndMessage { get; init; } = EndMessage;
 
     /// <summary>
-    /// Message from Otto shown in English when the quiz is finished. Optional.
+    /// Message shown in English when the quiz is finished. Optional.
     /// </summary>
     public string? EndMessageEn { get; init; } = EndMessageEn;
+
+    /// <summary>
+    /// Instruction of the quiz shown in Danish
+    /// </summary>
+    public string? Instruction { get; init; } = Instruction;
+
+    /// <summary>
+    /// Instruction of the quiz shown in English
+    /// </summary>
+    public string? InstructionEn { get; init; } = InstructionEn;
 }

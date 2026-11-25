@@ -1,4 +1,4 @@
-namespace VidensVejen.ContractsLib.Requests.GameService;
+namespace VidensVejen.ContractsLib.Requests.GameService.Drafts;
 
 /// <summary>
 /// 
@@ -8,8 +8,8 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 /// <param name="CorrectAnswer"></param>
 /// <param name="Feedback"></param>
 /// <param name="FeedbackEn"></param>
-public record CreateChoiceRequest(
-    string Text,
+public record UpdateChoiceDraftRequest(
+    string? Text,
     string? TextEn,
     bool CorrectAnswer,
     string? Feedback,
@@ -19,7 +19,7 @@ public record CreateChoiceRequest(
     /// <summary>
     /// The text in danish you want the choice to have.
     /// </summary>
-    public string Text { get; init; } = Text;
+    public string? Text { get; init; } = Text;
 
     /// <summary>
     /// The text in english you want the choice to have.

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using GameService.Api.Mappers.Sessions;
 using GameService.FacadeLib.Commands.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using VidensVejen.ContractsLib.Requests.GameService;
+using VidensVejen.ContractsLib.Requests.GameService.Sessions;
 using VidensVejen.ContractsLib.Responses.GameService;
 using VidensVejen.SharedKernelLib.Exceptions;
 

@@ -1,4 +1,4 @@
-using GameService.DomainLib.ValueObjects;
+using GameService.DomainLib.ValueObjects.Quizzes;
 using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.DomainLib.Tests;

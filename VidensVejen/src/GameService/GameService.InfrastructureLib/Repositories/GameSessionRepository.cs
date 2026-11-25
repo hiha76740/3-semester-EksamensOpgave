@@ -1,5 +1,5 @@
 using GameService.ApplicationLib.Repositories;
-using GameService.DomainLib.Entities;
+using GameService.DomainLib.Entities.Sessions;
 using GameService.InfrastructureLib.Persistence;
 using Microsoft.EntityFrameworkCore;
 

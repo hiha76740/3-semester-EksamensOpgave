@@ -1,4 +1,4 @@
-namespace VidensVejen.ContractsLib.Requests.GameService;
+namespace VidensVejen.ContractsLib.Requests.GameService.Sessions;
 
 /// <summary>
 /// 

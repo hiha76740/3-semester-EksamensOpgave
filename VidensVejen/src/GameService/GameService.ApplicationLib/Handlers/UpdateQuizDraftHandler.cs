@@ -1,6 +1,6 @@
 using GameService.ApplicationLib.Mappers;
 using GameService.ApplicationLib.Repositories;
-using GameService.DomainLib.Entities;
+using GameService.DomainLib.Entities.Drafts;
 using GameService.FacadeLib.Commands.DTOs;
 using GameService.FacadeLib.Commands.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -13,28 +13,48 @@ namespace GameService.ApplicationLib.Handlers;
 /// </summary>
 /// <param name="draftRepo"></param>
 /// <param name="logger"></param>
-public class UpdateQuizDraftHandler(IQuizDraftRepository draftRepo, ILogger<UpdateQuizDraftHandler> logger) : IUpdateQuizDraftHandler
+public class UpdateQuizDraftHandler(
+    IQuizDraftRepository draftRepo,
+    ILogger<UpdateQuizDraftHandler> logger
+    ) : IUpdateQuizDraftHandler
 {
-    async Task IUpdateQuizDraftHandler.HandleAsync(Guid draftId, CreateQuizCommand command)
+    async Task IUpdateQuizDraftHandler.HandleAsync(UpdateQuizDraftCommand command)
     {
-        if (logger.IsEnabled(LogLevel.Information))
-            logger.LogInformation("Beginning to update quiz draft {Id}", draftId);
+        try
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+                logger.LogInformation("Beginning to update quiz draft {Id}", command.DraftId);
 
-        var draft = await draftRepo.GetDraftByIdAsync(new QuizDraftId(draftId))
-            ?? throw new NotFoundException("Quiz draft was not found");
+            var id = new QuizDraftId(command.DraftId);
 
-        draft.Update(
-            command.Title,
-            command.TitleEn,
-            command.ExhibitionId,
-            command.QuizLayout,
-            command.EndMessage,
-            command.EndMessageEn,
-            command.Questions.AsNewQuestions());
+            var draft = await draftRepo.GetDraftByIdAsync(id)
+                ?? throw new NotFoundException("Quiz draft was not found");
 
-        await draftRepo.SaveAsync();
+            draft.Update(
+                command.Title,
+                command.TitleEn,
+                command.ExhibitionId,
+                command.QuizLayout,
+                command.EndMessage,
+                command.EndMessageEn,
+                command.Questions.AsNewDraftQuestions());
 
-        if (logger.IsEnabled(LogLevel.Information))
-            logger.LogInformation("Quiz draft {Id} updated successfully", draftId);
+            await draftRepo.SaveAsync();
+
+            if (logger.IsEnabled(LogLevel.Information))
+                logger.LogInformation("Quiz draft {Id} updated successfully", draft.Id.Value);
+        }
+        catch (Exception ex)
+        {
+            if (logger.IsEnabled(LogLevel.Error))
+            {
+                logger.LogError("Error {ErrorMessage}", ex.Message);
+
+                if (ex.InnerException != null)
+                    logger.LogError("InnerException Error {Error}", ex.InnerException.Message);
+            }
+
+            throw;
+        }
     }
 }

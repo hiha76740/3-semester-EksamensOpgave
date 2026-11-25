@@ -1,7 +1,8 @@
-using GameService.DomainLib.ValueObjects;
+using GameService.DomainLib.Entities.Quizzes;
+using GameService.DomainLib.ValueObjects.Sessions;
 using VidensVejen.SharedKernelLib.Exceptions;
 
-namespace GameService.DomainLib.Entities;
+namespace GameService.DomainLib.Entities.Sessions;
 
 /// <summary>
 /// 

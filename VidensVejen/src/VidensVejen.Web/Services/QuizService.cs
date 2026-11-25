@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
-using VidensVejen.ContractsLib.Requests.GameService;
+using VidensVejen.ContractsLib.Requests.GameService.Quizzes;
 using VidensVejen.Web.ServicesInterfaces;
 
 namespace VidensVejen.Web.Services;

@@ -1,4 +1,4 @@
-using GameService.DomainLib.Entities;
+using GameService.DomainLib.Entities.Drafts;
 
 namespace GameService.ApplicationLib.Repositories;
 

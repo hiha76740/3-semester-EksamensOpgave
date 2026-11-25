@@ -5,13 +5,12 @@ namespace GameService.FacadeLib.Commands.Interfaces;
 /// <summary>
 /// 
 /// </summary>
-public interface IPublishQuizHandler
+public interface ICreateQuizHandler
 {
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="draftId"></param>
     /// <param name="command"></param>
     /// <returns></returns>
-    Task<Guid> HandleAsync(Guid draftId, CreateQuizCommand command);
+    Task HandleAsync(CreateQuizCommand command);
 }

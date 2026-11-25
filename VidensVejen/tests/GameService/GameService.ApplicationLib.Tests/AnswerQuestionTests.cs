@@ -1,7 +1,8 @@
 using GameService.ApplicationLib.Handlers;
 using GameService.ApplicationLib.Repositories;
-using GameService.DomainLib.Entities;
-using GameService.DomainLib.ValueObjects;
+using GameService.DomainLib.Entities.Quizzes;
+using GameService.DomainLib.Entities.Sessions;
+using GameService.DomainLib.ValueObjects.Quizzes;
 using GameService.FacadeLib.Commands.DTOs;
 using GameService.FacadeLib.Commands.Interfaces;
 using Moq;

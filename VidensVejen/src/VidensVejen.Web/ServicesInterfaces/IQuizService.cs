@@ -1,5 +1,5 @@
 using System.Net;
-using VidensVejen.ContractsLib.Requests.GameService;
+using VidensVejen.ContractsLib.Requests.GameService.Quizzes;
 
 namespace VidensVejen.Web.ServicesInterfaces;
 

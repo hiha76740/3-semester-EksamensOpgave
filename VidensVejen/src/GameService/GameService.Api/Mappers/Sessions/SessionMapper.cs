@@ -1,7 +1,7 @@
 using GameService.FacadeLib.Queries.DTOs;
 using VidensVejen.ContractsLib.Responses.GameService;
 using GameService.FacadeLib.Commands.DTOs;
-using VidensVejen.ContractsLib.Requests.GameService;
+using VidensVejen.ContractsLib.Requests.GameService.Sessions;
 
 namespace GameService.Api.Mappers.Sessions;
 

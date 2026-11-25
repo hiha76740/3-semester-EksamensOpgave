@@ -1,6 +1,6 @@
 using GameService.FacadeLib.Commands.DTOs;
 using GameService.FacadeLib.Queries.DTOs;
-using VidensVejen.ContractsLib.Requests.GameService;
+using VidensVejen.ContractsLib.Requests.GameService.Quizzes;
 using VidensVejen.ContractsLib.Responses.GameService;
 
 namespace GameService.Api.Mappers.Quizzes;

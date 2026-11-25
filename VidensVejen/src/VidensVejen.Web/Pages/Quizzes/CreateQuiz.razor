@@ -1,4 +1,5 @@
 @page "/games/create"
+@using VidensVejen.ContractsLib.Requests.GameService.Quizzes
 
 
 @inject IExhibitionService ExhibitionService
@@ -123,7 +124,9 @@
                             )).ToList()
                     )).ToList(),
                 input.EndMessage,
-                input.EndMessageEn
+                input.EndMessageEn,
+                input.Instruction,
+                input.InstructionEn
             );
 
             var statusCode = await QuizService.CreateAsync(request);

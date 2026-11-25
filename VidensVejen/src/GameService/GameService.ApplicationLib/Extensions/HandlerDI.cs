@@ -18,7 +18,7 @@ public static class HandlerDI
     {
         services.AddScoped<ICreateQuizDraftHandler, CreateQuizDraftHandler>();
         services.AddScoped<IUpdateQuizDraftHandler, UpdateQuizDraftHandler>();
-        services.AddScoped<IPublishQuizHandler, PublishQuizHandler>();
+        services.AddScoped<ICreateQuizHandler, CreateQuizHandler>();
         services.AddScoped<IStartSessionHandler, StartSessionHandler>();
         services.AddScoped<IAnswerQuestionHandler, AnswerQuestionHandler>();
         services.AddScoped<IDeleteQuizHandler, DeleteQuizHandler>();

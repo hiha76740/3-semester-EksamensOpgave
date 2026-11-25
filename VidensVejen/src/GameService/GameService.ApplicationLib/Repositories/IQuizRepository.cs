@@ -1,4 +1,4 @@
-using GameService.DomainLib.Entities;
+using GameService.DomainLib.Entities.Quizzes;
 
 namespace GameService.ApplicationLib.Repositories;
 

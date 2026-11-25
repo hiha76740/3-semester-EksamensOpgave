@@ -1,6 +1,6 @@
 using VidensVejen.SharedKernelLib.Exceptions;
 
-namespace GameService.DomainLib.ValueObjects;
+namespace GameService.DomainLib.ValueObjects.Quizzes;
 
 /// <summary>
 /// 
@@ -15,7 +15,7 @@ public record Choice
     /// <summary>
     /// 
     /// </summary>
-    public string? TextEn { get; init; }
+    public string TextEn { get; init; }
     /// <summary>
     /// 
     /// </summary>
@@ -40,7 +40,7 @@ public record Choice
     /// <param name="feedback"></param>
     /// <param name="feedbackEn"></param>
     /// <exception cref="DomainException"></exception>
-    public Choice(string text, string? textEn, bool isCorrect, string? feedback, string? feedbackEn)
+    public Choice(string text, string textEn, bool isCorrect, string? feedback, string? feedbackEn)
     {
         if (string.IsNullOrWhiteSpace(text))
             throw new DomainException("Choice text could not be set, no value");

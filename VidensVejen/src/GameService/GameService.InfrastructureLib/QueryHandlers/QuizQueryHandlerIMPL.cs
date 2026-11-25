@@ -1,4 +1,4 @@
-using GameService.DomainLib.Entities;
+using GameService.DomainLib.Entities.Quizzes;
 using GameService.DomainLib.ValueObjects;
 using GameService.FacadeLib.Queries.DTOs;
 using GameService.FacadeLib.Queries.Interfaces;

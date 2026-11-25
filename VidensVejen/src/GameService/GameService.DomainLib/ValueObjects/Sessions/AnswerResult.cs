@@ -1,4 +1,4 @@
-namespace GameService.DomainLib.ValueObjects;
+namespace GameService.DomainLib.ValueObjects.Sessions;
 
 /// <summary>
 /// 

@@ -1,4 +1,4 @@
-namespace VidensVejen.ContractsLib.Requests.GameService;
+namespace VidensVejen.ContractsLib.Requests.GameService.Quizzes;
 
 /// <summary>
 /// 
@@ -7,23 +7,23 @@ namespace VidensVejen.ContractsLib.Requests.GameService;
 /// <param name="TextEn"></param>
 /// <param name="Choices"></param>
 public record CreateQuestionRequest(
-    string? Text,
-    string? TextEn,
-    List<CreateChoiceRequest>? Choices
+    string Text,
+    string TextEn,
+    List<CreateChoiceRequest> Choices
     )
 {
     /// <summary>
     /// The text of the question in Danish.
     /// </summary>
-    public string? Text { get; init; } = Text;
+    public string Text { get; init; } = Text;
 
     /// <summary>
     /// The text of the question in English.
     /// </summary>
-    public string? TextEn { get; init; } = TextEn;
+    public string TextEn { get; init; } = TextEn;
 
     /// <summary>
     /// A list of the choices you want the question to have.
     /// </summary>
-    public List<CreateChoiceRequest>? Choices { get; init; } = Choices;
+    public List<CreateChoiceRequest> Choices { get; init; } = Choices;
 }

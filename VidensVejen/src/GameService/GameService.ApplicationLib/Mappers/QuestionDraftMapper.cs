@@ -1,21 +1,21 @@
-using GameService.DomainLib.ValueObjects;
+using GameService.DomainLib.ValueObjects.Drafts;
 using GameService.FacadeLib.Commands.DTOs;
 
 namespace GameService.ApplicationLib.Mappers;
 
-internal static class QuestionCommandMapper
+internal static class QuestionDraftMapper
 {
-    internal static List<NewQuestion> AsNewQuestions(this List<CreateQuestionCommand>? commands)
+    internal static List<NewQuestionDraft> AsNewDraftQuestions(this List<UpdateQuestionDraftCommand>? commands)
     {
-        var questions = new List<NewQuestion>();
+        var questions = new List<NewQuestionDraft>();
 
         foreach (var questionCommand in commands ?? [])
         {
-            var choices = new List<Choice>();
+            var choices = new List<ChoiceDraft>();
 
             foreach (var choiceCommand in questionCommand.Choices ?? [])
             {
-                choices.Add(new Choice(
+                choices.Add(new ChoiceDraft(
                     choiceCommand.Text,
                     choiceCommand.TextEn,
                     choiceCommand.CorrectAnswer,
@@ -24,7 +24,7 @@ internal static class QuestionCommandMapper
                     ));
             }
 
-            questions.Add(new NewQuestion(
+            questions.Add(new NewQuestionDraft(
                 questionCommand.Text,
                 questionCommand.TextEn,
                 choices

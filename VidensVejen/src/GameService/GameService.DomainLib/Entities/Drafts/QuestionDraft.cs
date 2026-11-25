@@ -1,16 +1,16 @@
-using GameService.DomainLib.ValueObjects;
+using GameService.DomainLib.ValueObjects.Drafts;
 
-namespace GameService.DomainLib.Entities;
+namespace GameService.DomainLib.Entities.Drafts;
 
 /// <summary>
 /// 
 /// </summary>
-public class DraftQuestion
+public class QuestionDraft
 {
     /// <summary>
     /// 
     /// </summary>
-    public QuestionId Id { get; init; } = null!;
+    public QuestionDraftId Id { get; init; } = null!;
     /// <summary>
     /// 
     /// </summary>
@@ -23,14 +23,14 @@ public class DraftQuestion
     /// <summary>
     /// 
     /// </summary>
-    public IReadOnlyList<Choice> Choices => _choices.AsReadOnly();
+    public IReadOnlyList<ChoiceDraft> Choices => _choices.AsReadOnly();
 
-    private readonly List<Choice> _choices = [];
+    private readonly List<ChoiceDraft> _choices = [];
 
 
-    internal DraftQuestion(string? text, string? textEn, List<Choice>? choices)
+    internal QuestionDraft(string? text, string? textEn, List<ChoiceDraft>? choices)
     {
-        Id = new QuestionId(Guid.NewGuid());
+        Id = new QuestionDraftId(Guid.NewGuid());
         Text = text;
         TextEn = textEn;
 
@@ -39,5 +39,5 @@ public class DraftQuestion
     }
 
     // EF Core constructor
-    private DraftQuestion() { }
+    private QuestionDraft() { }
 }

@@ -1,4 +1,4 @@
-namespace GameService.DomainLib.ValueObjects;
+namespace GameService.DomainLib.ValueObjects.Quizzes;
 
 /// <summary>
 /// 
@@ -6,4 +6,4 @@ namespace GameService.DomainLib.ValueObjects;
 /// <param name="Text"></param>
 /// <param name="TextEn"></param>
 /// <param name="Choices"></param>
-public record NewQuestion(string? Text, string? TextEn, List<Choice>? Choices);
+public record NewQuestion(string Text, string TextEn, List<Choice> Choices);

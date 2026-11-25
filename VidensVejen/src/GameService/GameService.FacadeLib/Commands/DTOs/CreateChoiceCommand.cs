@@ -10,7 +10,7 @@ namespace GameService.FacadeLib.Commands.DTOs;
 /// <param name="FeedbackEn"></param>
 public record CreateChoiceCommand(
     string Text,
-    string? TextEn,
+    string TextEn,
     bool CorrectAnswer,
     string? Feedback,
     string? FeedbackEn

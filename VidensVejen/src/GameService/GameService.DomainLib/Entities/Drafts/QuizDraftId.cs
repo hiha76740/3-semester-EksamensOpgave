@@ -1,4 +1,4 @@
-namespace GameService.DomainLib.Entities;
+namespace GameService.DomainLib.Entities.Drafts;
 
 /// <summary>
 /// 

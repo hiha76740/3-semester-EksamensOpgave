@@ -1,7 +1,5 @@
-using GameService.ApplicationLib.Mappers;
 using GameService.ApplicationLib.Repositories;
-using GameService.DomainLib.Entities;
-using GameService.FacadeLib.Commands.DTOs;
+using GameService.DomainLib.Entities.Drafts;
 using GameService.FacadeLib.Commands.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -12,28 +10,42 @@ namespace GameService.ApplicationLib.Handlers;
 /// </summary>
 /// <param name="draftRepo"></param>
 /// <param name="logger"></param>
-public class CreateQuizDraftHandler(IQuizDraftRepository draftRepo, ILogger<CreateQuizDraftHandler> logger) : ICreateQuizDraftHandler
+public class CreateQuizDraftHandler(
+    IQuizDraftRepository draftRepo,
+    ILogger<CreateQuizDraftHandler> logger
+    ) : ICreateQuizDraftHandler
 {
-    async Task<Guid> ICreateQuizDraftHandler.HandleAsync(CreateQuizCommand command)
+    async Task<Guid> ICreateQuizDraftHandler.HandleAsync()
     {
-        if (logger.IsEnabled(LogLevel.Information))
-            logger.LogInformation("Beginning to create quiz draft with name {QuizName}", command.Title);
+        try
+        {
+            if (logger.IsEnabled(LogLevel.Information))
+                logger.LogInformation("Beginning to create a quiz draft");
 
-        var draft = QuizDraft.Create(
-            command.Title,
-            command.TitleEn,
-            command.ExhibitionId,
-            command.QuizLayout,
-            command.EndMessage,
-            command.EndMessageEn,
-            command.Questions.AsNewQuestions());
+            var draft = QuizDraft.Create();
 
-        await draftRepo.AddAsync(draft);
-        await draftRepo.SaveAsync();
+            if (logger.IsEnabled(LogLevel.Information))
+                logger.LogInformation("Quiz draft created with id: {QuizDraftId}", draft.Id.Value);
 
-        if (logger.IsEnabled(LogLevel.Information))
-            logger.LogInformation("Quiz draft {Id} saved in database successfully", draft.Id.Value);
+            await draftRepo.AddAsync(draft);
+            await draftRepo.SaveAsync();
 
-        return draft.Id.Value;
+            if (logger.IsEnabled(LogLevel.Information))
+                logger.LogInformation("Quiz draft {Id} saved in database successfully", draft.Id.Value);
+
+            return draft.Id.Value;
+        }
+        catch (Exception ex)
+        {
+            if (logger.IsEnabled(LogLevel.Error))
+            {
+                logger.LogError("Error {ErrorMessage}", ex.Message);
+
+                if (ex.InnerException != null)
+                    logger.LogError("InnerException Error {Error}", ex.InnerException.Message);
+            }
+
+            throw;
+        }
     }
 }
