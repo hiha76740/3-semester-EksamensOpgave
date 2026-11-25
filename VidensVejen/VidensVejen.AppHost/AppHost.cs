@@ -53,8 +53,17 @@ var imageService = builder.AddProject<Projects.ImageService_Api>("imageservice-a
     .WaitFor(imageDb);
 
 
+var statisticsDatabaseSqlServer = builder.AddSqlServer("statisticsSqlServer")
+    .WithContainerName("vidensvejen-statistics-sqlserver-dev")
+    .WithDataVolume("vidensvejen-statistics-data-dev")
+    .WithLifetime(ContainerLifetime.Persistent);
+
+var statisticsDb = statisticsDatabaseSqlServer.AddDatabase("StatisticsDb");
+
 var statisticsService = builder.AddProject<Projects.StatisticsService_Api>("statisticsservice-api")
-    .WithDaprSidecar();
+    .WithDaprSidecar()
+    .WithReference(statisticsDb)
+    .WaitFor(statisticsDb);
 
 
 var userDatabaseSqlServer = builder.AddSqlServer("userSqlServer")
