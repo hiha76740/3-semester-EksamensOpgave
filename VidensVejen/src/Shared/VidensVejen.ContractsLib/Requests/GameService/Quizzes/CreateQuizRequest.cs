@@ -3,6 +3,7 @@ namespace VidensVejen.ContractsLib.Requests.GameService.Quizzes;
 /// <summary>
 /// 
 /// </summary>
+/// <param name="DraftId"></param>
 /// <param name="Title"></param>
 /// <param name="TitleEn"></param>
 /// <param name="ExhibitionId"></param>
@@ -14,6 +15,7 @@ namespace VidensVejen.ContractsLib.Requests.GameService.Quizzes;
 /// <param name="InstructionEn"></param>
 /// <example>
 /// {
+///     "draftId": "123e4567-e89b-12d3-a456-426614174000",
 ///     "title": "Affaldshierakiet",
 ///     "titleEn": "The waste hierarchy",
 ///     "exhibitionId": "123e4567-e89b-12d3-a456-426614174000",
@@ -40,6 +42,7 @@ namespace VidensVejen.ContractsLib.Requests.GameService.Quizzes;
 /// }
 /// </example>
 public record CreateQuizRequest(
+    Guid DraftId,
     string Title,
     string TitleEn,
     Guid ExhibitionId,
@@ -51,6 +54,11 @@ public record CreateQuizRequest(
     string InstructionEn
     )
 {
+    /// <summary>
+    /// A unique identifier for a quiz draft.
+    /// </summary>
+    public Guid DraftId { get; init; } = DraftId;
+
     /// <summary>
     /// The title of the quiz in Danish.
     /// </summary>

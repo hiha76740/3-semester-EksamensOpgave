@@ -1,11 +1,10 @@
 @page "/games/create"
+@using VidensVejen.ContractsLib.Requests.GameService.Drafts
 @using VidensVejen.ContractsLib.Requests.GameService.Quizzes
 
 
 @inject IExhibitionService ExhibitionService
 @inject IQuizService QuizService
-@inject DialogService Dialog
-@inject NavigationManager NavigationManager
 
 <PageTitle>Opret quiz</PageTitle>
 
@@ -14,18 +13,36 @@
     <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">@exhibitionsError</RadzenAlert>
 }
 
-<QuizFormComponent @key="model" Model="model"
-                   Exhibitions="exhibitions"
-                   FormTitle="Opret quiz"
-                   SubmitText="Kontrollér kladde"
-                   SubmitCallback="Create"
-                   ResetCallback="ResetForm"
-                   Changed="ClearMessages"
-                   Message="@message"
-                   Errors="errors" />
+@if (model != null)
+{
+    <QuizFormComponent @key="model" Model="model"
+                       Exhibitions="exhibitions"
+                       FormTitle="Opret quiz"
+                       SubmitText="Publicér"
+                       SaveDraftCallback="SaveDraftAsync" IsBusy="isBusy"
+                       SubmitCallback="Create"
+                       ResetCallback="ResetForm"
+                       Changed="ClearMessages"
+                       Message="@message"
+                       Errors="errors" />
+}
+else
+{
+    @if (message != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">@message</RadzenAlert>
+    }
+    @if (errors.Count > 0)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@errors[0]</RadzenAlert>
+    }
+    <RadzenButton Text="Opret quiz" Icon="add" Click="StartDraftAsync" IsBusy="@isBusy" />
+}
 
 @code {
-    private QuizInputModel model = new();
+    private QuizInputModel? model;
+    private Guid? draftId;
+    private bool isBusy;
     private readonly List<string> errors = [];
     private string? message;
 
@@ -58,9 +75,23 @@
         }
     }
 
-    private async Task Create(QuizInputModel input)
+    private Task StartDraftAsync() => RunAsync(async () =>
     {
-        ClearMessages();
+        draftId = await QuizService.CreateDraftAsync();
+        model = new QuizInputModel();
+    }, "Quizkladden kunne ikke oprettes.");
+
+    private Task SaveDraftAsync(QuizInputModel input) => RunAsync(async () =>
+    {
+        if (draftId is Guid id)
+        {
+            await QuizService.SaveDraftAsync(id, BuildDraftRequest(input));
+            message = "Quizkladden er gemt.";
+        }
+    }, "Quizkladden kunne ikke gemmes.");
+
+    private Task Create(QuizInputModel input) => RunAsync(async () =>
+    {
 
         if (string.IsNullOrWhiteSpace(input.Title) || string.IsNullOrWhiteSpace(input.TitleEn))
         {
@@ -75,6 +106,11 @@
         if (!exhibitions.Any(option => option.Id == input.ExhibitionId))
         {
             errors.Add("Vælg en udstilling til quizzen.");
+        }
+
+        if (string.IsNullOrWhiteSpace(input.QuizLayout))
+        {
+            errors.Add("Vælg et layout til quizzen.");
         }
 
         for (var i = 0; i < input.Questions.Count; i++)
@@ -105,41 +141,63 @@
             }
         }
 
-        if (errors.Count == 0)
+        if (errors.Count != 0 || draftId == null)
         {
-            var request = new CreateQuizRequest(
-                input.Title,
-                input.TitleEn,
-                input.ExhibitionId.GetValueOrDefault(),
-                input.QuizLayout,
-                input.Questions.Select(q => new CreateQuestionRequest(
-                    q.Text,
-                    q.TextEn,
-                    q.Answers.Select(c => new CreateChoiceRequest(
-                            c.Text,
-                            c.TextEn,
-                            c.IsCorrect,
-                            c.Feedback,
-                            c.FeedbackEn
-                            )).ToList()
-                    )).ToList(),
-                input.EndMessage,
-                input.EndMessageEn,
-                input.Instruction,
-                input.InstructionEn
-            );
+            return;
+        }
 
-            var statusCode = await QuizService.CreateAsync(request);
+        var status = await QuizService.PublishAsync(draftId.Value, BuildRequest(input));
+        if (status == HttpStatusCode.OK || status == HttpStatusCode.Created)
+        {
+            draftId = null;
+            model = null;
+            message = "Quizzen er publiceret.";
+        }
+        else
+        {
+            errors.Add($"Quizzen kunne ikke publiceres (HTTP {(int)status}).");
+        }
+    }, "Publiceringen kunne ikke bekræftes.");
 
-            if (statusCode == HttpStatusCode.Created)
-            {
-                await Dialog.Alert("Quiz oprettet", "Quiz oprettelse");
-                NavigationManager.NavigateTo("/quizzes");
-            }
-            else
-            {
-                await Dialog.Alert("Fejl opstået ved oprettelse af quiz. Prøv igen");
-            }
+    private static CreateQuizRequest BuildRequest(QuizInputModel input) =>
+        new(input.DraftId, input.Title, input.TitleEn, input.ExhibitionId.GetValueOrDefault(), input.QuizLayout,
+            input.Questions.Select(question => new CreateQuestionRequest(
+                question.Text, question.TextEn,
+                question.Answers.Select(answer => new CreateChoiceRequest(
+                    answer.Text, answer.TextEn, answer.IsCorrect,
+                    answer.Feedback, answer.FeedbackEn)).ToList())).ToList(),
+            input.EndMessage, input.EndMessageEn, input.Instruction, input.InstructionEn);
+
+    private static UpdateQuizDraftRequest BuildDraftRequest(QuizInputModel input) =>
+        new(input.Title, input.TitleEn, input.ExhibitionId, input.QuizLayout,
+            input.Questions.Select(question => new UpdateQuestionDraftRequest(
+                question.Text, question.TextEn,
+                question.Answers.Select(answer => new UpdateChoiceDraftRequest(
+                    answer.Text, answer.TextEn, answer.IsCorrect,
+                    answer.Feedback, answer.FeedbackEn)).ToList())).ToList(),
+            input.EndMessage, input.EndMessageEn, input.Instruction, input.InstructionEn);
+
+    private async Task RunAsync(Func<Task> action, string failureMessage)
+    {
+        if (isBusy)
+        {
+            return;
+        }
+
+        isBusy = true;
+        ClearMessages();
+        try
+        {
+            await action();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or System.Text.Json.JsonException
+            or OperationCanceledException)
+        {
+            errors.Add(failureMessage);
+        }
+        finally
+        {
+            isBusy = false;
         }
     }
 

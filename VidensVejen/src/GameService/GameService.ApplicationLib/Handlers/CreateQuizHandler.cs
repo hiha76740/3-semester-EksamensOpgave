@@ -27,12 +27,12 @@ public class CreateQuizHandler(
 {
     async Task ICreateQuizHandler.HandleAsync(CreateQuizCommand command)
     {
+        unitOfWork.BeginTransaction(IsolationLevel.Serializable);
+
         try
         {
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Beginning to create quiz from draft {DraftId}", command.DraftId);
-
-            unitOfWork.BeginTransaction(IsolationLevel.Serializable);
 
             var id = new QuizDraftId(command.DraftId);
 
