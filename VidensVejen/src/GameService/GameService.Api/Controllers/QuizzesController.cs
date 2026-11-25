@@ -13,11 +13,40 @@ namespace GameService.Api.Controllers;
 [Route("/v1/games/quizzes")]
 [ApiController]
 public class QuizzesController(
+    IPublishQuizHandler publish,
     IUpdateQuizHandler update,
     IDeleteQuizHandler delete,
     IQuizQueries queries
     ) : ControllerBase
 {
+    [HttpPost]
+    [EndpointSummary("Publish a quiz")]
+    [EndpointDescription("Creates a quiz from the request and deletes the quiz draft in the same transaction")]
+    [ProducesResponseType<QuizIdResponse>(StatusCodes.Status201Created, "Application/json", Description = "Returns the id of the published quiz")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "The quiz does not meet the rules for publishing")]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Quiz draft was not found")]
+    public async Task<ActionResult<QuizIdResponse>> PublishQuiz(
+        [Required][FromQuery][Description("A unique identifier for the quiz draft that is published")] Guid quizDraftId,
+        [Required][Description("Object used to publish a quiz")] CreateQuizRequest request)
+    {
+        try
+        {
+            var id = await publish.HandleAsync(quizDraftId, request.AsCreateCommand());
+
+            var response = new QuizIdResponse(id);
+
+            return Created($"/v1/games/quizzes/{id}", response);
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
     [HttpGet("{id:guid}")]
     [EndpointSummary("Get a quiz")]
     [EndpointDescription("Gets a single instance of quiz")]

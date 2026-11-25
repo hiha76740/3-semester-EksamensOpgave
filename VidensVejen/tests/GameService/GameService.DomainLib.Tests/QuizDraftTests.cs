@@ -1,6 +1,5 @@
 using GameService.DomainLib.Entities;
 using GameService.DomainLib.ValueObjects;
-using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.DomainLib.Tests;
 
@@ -63,46 +62,54 @@ public class QuizDraftTests
     }
 
     [Fact]
-    public void Publish_GivenValidDraft_ReturnsQuizWithSameContent()
+    public void Update_GivenNewData_ReplacesFieldsAndQuestions()
+    {
+        // Arrange
+        var draft = QuizDraft.Create("Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN", CreateQuestions());
+        var exhibitionId = Guid.NewGuid();
+        List<NewQuestion> questions = [new NewQuestion("New", "New EN", [new Choice("A", "A EN", true, null, null)])];
+
+        // Act
+        draft.Update("New quiz", "New quiz EN", exhibitionId, "horizontal", "Bye", "Bye EN", questions);
+
+        // Assert
+        Assert.Equal("New quiz", draft.Title);
+        Assert.Equal("New quiz EN", draft.TitleEn);
+        Assert.Equal(exhibitionId, draft.ExhibitionId?.Value);
+        Assert.Equal("horizontal", draft.QuizLayout);
+        Assert.Equal("Bye", draft.EndMessage);
+        Assert.Equal("Bye EN", draft.EndMessageEn);
+        var question = Assert.Single(draft.Questions);
+        Assert.Equal("New", question.Text);
+        Assert.Single(question.Choices);
+    }
+
+    [Fact]
+    public void Update_GivenNoData_ClearsDraft()
     {
         // Arrange
         var draft = QuizDraft.Create("Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN", CreateQuestions());
 
         // Act
-        var quiz = draft.Publish();
+        draft.Update(null, null, null, null, null, null, null);
 
         // Assert
-        Assert.NotEqual(Guid.Empty, quiz.Id.Value);
-        Assert.Equal(draft.Title, quiz.Title);
-        Assert.Equal(draft.TitleEn, quiz.TitleEn);
-        Assert.Equal(draft.ExhibitionId?.Value, quiz.ExhibitionId.Value);
-        Assert.Equal(draft.QuizLayout, quiz.QuizLayout);
-        Assert.Equal(draft.EndMessage, quiz.EndMessage);
-        Assert.Equal(draft.EndMessageEn, quiz.EndMessageEn);
-        var question = Assert.Single(quiz.Questions);
-        Assert.Equal("Question", question.Text);
-        Assert.Equal("Question EN", question.TextEn);
-        Assert.Equal(draft.Questions[0].Choices, question.Choices);
+        Assert.Null(draft.Title);
+        Assert.Null(draft.ExhibitionId);
+        Assert.Null(draft.QuizLayout);
+        Assert.Empty(draft.Questions);
     }
 
     [Fact]
-    public void Publish_GivenEmptyDraft_ThrowsDomainException()
+    public void Update_GivenEmptyExhibition_SetsExhibitionToNull()
     {
         // Arrange
-        var draft = QuizDraft.Create(null, null, null, null, null, null, null);
+        var draft = QuizDraft.Create("Quiz", null, Guid.NewGuid(), "vertical", null, null, null);
 
-        // Act & Assert
-        Assert.Throws<DomainException>(draft.Publish);
-    }
+        // Act
+        draft.Update("Quiz", null, Guid.Empty, "vertical", null, null, null);
 
-    [Fact]
-    public void Publish_GivenInvalidQuestion_ThrowsDomainException()
-    {
-        // Arrange
-        List<NewQuestion> questions = [new NewQuestion("Question", "Question EN", [new Choice("Only", "Only EN", true, null, null)])];
-        var draft = QuizDraft.Create("Quiz", null, Guid.NewGuid(), "vertical", null, null, questions);
-
-        // Act & Assert
-        Assert.Throws<DomainException>(draft.Publish);
+        // Assert
+        Assert.Null(draft.ExhibitionId);
     }
 }

@@ -17,6 +17,7 @@ public static class HandlerDI
     public static IServiceCollection AddHandlerDI(this IServiceCollection services)
     {
         services.AddScoped<ICreateQuizDraftHandler, CreateQuizDraftHandler>();
+        services.AddScoped<IUpdateQuizDraftHandler, UpdateQuizDraftHandler>();
         services.AddScoped<IUpdateQuizHandler, UpdateQuizHandler>();
         services.AddScoped<IPublishQuizHandler, PublishQuizHandler>();
         services.AddScoped<IStartSessionHandler, StartSessionHandler>();

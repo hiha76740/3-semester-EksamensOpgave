@@ -1,5 +1,4 @@
 using GameService.DomainLib.ValueObjects;
-using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.DomainLib.Entities;
 
@@ -70,18 +69,32 @@ public class QuizDraft
     /// <summary>
     /// 
     /// </summary>
-    /// <returns></returns>
-    /// <exception cref="DomainException"></exception>
-    public Quiz Publish()
+    /// <param name="title"></param>
+    /// <param name="titleEn"></param>
+    /// <param name="exhibitionId"></param>
+    /// <param name="quizLayout"></param>
+    /// <param name="endMessage"></param>
+    /// <param name="endMessageEn"></param>
+    /// <param name="questions"></param>
+    public void Update(string? title, string? titleEn, Guid? exhibitionId, string? quizLayout, string? endMessage, string? endMessageEn, List<NewQuestion>? questions)
     {
-        var questions = new List<NewQuestion>();
+        ExhibitionId = null;
 
-        foreach (var question in _questions)
+        if (exhibitionId != null && exhibitionId != Guid.Empty)
+            ExhibitionId = new ExhibitionId(exhibitionId.Value);
+
+        Title = title;
+        TitleEn = titleEn;
+        QuizLayout = quizLayout;
+        EndMessage = endMessage;
+        EndMessageEn = endMessageEn;
+
+        _questions.Clear();
+
+        foreach (var question in questions ?? [])
         {
-            questions.Add(question.AsNewQuestion());
+            AddQuestion(question);
         }
-
-        return Quiz.Create(Title, TitleEn, ExhibitionId?.Value, QuizLayout, EndMessage, EndMessageEn, questions);
     }
 
     private void AddQuestion(NewQuestion newQuestion)

@@ -13,7 +13,7 @@ namespace GameService.Api.Controllers;
 [ApiController]
 public class QuizDraftsController(
     ICreateQuizDraftHandler create,
-    IPublishQuizHandler publish
+    IUpdateQuizDraftHandler update
     ) : ControllerBase
 {
     [HttpPost]
@@ -38,22 +38,21 @@ public class QuizDraftsController(
         }
     }
 
-    [HttpPost("{id:guid}/publish")]
-    [EndpointSummary("Publish a quiz draft")]
-    [EndpointDescription("Turns a quiz draft into a quiz that can be played. The draft is deleted in the same transaction")]
-    [ProducesResponseType<QuizIdResponse>(StatusCodes.Status201Created, "Application/json", Description = "Returns the id of the published quiz")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "The draft does not meet the rules for a quiz")]
+    [HttpPut("{id:guid}")]
+    [EndpointSummary("Update a quiz draft")]
+    [EndpointDescription("Saves the quiz draft. Every field may be empty until the draft is published")]
+    [ProducesResponseType(StatusCodes.Status204NoContent, Description = "Quiz draft was saved successfully")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to save the quiz draft")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Quiz draft was not found")]
-    public async Task<ActionResult<QuizIdResponse>> PublishQuizDraft(
-        [Required][Description("A unique identifier for a quiz draft")] Guid id)
+    public async Task<ActionResult> UpdateQuizDraft(
+        [Required][Description("A unique identifier for a quiz draft")] Guid id,
+        [Required][Description("Object used to save a quiz draft")] CreateQuizRequest request)
     {
         try
         {
-            var quizId = await publish.HandleAsync(id);
+            await update.HandleAsync(id, request.AsCreateCommand());
 
-            var response = new QuizIdResponse(quizId);
-
-            return Created($"/v1/games/quizzes/{quizId}", response);
+            return NoContent();
         }
         catch (NotFoundException ex)
         {

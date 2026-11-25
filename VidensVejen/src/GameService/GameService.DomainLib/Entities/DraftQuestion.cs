@@ -38,11 +38,6 @@ public class DraftQuestion
             _choices.AddRange(choices);
     }
 
-    internal NewQuestion AsNewQuestion()
-    {
-        return new NewQuestion(Text, TextEn, [.. _choices]);
-    }
-
     // EF Core constructor
     private DraftQuestion() { }
 }
