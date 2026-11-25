@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using GameService.Api.Mappers.Quizzes;
 using GameService.FacadeLib.Commands.Interfaces;
+using GameService.FacadeLib.Queries.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using VidensVejen.ContractsLib.Requests.GameService;
 using VidensVejen.ContractsLib.Responses.GameService;
@@ -13,7 +14,8 @@ namespace GameService.Api.Controllers;
 [ApiController]
 public class QuizDraftsController(
     ICreateQuizDraftHandler create,
-    IUpdateQuizDraftHandler update
+    IUpdateQuizDraftHandler update,
+    IQuizQueries queries
     ) : ControllerBase
 {
     [HttpPost]
@@ -31,6 +33,49 @@ public class QuizDraftsController(
             var response = new QuizDraftIdResponse(id);
 
             return Created($"/v1/games/quiz-drafts/{id}", response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("{id:guid}")]
+    [EndpointSummary("Get a quiz draft")]
+    [EndpointDescription("Gets a single quiz draft so it can be opened and edited again")]
+    [ProducesResponseType<QuizDraftResponse>(StatusCodes.Status200OK, "Application/json", Description = "Returns the requested quiz draft")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to get the quiz draft")]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Quiz draft was not found")]
+    public async Task<ActionResult<QuizDraftResponse>> GetQuizDraft(
+        [Required][Description("A unique identifier for a quiz draft")] Guid id)
+    {
+        try
+        {
+            var dto = await queries.GetQuizDraftByIdAsync(id);
+
+            if (dto == null)
+                return NotFound("Quiz draft was not found");
+
+            return Ok(dto.AsResponse());
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet]
+    [EndpointSummary("Get quiz drafts")]
+    [EndpointDescription("Gets all quiz drafts")]
+    [ProducesResponseType<List<QuizDraftResponse>>(StatusCodes.Status200OK, "Application/json", Description = "Returns all quiz drafts")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to get the quiz drafts")]
+    public async Task<ActionResult<List<QuizDraftResponse>>> GetQuizDrafts()
+    {
+        try
+        {
+            var dtos = await queries.GetQuizDraftsAsync();
+
+            return Ok(dtos.Select(d => d.AsResponse()).ToList());
         }
         catch (Exception ex)
         {

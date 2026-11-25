@@ -41,6 +41,31 @@ public class QuizQueryHandlerIMPL(GameDbContext db) : IQuizQueries
         return quizzes.Select(AsDto).ToList();
     }
 
+    async Task<QuizDraftDto?> IQuizQueries.GetQuizDraftByIdAsync(Guid id)
+    {
+        var draftKey = new QuizDraftId(id);
+
+        var draft = await db.QuizDrafts
+            .AsNoTracking()
+            .Include(d => d.Questions)
+            .FirstOrDefaultAsync(d => d.Id == draftKey);
+
+        if (draft == null)
+            return null;
+
+        return AsDraftDto(draft);
+    }
+
+    async Task<List<QuizDraftDto>> IQuizQueries.GetQuizDraftsAsync()
+    {
+        var drafts = await db.QuizDrafts
+            .AsNoTracking()
+            .Include(d => d.Questions)
+            .ToListAsync();
+
+        return drafts.Select(AsDraftDto).ToList();
+    }
+
     private static QuizDto AsDto(Quiz quiz)
     {
         return new QuizDto(
@@ -54,6 +79,34 @@ public class QuizQueryHandlerIMPL(GameDbContext db) : IQuizQueries
             quiz.Questions
             .Select(
                 q => new QuestionDto(
+                    q.Id.Value,
+                    q.Text,
+                    q.TextEn,
+                    q.Choices
+                    .Select(
+                        c => new ChoiceDto(
+                            c.Text,
+                            c.TextEn,
+                            c.IsCorrect,
+                            c.Feedback,
+                            c.FeedbackEn))
+                    .ToList()))
+            .ToList());
+    }
+
+    private static QuizDraftDto AsDraftDto(QuizDraft draft)
+    {
+        return new QuizDraftDto(
+            draft.Id.Value,
+            draft.Title,
+            draft.TitleEn,
+            draft.ExhibitionId?.Value,
+            draft.QuizLayout,
+            draft.EndMessage,
+            draft.EndMessageEn,
+            draft.Questions
+            .Select(
+                q => new DraftQuestionDto(
                     q.Id.Value,
                     q.Text,
                     q.TextEn,
