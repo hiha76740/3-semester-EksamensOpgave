@@ -23,6 +23,7 @@ public static class HandlerDI
         services.AddScoped<IAnswerQuestionHandler, AnswerQuestionHandler>();
         services.AddScoped<IFinishSessionHandler, FinishSessionHandler>();
         services.AddScoped<IDeleteQuizHandler, DeleteQuizHandler>();
+        services.AddScoped<IDeleteDraftHandler, DeleteDraftHandler>();
 
         return services;
     }
