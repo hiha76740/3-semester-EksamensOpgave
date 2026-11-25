@@ -46,9 +46,12 @@ public class StartSessionTests
         Assert.Equal(savedSession.Id.Value, result.SessionId);
         Assert.Equal(quiz.Id, savedSession.QuizId);
         Assert.Equal(quiz.Id.Value, result.Quiz.Id);
+        Assert.Equal("Quiz EN", result.Quiz.TitleEn);
+        Assert.Equal("Done EN", result.Quiz.EndMessageEn);
         var question = Assert.Single(result.Quiz.Questions);
+        Assert.Equal("Question EN", question.TextEn);
         Assert.Collection(question.Choices,
-            choice => { Assert.Equal(0, choice.Index); Assert.Equal("Yes", choice.Text); },
+            choice => { Assert.Equal(0, choice.Index); Assert.Equal("Yes", choice.Text); Assert.Equal("Yes EN", choice.TextEn); },
             choice => { Assert.Equal(1, choice.Index); Assert.Equal("No", choice.Text); });
         sessionRepository.Verify(r => r.AddAsync(It.IsAny<GameSession>()), Times.Once);
         sessionRepository.Verify(r => r.SaveAsync(), Times.Once);

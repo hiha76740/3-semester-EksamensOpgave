@@ -1,4 +1,5 @@
 using GameService.DomainLib.Entities.Quizzes;
+using GameService.DomainLib.ValueObjects;
 using GameService.DomainLib.ValueObjects.Sessions;
 using VidensVejen.SharedKernelLib.Exceptions;
 
@@ -17,6 +18,11 @@ public class GameSession
     /// 
     /// </summary>
     public QuizId QuizId { get; init; } = null!;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public DateTime? CompletedAt { get; private set; }
 
     /// <summary>
     /// 
@@ -48,9 +54,6 @@ public class GameSession
     /// <exception cref="NotFoundException"></exception>
     public AnswerResult Answer(Quiz quiz, Guid questionId, int choiceIndex)
     {
-        if (quiz.Id != QuizId)
-            throw new DomainException("The quiz does not belong to this session");
-
         var question = quiz.Questions.FirstOrDefault(q => q.Id.Value == questionId)
             ?? throw new NotFoundException("Question was not found in the quiz");
 
@@ -69,7 +72,25 @@ public class GameSession
         var feedback = question.Choices[choiceIndex].Feedback;
         var feedbackEn = question.Choices[choiceIndex].FeedbackEn;
 
-        return new AnswerResult(isCorrect, feedback, feedbackEn, correctChoice.Text);
+        return new AnswerResult(isCorrect, feedback, feedbackEn, correctChoice.Text, correctChoice.TextEn);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="quiz"></param>
+    /// <returns></returns>
+    /// <exception cref="DomainException"></exception>
+    public SessionScore Finish(Quiz quiz)
+    {
+        if (_answers.Count != quiz.Questions.Count)
+            throw new DomainException("All questions must be answered before the session can be finished");
+
+        CompletedAt = DateTime.UtcNow;
+
+        var correctCount = _answers.Count(a => a.IsCorrect);
+
+        return new SessionScore(correctCount, quiz.Questions.Count);
     }
 
     private GameSession(QuizId quizId)

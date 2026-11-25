@@ -5,9 +5,13 @@ namespace GameService.FacadeLib.Queries.DTOs;
 /// </summary>
 /// <param name="IsCorrect"></param>
 /// <param name="Feedback"></param>
+/// <param name="FeedbackEn"></param>
 /// <param name="CorrectAnswer"></param>
+/// <param name="CorrectAnswerEn"></param>
 public record AnswerResultDto(
     bool IsCorrect,
     string? Feedback,
-    string CorrectAnswer
+    string? FeedbackEn,
+    string CorrectAnswer,
+    string? CorrectAnswerEn
     );

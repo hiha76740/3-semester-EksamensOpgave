@@ -22,8 +22,10 @@ internal static class SessionMapper
         var output = new PlayQuizResponse(
             dto.Id,
             dto.Title,
+            dto.TitleEn,
             dto.QuizLayout,
             dto.EndMessage,
+            dto.EndMessageEn,
             dto.Questions
             .Select(
                 q => q.AsResponse())
@@ -38,6 +40,7 @@ internal static class SessionMapper
         var output = new PlayQuestionResponse(
             dto.Id,
             dto.Text,
+            dto.TextEn,
             dto.Choices
             .Select(
                 c => c.AsResponse())
@@ -51,7 +54,8 @@ internal static class SessionMapper
     {
         var output = new PlayChoiceResponse(
             dto.Index,
-            dto.Text
+            dto.Text,
+            dto.TextEn
             );
 
         return output;
@@ -73,7 +77,20 @@ internal static class SessionMapper
         var output = new AnswerResultResponse(
             dto.IsCorrect,
             dto.Feedback,
-            dto.CorrectAnswer
+            dto.FeedbackEn,
+            dto.CorrectAnswer,
+            dto.CorrectAnswerEn
+            );
+
+        return output;
+    }
+
+    internal static SessionScoreResponse AsResponse(this SessionScoreDto dto)
+    {
+        var output = new SessionScoreResponse(
+            dto.CorrectCount,
+            dto.TotalCount,
+            dto.Percentage
             );
 
         return output;

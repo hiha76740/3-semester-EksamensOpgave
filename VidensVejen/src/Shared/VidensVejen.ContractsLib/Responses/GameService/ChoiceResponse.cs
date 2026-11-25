@@ -10,7 +10,7 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 /// <param name="FeedbackEn"></param>
 public record ChoiceResponse(
     string Text,
-    string? TextEn,
+    string TextEn,
     bool CorrectAnswer,
     string? Feedback,
     string? FeedbackEn
@@ -24,7 +24,7 @@ public record ChoiceResponse(
     /// <summary>
     /// The text of the choice in English.
     /// </summary>
-    public string? TextEn { get; init; } = TextEn;
+    public string TextEn { get; init; } = TextEn;
 
     /// <summary>
     /// Marks the choice as correct

@@ -32,13 +32,13 @@ public class StartSessionHandler(IQuizRepository quizRepo, IGameSessionRepositor
 
             for (var i = 0; i < question.Choices.Count; i++)
             {
-                choices.Add(new PlayChoiceDto(i, question.Choices[i].Text));
+                choices.Add(new PlayChoiceDto(i, question.Choices[i].Text, question.Choices[i].TextEn));
             }
 
-            questions.Add(new PlayQuestionDto(question.Id.Value, question.Text, choices));
+            questions.Add(new PlayQuestionDto(question.Id.Value, question.Text, question.TextEn, choices));
         }
 
-        var playQuiz = new PlayQuizDto(quiz.Id.Value, quiz.Title, quiz.QuizLayout, quiz.EndMessage, questions);
+        var playQuiz = new PlayQuizDto(quiz.Id.Value, quiz.Title, quiz.TitleEn, quiz.QuizLayout, quiz.EndMessage, quiz.EndMessageEn, questions);
 
         return new StartSessionDto(session.Id.Value, playQuiz);
     }

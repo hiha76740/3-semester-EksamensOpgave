@@ -26,6 +26,6 @@ public class AnswerQuestionHandler(IGameSessionRepository sessionRepo, IQuizRepo
 
         await sessionRepo.SaveAsync();
 
-        return new AnswerResultDto(result.IsCorrect, result.Feedback, result.CorrectAnswer);
+        return new AnswerResultDto(result.IsCorrect, result.Feedback, result.FeedbackEn, result.CorrectAnswer, result.CorrectAnswerEn);
     }
 }
