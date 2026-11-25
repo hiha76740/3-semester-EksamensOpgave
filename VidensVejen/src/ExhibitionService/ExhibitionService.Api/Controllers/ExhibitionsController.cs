@@ -10,7 +10,7 @@ using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace ExhibitionService.Api.Controllers;
 
-[Route("api/exhibitions")]
+[Route("v1/exhibitions")]
 [ApiController]
 public class ExhibitionsController(
     ICreateExhibitionHandler create,

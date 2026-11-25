@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ExhibitionService.Api.Controllers;
 
-[Route("api/exhibitions/draft")]
+[Route("v1/exhibitions/draft")]
 [ApiController]
 public class ExhibitionDraftController : ControllerBase
 {
