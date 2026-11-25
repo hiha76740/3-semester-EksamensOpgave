@@ -1,4 +1,5 @@
 using GameService.ApplicationLib.Repositories;
+using GameService.DomainLib.Entities.Sessions;
 using GameService.FacadeLib.Commands.Interfaces;
 using GameService.FacadeLib.Queries.DTOs;
 using VidensVejen.SharedKernelLib.Exceptions;
