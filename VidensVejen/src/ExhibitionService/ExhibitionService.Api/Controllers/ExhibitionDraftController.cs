@@ -1,5 +1,8 @@
+using ExhibitionService.Api.Mappers;
 using ExhibitionService.FacadeLib.Commands.Interfaces;
+using ExhibitionService.FacadeLib.Queries.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using VidensVejen.ContractsLib.Responses.ExhibitionService;
 
 
 namespace ExhibitionService.Api.Controllers;
@@ -9,8 +12,32 @@ namespace ExhibitionService.Api.Controllers;
 public class ExhibitionDraftController : ControllerBase
 {
     public class ExhibitionDraftsController(
-    ICreateExhibitionDraftHandler create) : ControllerBase
+    ICreateExhibitionDraftHandler create,
+    IExhibitionDraftQueries queries) : ControllerBase
     {
+        [HttpGet("{id:guid}")]
+        [EndpointSummary("Get a single instance of an exhibition draft")]
+        [EndpointDescription("Gets the details of an exhibition draft")]
+        [ProducesResponseType(StatusCodes.Status200OK, Description = "Returns a single exhibition draft")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to get the requested exhibition draft")]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Exhibition draft was not found")]
+        public async Task<ActionResult<ExhibitionDraftResponse>> GetExhibitionDraft(Guid id)
+        {
+            try
+            {
+                var dto = await queries.GetExhibitionDraftByIdAsync(id);
+
+                if (dto == null)
+                    return NotFound("Exhibition draft was not found");
+
+                return Ok(dto.AsResponse());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost]
         [EndpointSummary("Create an exhibition draft")]
         [EndpointDescription("Creates a new instance of ExhibitionDraft")]
@@ -29,5 +56,7 @@ public class ExhibitionDraftController : ControllerBase
                 return BadRequest(ex.Message);
             }
         }
+
+
     }
 }
