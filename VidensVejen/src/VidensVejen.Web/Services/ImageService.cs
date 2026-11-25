@@ -14,13 +14,18 @@ public class ImageService(HttpClient httpClient) : IImageService
 {
     private readonly string _baseUrl = "/images-api";
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="imageFile"></param>
-    /// <param name="maxFileSize"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidOperationException"></exception>
+    async Task<IReadOnlyList<ImageResponse>> IImageService.GetAllAsync()
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}");
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<IReadOnlyList<ImageResponse>>()
+            ?? throw new System.Text.Json.JsonException("Could not deserialize the image list.");
+    }
+
     async Task<ImageIdResponse> IImageService.UploadImage(IBrowserFile imageFile, long maxFileSize)
     {
         using var content = new MultipartFormDataContent();

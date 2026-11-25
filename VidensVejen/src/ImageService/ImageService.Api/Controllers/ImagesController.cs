@@ -138,6 +138,36 @@ public class ImagesController(
         }
     }
 
+    [HttpGet]
+    [EndpointSummary("Get all images")]
+    [EndpointDescription("Gets all instances of a image")]
+    [ProducesResponseType<IReadOnlyList<ImageResponse>>(StatusCodes.Status200OK, "Application/json", Description = "Returns a list of all images")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to get all images")]
+    public async Task<ActionResult<IReadOnlyList<ImageResponse>>> GetAll()
+    {
+        try
+        {
+            var list = await queries.GetAllAsync();
+
+            var repsonse = new List<ImageResponse>();
+
+            foreach (var dto in list)
+            {
+                var baseUrl = appsettings["ImageBaseUrl"];
+
+                var url = baseUrl == null ? $"/images/themes/{dto.StorageKey}{dto.Extension}" : $"{baseUrl}/images/themes/{dto.StorageKey}{dto.Extension}";
+
+                repsonse.Add(dto.AsResponse(url));
+            }
+
+            return Ok(repsonse);
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+    }
 
 
 }

@@ -19,6 +19,18 @@ public class ImageQueryHandlerIMPL(ImageDbContext db) : IImageQueries
         return await db.Images.AnyAsync(i => i.Id == imageKey);
     }
 
+    async Task<IReadOnlyList<ImageDto>> IImageQueries.GetAllAsync()
+    {
+        return await db.Images
+            .AsNoTracking()
+            .Select(i => new ImageDto(
+                i.Id.Value,
+                i.StorageKey,
+                i.Extension
+                ))
+            .ToListAsync();
+    }
+
     async Task<ImageUrlComponentsDto?> IImageQueries.GetImageUrlComponentsById(Guid id)
     {
         var imageKey = new ImageId(id);

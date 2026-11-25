@@ -1,0 +1,49 @@
+@page "/images"
+
+@inject IImageService ImageService
+
+<PageTitle>Mediebibliotek</PageTitle>
+
+<RadzenStack Gap="1rem">
+    <RadzenText TextStyle="TextStyle.H2" Text="Mediebibliotek" />
+
+    @if (isLoading)
+    {
+        <RadzenText role="status" Text="Henter billeder …" />
+    }
+    else if (error != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
+        <RadzenButton Text="Prøv igen" Click="LoadImagesAsync" />
+    }
+    else
+    {
+        <ImageListComponent Images="images" />
+    }
+</RadzenStack>
+
+@code {
+    private IReadOnlyList<ImageResponse> images = [];
+    private string? error;
+    private bool isLoading;
+
+    protected override Task OnInitializedAsync() => LoadImagesAsync();
+
+    private async Task LoadImagesAsync()
+    {
+        isLoading = true;
+        error = null;
+        try
+        {
+            images = await ImageService.GetAllAsync();
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            error = "Billederne kunne ikke hentes.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

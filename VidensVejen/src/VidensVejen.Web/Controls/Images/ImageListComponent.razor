@@ -1,0 +1,23 @@
+@using VidensVejen.ContractsLib.Responses.ImageService
+
+<RadzenDataGrid TItem="ImageResponse" Data="@Images"
+AllowPaging="true" PageSize="15" AllowSorting="true"
+                EmptyText="Der er endnu ingen billeder i mediebiblioteket.">
+    <Columns>
+        <RadzenDataGridColumn TItem="ImageResponse" Title="Forhåndsvisning" Sortable="false">
+            <Template Context="image">
+                <RadzenImage Path="@image.Url" AlternateText="@($"Billede {image.Id}")"
+                             Style="width: 6rem; height: 4rem; object-fit: contain;" />
+            </Template>
+        </RadzenDataGridColumn>
+        <RadzenDataGridColumn TItem="ImageResponse" Title="Filendelse"
+                              Property="@nameof(ImageResponse.Extension)" />
+        <RadzenDataGridColumn TItem="ImageResponse" Title="Billed-ID"
+                              Property="@nameof(ImageResponse.Id)" />
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<ImageResponse> Images { get; set; } = [];
+}

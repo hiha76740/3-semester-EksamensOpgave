@@ -17,6 +17,12 @@ public interface IImageQueries
     /// <summary>
     /// 
     /// </summary>
+    /// <returns></returns>
+    Task<IReadOnlyList<ImageDto>> GetAllAsync();
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
     Task<ImageUrlComponentsDto?> GetImageUrlComponentsById(Guid id);
