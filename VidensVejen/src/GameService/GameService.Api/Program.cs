@@ -22,6 +22,7 @@ builder.Services.AddOpenApi(options =>
     options.WithCustomApiInfo(serviceName));
 
 var app = builder.Build();
+app.Services.ApplyDatabaseMigrations();
 
 app.MapDefaultEndpoints();
 

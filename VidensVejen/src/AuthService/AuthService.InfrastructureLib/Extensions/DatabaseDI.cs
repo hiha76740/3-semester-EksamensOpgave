@@ -36,17 +36,11 @@ public static class DatabaseDI
     }
 
     /// <summary>
-    /// Applies database migrations and initializes the administrator when configured.
+    /// Applies pending EF Core migrations to this service's database.
     /// </summary>
     /// <param name="services">The application service provider.</param>
-    /// <param name="configuration">The application configuration.</param>
-    public static void InitializeAdminDatabase(this IServiceProvider services, IConfiguration configuration)
+    public static void ApplyDatabaseMigrations(this IServiceProvider services)
     {
-        if (string.IsNullOrWhiteSpace(configuration["BootstrapAdmin:Email"]))
-        {
-            return;
-        }
-
         using var scope = services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AuthUserDbContext>();
         context.Database.Migrate();

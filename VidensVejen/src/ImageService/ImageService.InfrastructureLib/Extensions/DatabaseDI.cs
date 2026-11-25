@@ -24,4 +24,15 @@ public static class DatabaseDI
 
         return services;
     }
+
+    /// <summary>
+    /// Applies pending EF Core migrations to this service's database.
+    /// </summary>
+    /// <param name="services">The application service provider.</param>
+    public static void ApplyDatabaseMigrations(this IServiceProvider services)
+    {
+        using var scope = services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ImageDbContext>();
+        context.Database.Migrate();
+    }
 }

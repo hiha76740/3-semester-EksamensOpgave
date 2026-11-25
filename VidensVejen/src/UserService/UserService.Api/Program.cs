@@ -24,7 +24,7 @@ builder.Services.AddOpenApi(options =>
     options.WithCustomApiInfo(serviceName));
 
 var app = builder.Build();
-app.Services.InitializeAdminDatabase(app.Configuration);
+app.Services.ApplyDatabaseMigrations();
 
 app.MapDefaultEndpoints();
 
