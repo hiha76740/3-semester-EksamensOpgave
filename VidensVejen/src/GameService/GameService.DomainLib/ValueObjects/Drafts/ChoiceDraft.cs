@@ -42,9 +42,6 @@ public record ChoiceDraft
     /// <exception cref="DomainException"></exception>
     public ChoiceDraft(string? text, string? textEn, bool isCorrect, string? feedback, string? feedbackEn)
     {
-        if (string.IsNullOrWhiteSpace(text))
-            throw new DomainException("Choice text could not be set, no value");
-
         Text = text;
         TextEn = textEn;
         IsCorrect = isCorrect;
