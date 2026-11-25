@@ -60,4 +60,13 @@ internal static class ExhibitionMapper
 
         return output;
     }
+
+    internal static DeleteExhibitionCommand AsDeleteCommand(this DeleteExhibitionRequest request, Guid exhibitionId)
+    {
+        var output = new DeleteExhibitionCommand(
+            exhibitionId,
+            request.RowVersion);
+
+        return output;
+    }
 }
