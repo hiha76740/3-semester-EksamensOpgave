@@ -50,6 +50,7 @@ public class GameSessionTests
         Assert.Equal("Correct", result.Feedback);
         Assert.Equal("Correct EN", result.FeedbackEn);
         Assert.Equal("Yes", result.CorrectAnswer);
+        Assert.Equal("Yes EN", result.CorrectAnswerEn);
         var answer = Assert.Single(session.Answers);
         Assert.Equal(questionId, answer.QuestionId);
         Assert.Equal(0, answer.ChoiceIndex);

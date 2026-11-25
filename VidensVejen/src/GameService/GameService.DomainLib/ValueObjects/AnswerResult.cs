@@ -7,4 +7,5 @@ namespace GameService.DomainLib.ValueObjects;
 /// <param name="Feedback"></param>
 /// <param name="FeedbackEn"></param>
 /// <param name="CorrectAnswer"></param>
-public record AnswerResult(bool IsCorrect, string? Feedback, string? FeedbackEn, string CorrectAnswer);
+/// <param name="CorrectAnswerEn"></param>
+public record AnswerResult(bool IsCorrect, string? Feedback, string? FeedbackEn, string CorrectAnswer, string? CorrectAnswerEn);

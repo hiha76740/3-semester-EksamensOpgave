@@ -68,7 +68,7 @@ public class GameSession
         var feedback = question.Choices[choiceIndex].Feedback;
         var feedbackEn = question.Choices[choiceIndex].FeedbackEn;
 
-        return new AnswerResult(isCorrect, feedback, feedbackEn, correctChoice.Text);
+        return new AnswerResult(isCorrect, feedback, feedbackEn, correctChoice.Text, correctChoice.TextEn);
     }
 
     private GameSession(QuizId quizId)
