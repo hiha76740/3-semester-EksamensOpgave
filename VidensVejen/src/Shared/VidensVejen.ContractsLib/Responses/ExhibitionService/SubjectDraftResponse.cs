@@ -21,6 +21,15 @@ public record SubjectDraftResponse(
     List<TopicDraftResponse> TopicDrafts
     )
 {
+    /// <summary>Gets the identifier of the published quiz.</summary>
+    public Guid? QuizId { get; init; }
+
+    /// <summary>Gets the identifier of the quiz draft.</summary>
+    public Guid? QuizDraftId { get; init; }
+
+    /// <summary>Gets whether this subject is intended to contain a quiz.</summary>
+    public bool IsQuiz { get; init; }
+
     /// <summary>
     /// A unique identifier for the Subject draft.
     /// </summary>

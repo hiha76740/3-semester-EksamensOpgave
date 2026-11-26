@@ -18,6 +18,9 @@ public record CreateSubjectRequest(
     List<CreateTopicRequest> Topics
     )
 {
+    /// <summary>Gets the identifier of the published quiz.</summary>
+    public Guid? QuizId { get; init; }
+
     /// <summary>
     /// The title of the subject.
     /// </summary>

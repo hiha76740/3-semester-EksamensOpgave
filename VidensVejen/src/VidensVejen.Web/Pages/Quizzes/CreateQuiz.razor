@@ -208,7 +208,7 @@ else
         }
 
         var id = draftId.GetValueOrDefault();
-        await QuizService.SaveDraftAsync(id, BuildDraftRequest(input));
+        await QuizService.SaveDraftAsync(id, QuizEditorMapper.BuildDraftRequest(input));
 
         draftVersionNeedsReload = true;
         message = "Quizkladden er gemt.";
@@ -223,58 +223,7 @@ else
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(input.Title) || string.IsNullOrWhiteSpace(input.TitleEn))
-        {
-            errors.Add("Quizzen skal have en titel på dansk og engelsk.");
-        }
-
-        if (string.IsNullOrWhiteSpace(input.Instruction) || string.IsNullOrWhiteSpace(input.InstructionEn))
-        {
-            errors.Add("Quizzen skal have en instruktion på dansk og engelsk.");
-        }
-
-        if (input.ExhibitionId == null || input.ExhibitionId == Guid.Empty)
-        {
-            errors.Add("Vælg en udstilling til quizzen.");
-        }
-
-        if (string.IsNullOrWhiteSpace(input.QuizLayout))
-        {
-            errors.Add("Vælg et layout til quizzen.");
-        }
-
-        if (input.Questions.Count == 0)
-        {
-            errors.Add("Quizzen skal have mindst ét spørgsmål.");
-        }
-
-        for (var i = 0; i < input.Questions.Count; i++)
-        {
-            var question = input.Questions[i];
-
-            if (string.IsNullOrWhiteSpace(question.Text) || string.IsNullOrWhiteSpace(question.TextEn))
-            {
-                errors.Add($"Spørgsmål {i + 1} skal have tekst på dansk og engelsk.");
-            }
-
-            if (question.Answers.Count < 2)
-            {
-                errors.Add($"Spørgsmål {i + 1} skal have mindst to svar.");
-            }
-
-            if (question.Answers.Count(answer => answer.IsCorrect) != 1)
-            {
-                errors.Add($"Spørgsmål {i + 1} skal have præcis ét korrekt svar.");
-            }
-
-            for (var j = 0; j < question.Answers.Count; j++)
-            {
-                if (string.IsNullOrWhiteSpace(question.Answers[j].Text) || string.IsNullOrWhiteSpace(question.Answers[j].TextEn))
-                {
-                    errors.Add($"Spørgsmål {i + 1}, svar {j + 1} skal have svartekst på dansk og engelsk.");
-                }
-            }
-        }
+        QuizEditorMapper.ValidatePublication(input, errors);
 
         if (errors.Count != 0)
         {
@@ -287,17 +236,10 @@ else
         }
 
         var id = draftId.GetValueOrDefault();
-        var status = await QuizService.PublishAsync(id, BuildRequest(id, input));
-        if (status == HttpStatusCode.OK || status == HttpStatusCode.Created)
-        {
-            draftId = null;
-            model = null;
-            message = "Quizzen er publiceret.";
-        }
-        else
-        {
-            errors.Add($"Quizzen kunne ikke publiceres (HTTP {(int)status}).");
-        }
+        await QuizService.PublishAsync(id, QuizEditorMapper.BuildRequest(id, input));
+        draftId = null;
+        model = null;
+        message = "Quizzen er publiceret.";
     }, "Publiceringen kunne ikke bekræftes.");
 
     private async Task<bool> EnsureDraftAsync(QuizInputModel input)
@@ -327,24 +269,6 @@ else
 
         input.RowVersion = draft.RowVersion;
     }
-
-    private static CreateQuizRequest BuildRequest(Guid draftId, QuizInputModel input) =>
-        new(draftId, input.Title, input.TitleEn, input.ExhibitionId.GetValueOrDefault(), input.QuizLayout,
-            input.Questions.Select(question => new CreateQuestionRequest(
-                question.Text, question.TextEn,
-                question.Answers.Select(answer => new CreateChoiceRequest(
-                    answer.Text, answer.TextEn, answer.IsCorrect,
-                    answer.Feedback, answer.FeedbackEn)).ToList())).ToList(),
-            input.EndMessage, input.EndMessageEn, input.Instruction, input.InstructionEn, input.RowVersion);
-
-    private static UpdateQuizDraftRequest BuildDraftRequest(QuizInputModel input) =>
-        new(input.Title, input.TitleEn, input.ExhibitionId, input.QuizLayout,
-            input.Questions.Select(question => new UpdateQuestionDraftRequest(
-                question.Text, question.TextEn,
-                question.Answers.Select(answer => new UpdateChoiceDraftRequest(
-                    answer.Text, answer.TextEn, answer.IsCorrect,
-                    answer.Feedback, answer.FeedbackEn)).ToList())).ToList(),
-            input.EndMessage, input.EndMessageEn, input.Instruction, input.InstructionEn, input.RowVersion);
 
     private async Task RunAsync(Func<Task> action, string failureMessage)
     {

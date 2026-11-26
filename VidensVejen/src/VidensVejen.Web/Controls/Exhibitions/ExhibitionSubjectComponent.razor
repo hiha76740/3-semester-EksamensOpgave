@@ -31,9 +31,10 @@
                             TextProperty="@nameof(QuizOption.Title)" ValueProperty="@nameof(QuizOption.Value)"
                             Value="@SelectedQuiz" Change="SelectQuizAsync" Placeholder="Vælg en quiz" />
         </RadzenFormField>
-        @if (Model.NewQuiz != null)
+        @if (CanEditQuiz && Model.QuizDraftId.HasValue)
         {
-            <RadzenText Text="@($"Ny quizkladde: {Model.NewQuiz.Title}")" />
+            <RadzenButton Text="Redigér quizkladde" Icon="edit" ButtonType="ButtonType.Button"
+                          Variant="Variant.Outlined" Click="@(() => OpenQuizAsync(Model.QuizDraftId))" />
         }
     }
     else
@@ -67,12 +68,21 @@
     [Parameter, EditorRequired]
     public string ExhibitionName { get; set; } = string.Empty;
 
+    [Parameter]
+    public Guid ExhibitionId { get; set; }
+
+    [Parameter]
+    public EventCallback QuizChanged { get; set; }
+
+    [Parameter]
+    public bool CanEditQuiz { get; set; }
+
     private string Id { get; } = $"subject-{Guid.NewGuid():N}";
     private int quizPickerVersion;
 
     private const string CreateNew = "new";
 
-    private IReadOnlyList<QuizOption> quizOptions = [new(CreateNew, "Lav en ny quiz")];
+    private IReadOnlyList<QuizOption> quizOptions = [];
     private bool quizOptionsLoaded;
     private bool quizOptionsLoading;
     private bool quizOptionsError;
@@ -86,15 +96,20 @@
             return;
         }
 
+        quizOptions = CanEditQuiz ? [new(CreateNew, "Lav en ny quiz")] : [];
         quizOptionsLoading = true;
         quizOptionsError = false;
         try
         {
             var quizzes = await QuizService.GetPublishedAsync();
-            quizOptions = quizzes.OrderBy(quiz => quiz.Title)
-                .Select(quiz => new QuizOption(quiz.Id.ToString(), quiz.Title))
-                .Append(new QuizOption(CreateNew, "Lav en ny quiz"))
-                .ToArray();
+            var options = quizzes.OrderBy(quiz => quiz.Title)
+                .Select(quiz => new QuizOption(quiz.Id.ToString(), quiz.Title)).ToList();
+            if (CanEditQuiz)
+            {
+                options.Add(new QuizOption(CreateNew, "Lav en ny quiz"));
+            }
+
+            quizOptions = options;
             quizOptionsLoaded = true;
         }
         catch (Exception exception) when (exception is HttpRequestException or System.Text.Json.JsonException
@@ -114,26 +129,37 @@
     {
         if (value is string option && option == CreateNew)
         {
-            object? result = await Dialog.OpenAsync<ExhibitionQuizDraftDialog>(
-                "Opret quiz",
-                new Dictionary<string, object?>
-                {
-                    [nameof(ExhibitionQuizDraftDialog.ExhibitionName)] = ExhibitionName
-                },
-                new DialogOptions { Width = "min(92vw, 900px)", CloseDialogOnOverlayClick = false });
-
-            if (result is QuizInputModel draft)
-            {
-                Model.NewQuiz = draft;
-                Model.QuizId = null;
-            }
-
+            await OpenQuizAsync(null);
             quizPickerVersion++;
         }
         else if (value is string quizId && Guid.TryParse(quizId, out var id))
         {
             Model.QuizId = id;
-            Model.NewQuiz = null;
+            Model.QuizDraftId = null;
+        }
+    }
+
+    private async Task OpenQuizAsync(Guid? quizDraftId)
+    {
+        object? result = await Dialog.OpenAsync<ExhibitionQuizDraftDialog>(
+            "Quizkladde",
+            new Dictionary<string, object?>
+            {
+                [nameof(ExhibitionQuizDraftDialog.ExhibitionName)] = ExhibitionName,
+                [nameof(ExhibitionQuizDraftDialog.ExhibitionId)] = ExhibitionId,
+                [nameof(ExhibitionQuizDraftDialog.QuizDraftId)] = quizDraftId
+            },
+            new DialogOptions { Width = "min(92vw, 900px)", CloseDialogOnOverlayClick = false });
+
+        if (result is Guid draftId)
+        {
+            Model.QuizDraftId = draftId;
+            Model.QuizId = null;
+            await QuizChanged.InvokeAsync();
+        }
+        else if (result is false)
+        {
+            Model.QuizDraftId = null;
         }
     }
 

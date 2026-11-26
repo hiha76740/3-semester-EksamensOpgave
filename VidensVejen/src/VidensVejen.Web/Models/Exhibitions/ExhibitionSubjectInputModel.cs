@@ -1,5 +1,3 @@
-using VidensVejen.Web.Models.Games;
-
 namespace VidensVejen.Web.Models.Exhibitions;
 
 /// <summary>
@@ -37,13 +35,9 @@ public sealed class ExhibitionSubjectInputModel
     /// </summary>
     public Guid? QuizId { get; set; }
 
-    /// <summary>
-    /// Gets or sets the new quiz draft attached to the subject, if any.
-    /// </summary>
-    public QuizInputModel? NewQuiz { get; set; }
+    /// <summary>Gets or sets the identifier of the linked quiz draft.</summary>
+    public Guid? QuizDraftId { get; set; }
 
-    /// <summary>
-    /// Gets the topics shown when the subject is configured as content.
-    /// </summary>
+    /// <summary>Gets the topics shown for a content subject.</summary>
     public List<ExhibitionTopicInputModel> Topics { get; } = [];
 }

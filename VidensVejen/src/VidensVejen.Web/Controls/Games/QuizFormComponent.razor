@@ -58,7 +58,10 @@
             </RadzenStack>
         </RadzenCard>
 
-        <QuizDraftPreviewComponent Title="@Model.Title" Instruction="@Model.Instruction" Question="Model.Questions[0]" />
+        @if (Model.Questions.Count > 0)
+        {
+            <QuizDraftPreviewComponent Title="@Model.Title" Instruction="@Model.Instruction" Question="Model.Questions[0]" />
+        }
     </RadzenStack>
 </RadzenTemplateForm>
 
@@ -69,10 +72,10 @@
     [Parameter, EditorRequired]
     public string FormTitle { get; set; } = string.Empty;
 
-    [Parameter, EditorRequired]
-    public string SubmitText { get; set; } = string.Empty;
+    [Parameter]
+    public string SubmitText { get; set; } = "Publicér";
 
-    [Parameter, EditorRequired]
+    [Parameter]
     public EventCallback<QuizInputModel> SubmitCallback { get; set; }
 
     [Parameter, EditorRequired]

@@ -24,6 +24,9 @@ public interface IExhibitionService
     /// <summary>Creates an empty exhibition draft and returns its identifier.</summary>
     Task<Guid> CreateDraftAsync();
 
+    /// <summary>Gets an existing exhibition draft.</summary>
+    Task<ExhibitionDraftResponse> GetDraftAsync(Guid draftId);
+
     /// <summary>Replaces all saved fields of the specified draft.</summary>
-    Task SaveDraftAsync(Guid draftId, SaveExhibitionDraftRequest draft);
+    Task SaveDraftAsync(Guid draftId, UpdateExhibitionDraftRequest draft);
 }

@@ -46,6 +46,9 @@ public record CreateExhibitionRequest(
     List<CreateSubjectRequest> Subjects
     )
 {
+    /// <summary>Gets the identifier reserved for the exhibition by its draft.</summary>
+    public Guid? ExhibitionId { get; init; }
+
     /// <summary>
     /// The name of the exhibition.
     /// </summary>

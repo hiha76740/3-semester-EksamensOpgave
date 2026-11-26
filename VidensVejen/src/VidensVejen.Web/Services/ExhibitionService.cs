@@ -64,7 +64,18 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
         return id;
     }
 
-    async Task IExhibitionService.SaveDraftAsync(Guid draftId, SaveExhibitionDraftRequest draft)
+    async Task<ExhibitionDraftResponse> IExhibitionService.GetDraftAsync(Guid draftId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"{DraftBaseUrl}/{draftId:D}");
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<ExhibitionDraftResponse>()
+            ?? throw new JsonException("The exhibition draft response was empty.");
+    }
+
+    async Task IExhibitionService.SaveDraftAsync(Guid draftId, UpdateExhibitionDraftRequest draft)
     {
         using var request = new HttpRequestMessage(HttpMethod.Put, $"{DraftBaseUrl}/{draftId}")
         {

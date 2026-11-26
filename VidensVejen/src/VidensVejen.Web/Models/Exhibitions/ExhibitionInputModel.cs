@@ -30,6 +30,6 @@ public sealed class ExhibitionInputModel
     /// <summary>
     /// Gets the four subject slots in display order.
     /// </summary>
-    public IReadOnlyList<ExhibitionSubjectInputModel> Subjects { get; } =
+    public IReadOnlyList<ExhibitionSubjectInputModel> Subjects { get; init; } =
         [new(), new(), new(), new()];
 }

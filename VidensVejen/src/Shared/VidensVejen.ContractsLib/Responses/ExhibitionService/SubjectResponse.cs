@@ -16,6 +16,9 @@ public record SubjectResponse(
     IReadOnlyList<TopicResponse> Topics
     )
 {
+    /// <summary>Gets the identifier of the published quiz.</summary>
+    public Guid? QuizId { get; init; }
+
     /// <summary>
     /// A unique identifier for the subject.
     /// </summary>

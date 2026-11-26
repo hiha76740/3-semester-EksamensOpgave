@@ -1,41 +1,93 @@
 @inject DialogService Dialog
+@inject IQuizService QuizService
 
-<QuizFormComponent Model="quiz" FormTitle="Ny quiz" SubmitText="Brug quizkladden"
-                   LockedExhibitionName="@ExhibitionName" Exhibitions="noExhibitions"
-                   SubmitCallback="Save" ResetCallback="Cancel" ResetText="Annullér"
-                   Errors="errors" />
+@if (quiz != null)
+{
+    <QuizFormComponent Model="quiz" FormTitle="Quizkladde" CanSubmit="false"
+                       LockedExhibitionName="@ExhibitionName" Exhibitions="noExhibitions"
+                       SaveDraftCallback="SaveAsync" ResetCallback="Cancel" ResetText="Annullér"
+                       IsBusy="isSaving" Errors="errors" />
+}
+else if (errors.Count > 0)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@errors[0]</RadzenAlert>
+}
+else
+{
+    <RadzenText Text="Henter quizkladde …" />
+}
 
 @code {
     [Parameter, EditorRequired]
     public string ExhibitionName { get; set; } = string.Empty;
 
-    private readonly QuizInputModel quiz = new();
+    [Parameter, EditorRequired]
+    public Guid ExhibitionId { get; set; }
+
+    [Parameter]
+    public Guid? QuizDraftId { get; set; }
+
+    private QuizInputModel? quiz;
+    private Guid? draftId;
+    private bool isSaving;
     private readonly IReadOnlyList<ExhibitionNameResponse> noExhibitions = [];
     private readonly List<string> errors = [];
 
-    private void Save(QuizInputModel draft)
+    protected override async Task OnInitializedAsync()
     {
-        errors.Clear();
-        if (string.IsNullOrWhiteSpace(draft.Title) || string.IsNullOrWhiteSpace(draft.TitleEn)
-            || string.IsNullOrWhiteSpace(draft.Instruction) || string.IsNullOrWhiteSpace(draft.InstructionEn))
+        draftId = QuizDraftId;
+        try
         {
-            errors.Add("Udfyld titel og instruktion på dansk og engelsk.");
-        }
-
-        for (var i = 0; i < draft.Questions.Count; i++)
-        {
-            var question = draft.Questions[i];
-            if (string.IsNullOrWhiteSpace(question.Text) || string.IsNullOrWhiteSpace(question.TextEn)
-                || question.Answers.Any(answer => string.IsNullOrWhiteSpace(answer.Text)
-                    || string.IsNullOrWhiteSpace(answer.TextEn)))
+            if (draftId is Guid id)
             {
-                errors.Add($"Udfyld spørgsmål {i + 1} og dets svar på begge sprog.");
+                var draft = await QuizService.GetDraftAsync(id);
+                quiz = QuizEditorMapper.FromDraft(draft);
+                quiz.RowVersion = draft.RowVersion;
             }
+            else
+            {
+                quiz = new QuizInputModel();
+            }
+
+            quiz.ExhibitionId = ExhibitionId;
+        }
+        catch (HttpRequestException exception) when (exception.StatusCode == HttpStatusCode.NotFound)
+        {
+            Dialog.Close(false);
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            errors.Add("Quizkladden kunne ikke hentes.");
+        }
+    }
+
+    private async Task SaveAsync(QuizInputModel input)
+    {
+        if (isSaving)
+        {
+            return;
         }
 
-        if (errors.Count == 0)
+        isSaving = true;
+        errors.Clear();
+        try
         {
-            Dialog.Close(draft);
+            var id = draftId ??= await QuizService.CreateDraftAsync();
+            if (input.RowVersion.Length == 0)
+            {
+                input.RowVersion = (await QuizService.GetDraftAsync(id)).RowVersion;
+            }
+
+            await QuizService.SaveDraftAsync(id, QuizEditorMapper.BuildDraftRequest(input));
+            Dialog.Close(id);
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            errors.Add("Quizkladden kunne ikke gemmes. Kontrollér, om kladden stadig findes, eller åbn den igen.");
+        }
+        finally
+        {
+            isSaving = false;
         }
     }
 

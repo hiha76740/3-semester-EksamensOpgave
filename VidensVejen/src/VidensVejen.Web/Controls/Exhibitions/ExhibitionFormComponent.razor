@@ -34,7 +34,8 @@
                         var number = index + 1;
                         var subject = Model.Subjects[index];
                         <RadzenAccordionItem @key="subject" Text="@($"Subject {number}")" @bind-Selected="expandedSubjects[number - 1]">
-                            <ExhibitionSubjectComponent Model="subject" ExhibitionName="@Model.ExhibitionName" />
+                            <ExhibitionSubjectComponent Model="subject" ExhibitionName="@Model.ExhibitionName" ExhibitionId="ExhibitionId" CanEditQuiz="CanEditQuiz"
+                                                        QuizChanged="@(() => SaveDraftCallback.InvokeAsync(Model))" />
                         </RadzenAccordionItem>
                     }
                 </Items>
@@ -71,6 +72,12 @@
 
     [Parameter]
     public bool IsBusy { get; set; }
+
+    [Parameter]
+    public Guid ExhibitionId { get; set; }
+
+    [Parameter]
+    public bool CanEditQuiz { get; set; }
 
     private bool[] expandedSubjects = [];
     private string? themeError;

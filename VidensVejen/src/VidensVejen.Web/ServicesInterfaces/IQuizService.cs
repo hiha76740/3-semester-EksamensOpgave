@@ -1,5 +1,4 @@
 using VidensVejen.ContractsLib.Responses.GameService;
-using System.Net;
 using VidensVejen.ContractsLib.Requests.GameService.Drafts;
 using VidensVejen.ContractsLib.Requests.GameService.Quizzes;
 
@@ -16,7 +15,7 @@ public interface IQuizService
     /// <param name="draftId">The draft to publish.</param>
     /// <param name="quiz"></param>
     /// <returns></returns>
-    Task<HttpStatusCode> PublishAsync(Guid draftId, CreateQuizRequest quiz);
+    Task<QuizIdResponse> PublishAsync(Guid draftId, CreateQuizRequest quiz);
 
     /// <summary>Creates an empty quiz draft and returns its identifier.</summary>
     Task<Guid> CreateDraftAsync();

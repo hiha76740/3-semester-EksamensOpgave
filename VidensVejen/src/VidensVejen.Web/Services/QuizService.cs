@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using VidensVejen.ContractsLib.Requests.GameService.Drafts;
@@ -18,7 +17,7 @@ public class QuizService(HttpClient httpClient) : IQuizService
 
     private const string DraftUrl = "/quiz-drafts-api";
 
-    async Task<HttpStatusCode> IQuizService.PublishAsync(Guid draftId, CreateQuizRequest quiz)
+    async Task<QuizIdResponse> IQuizService.PublishAsync(Guid draftId, CreateQuizRequest quiz)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}?quizDraftId={draftId:D}")
         {
@@ -28,7 +27,15 @@ public class QuizService(HttpClient httpClient) : IQuizService
 
         using var response = await httpClient.SendAsync(request);
 
-        return response.StatusCode;
+        response.EnsureSuccessStatusCode();
+
+        var quizId = await response.Content.ReadFromJsonAsync<QuizIdResponse>();
+        if (quizId == null || quizId.QuizId == Guid.Empty)
+        {
+            throw new JsonException("The published quiz response did not contain an identifier.");
+        }
+
+        return quizId;
     }
 
     async Task<Guid> IQuizService.CreateDraftAsync()

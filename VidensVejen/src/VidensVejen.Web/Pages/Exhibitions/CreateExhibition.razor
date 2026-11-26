@@ -1,9 +1,11 @@
 @page "/exhibition/create"
+@page "/exhibition/drafts/{ExistingDraftId:guid}"
 @using System.Text.Json
 @using Microsoft.AspNetCore.Components.Forms
 
 @inject IImageService ImageService
 @inject IExhibitionService ExhibitionService
+@inject IQuizService QuizService
 @inject DialogService Dialog
 @inject NavigationManager NavigationManager
 
@@ -11,7 +13,7 @@
 
 @if (model != null)
 {
-    <ExhibitionFormComponent Model="model" SubmitCallback="Create" SubmitButtonText="Publicér"
+    <ExhibitionFormComponent @key="model" Model="model" ExhibitionId="draftId.GetValueOrDefault()" CanEditQuiz="canEditQuiz" SubmitCallback="Create" SubmitButtonText="Publicér"
                              SaveDraftCallback="SaveDraftAsync" IsBusy="isBusy"
                              Error="@error" Message="@message" />
 }
@@ -21,11 +23,25 @@ else
     {
         <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
     }
-    <RadzenButton Text="Opret udstilling" Icon="add" Click="StartDraftAsync" IsBusy="@isBusy" />
+    @if (ExistingDraftId.HasValue)
+    {
+        <RadzenButton Text="Hent kladde" Click="LoadDraftAsync" IsBusy="@isBusy" />
+    }
+    else
+    {
+        <RadzenButton Text="Opret udstilling" Icon="add" Click="StartDraftAsync" IsBusy="@isBusy" />
+    }
 }
 
 @code {
-    private static readonly JsonSerializerOptions DraftJsonOptions = new(JsonSerializerDefaults.Web);
+    [Parameter]
+    public Guid? ExistingDraftId { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private bool canPublishQuiz;
+    private bool canEditQuiz;
     private ExhibitionInputModel? model;
     private Guid? draftId;
     private IBrowserFile? uploadedThemeFile;
@@ -34,36 +50,153 @@ else
     private string? error;
     private string? message;
 
-    private Task StartDraftAsync() => RunAsync(async () =>
+    protected override async Task OnParametersSetAsync()
     {
-        draftId = await ExhibitionService.CreateDraftAsync();
-        model = new ExhibitionInputModel();
-    }, "Kladden kunne ikke oprettes.");
+        if (draftId == ExistingDraftId && model != null)
+        {
+            return;
+        }
+
+        var authentication = AuthenticationStateTask;
+        if (authentication != null)
+        {
+            var user = (await authentication).User;
+            canEditQuiz = user.Identity?.IsAuthenticated == true
+                && user.HasClaim(CustomClaimTypes.Permission, "Game.Edit");
+            canPublishQuiz = user.Identity?.IsAuthenticated == true
+                && user.HasClaim(CustomClaimTypes.Permission, "Game.Create");
+        }
+
+        model = null;
+        draftId = null;
+        uploadedThemeFile = null;
+        uploadedThemeId = null;
+        if (ExistingDraftId.HasValue)
+        {
+            await LoadDraftAsync();
+        }
+    }
+
+    private async Task StartDraftAsync()
+    {
+        Guid? newId = null;
+        await RunAsync(async () =>
+        {
+            newId = await ExhibitionService.CreateDraftAsync();
+        }, "Kladden kunne ikke oprettes.");
+        if (newId is Guid id)
+        {
+            NavigationManager.NavigateTo($"exhibition/drafts/{id:D}");
+        }
+    }
+
+    private Task LoadDraftAsync() => RunAsync(async () =>
+    {
+        var id = ExistingDraftId.GetValueOrDefault();
+        var draft = await ExhibitionService.GetDraftAsync(id);
+        var subjects = new List<ExhibitionSubjectInputModel>();
+        foreach (var saved in draft.SubjectDrafts)
+        {
+            var subject = new ExhibitionSubjectInputModel
+            {
+                Title = saved.Title ?? string.Empty,
+                TitleEn = saved.TitleEn ?? string.Empty,
+                Description = saved.Description ?? string.Empty,
+                DescriptionEn = saved.DescriptionEn ?? string.Empty,
+                IsQuiz = saved.IsQuiz,
+                QuizId = saved.QuizId,
+                QuizDraftId = saved.QuizDraftId
+            };
+
+            subject.Topics.AddRange(saved.TopicDrafts.Select(topic => new ExhibitionTopicInputModel
+            {
+                Title = topic.Title ?? string.Empty,
+                TitleEn = topic.TitleEn ?? string.Empty,
+                Description = topic.Description ?? string.Empty,
+                DescriptionEn = topic.DescriptionEn ?? string.Empty,
+                Body = topic.Body ?? string.Empty,
+                BodyEn = topic.BodyEn ?? string.Empty,
+                CalloutLabel = topic.CalloutLabel ?? string.Empty,
+                CalloutLabelEn = topic.CalloutLabelEn ?? string.Empty,
+                CalloutText = topic.CalloutText ?? string.Empty,
+                CalloutTextEn = topic.CalloutTextEn ?? string.Empty,
+                Quote = topic.Quote ?? string.Empty,
+                QuoteEn = topic.QuoteEn ?? string.Empty
+            }));
+
+            if (subject.IsQuiz && subject.QuizDraftId is Guid quizDraftId
+                && await FetchQuizDraftAsync(quizDraftId) == null)
+            {
+                subject.QuizDraftId = null;
+            }
+
+            subjects.Add(subject);
+        }
+
+        while (subjects.Count < 4)
+        {
+            subjects.Add(new ExhibitionSubjectInputModel());
+        }
+
+        uploadedThemeId = draft.ThemeImageId;
+        draftId = id;
+        model = new ExhibitionInputModel
+        {
+            ExhibitionName = draft.Name ?? string.Empty,
+            ExhibitionNameEn = draft.NameEn ?? string.Empty,
+            Subjects = subjects
+        };
+    }, "Kladden kunne ikke hentes.");
+
+    private async Task<QuizDraftResponse?> FetchQuizDraftAsync(Guid id)
+    {
+        try
+        {
+            return await QuizService.GetDraftAsync(id);
+        }
+        catch (HttpRequestException exception) when (exception.StatusCode == HttpStatusCode.NotFound)
+        {
+            return null;
+        }
+    }
 
     private Task SaveDraftAsync(ExhibitionInputModel input) => RunAsync(async () =>
     {
         if (draftId is Guid id)
         {
             var imageId = await ResolveThemeIdAsync(input.ThemeFile);
-            var request = new SaveExhibitionDraftRequest(
-                input.ExhibitionName, input.ExhibitionNameEn, imageId,
-                input.Subjects.Select(subject => new SaveSubjectDraftRequest(
-                    subject.Title, subject.TitleEn, subject.Title.ToLowerInvariant(),
-                    subject.Description, subject.DescriptionEn,
-                    subject.Topics.Select(topic => new SaveTopicDraftRequest(
-                        topic.Title, topic.TitleEn, topic.Description, topic.DescriptionEn,
-                        topic.Body, topic.BodyEn, topic.CalloutLabel, topic.CalloutLabelEn,
-                        topic.CalloutText, topic.CalloutTextEn, topic.Quote, topic.QuoteEn)).ToList(),
-                    subject.IsQuiz, subject.QuizId,
-                    subject.NewQuiz == null ? null : JsonSerializer.SerializeToElement(subject.NewQuiz, DraftJsonOptions))).ToList());
-
-            await ExhibitionService.SaveDraftAsync(id, request);
+            await PersistDraftAsync(id, input, imageId);
             message = "Kladden er gemt.";
         }
     }, "Kladden kunne ikke gemmes.");
 
+    private Task PersistDraftAsync(Guid id, ExhibitionInputModel input, Guid? imageId)
+    {
+        var request = new UpdateExhibitionDraftRequest(
+            input.ExhibitionName, input.ExhibitionNameEn, imageId,
+            input.Subjects.Select(subject => new UpdateSubjectDraftRequest(
+                Guid.Empty, subject.Title, subject.TitleEn, subject.Title.ToLowerInvariant(),
+                subject.Description, subject.DescriptionEn,
+                subject.Topics.Select(topic => new UpdateTopicDraftRequest(
+                    topic.Title, topic.TitleEn, topic.Description, topic.DescriptionEn,
+                    topic.Body, topic.BodyEn, topic.CalloutLabel, topic.CalloutLabelEn,
+                    topic.CalloutText, topic.CalloutTextEn, topic.Quote, topic.QuoteEn)).ToList())
+            {
+                IsQuiz = subject.IsQuiz,
+                QuizId = subject.IsQuiz ? subject.QuizId : null,
+                QuizDraftId = subject.IsQuiz ? subject.QuizDraftId : null
+            }).ToList());
+
+        return ExhibitionService.SaveDraftAsync(id, request);
+    }
+
     public Task Create(ExhibitionInputModel input) => RunAsync(async () =>
     {
+        if (draftId is not Guid id)
+        {
+            return;
+        }
+
         error = ValidatePublication(input);
         if (error != null)
         {
@@ -77,6 +210,51 @@ else
             return;
         }
 
+        var quizzes = new List<(ExhibitionSubjectInputModel Subject, Guid DraftId, QuizInputModel Quiz)>();
+        foreach (var subject in input.Subjects)
+        {
+            if (!subject.IsQuiz || subject.QuizDraftId is not Guid quizDraftId)
+            {
+                continue;
+            }
+
+            if (!canPublishQuiz)
+            {
+                error = "Du skal have Game.Create for at publicere quizkladderne.";
+                return;
+            }
+
+            var draft = await FetchQuizDraftAsync(quizDraftId);
+            if (draft == null)
+            {
+                subject.QuizDraftId = null;
+                error = $"Quizkladden til {subject.Title} findes ikke længere. Vælg eller opret en quiz.";
+                return;
+            }
+
+            var quiz = QuizEditorMapper.FromDraft(draft);
+            quiz.RowVersion = draft.RowVersion;
+            quiz.ExhibitionId = id;
+            var quizErrors = new List<string>();
+            QuizEditorMapper.ValidatePublication(quiz, quizErrors);
+            if (quizErrors.Count > 0)
+            {
+                error = $"Quiz til {subject.Title}: {string.Join(" ", quizErrors)}";
+                return;
+            }
+
+            quizzes.Add((subject, quizDraftId, quiz));
+        }
+
+        await PersistDraftAsync(id, input, imageId);
+        foreach (var (subject, quizDraftId, quiz) in quizzes)
+        {
+            var response = await QuizService.PublishAsync(quizDraftId, QuizEditorMapper.BuildRequest(quizDraftId, quiz));
+            subject.QuizId = response.QuizId;
+            subject.QuizDraftId = null;
+            await PersistDraftAsync(id, input, imageId);
+        }
+
         var request = new CreateExhibitionRequest(
             input.ExhibitionName,
             input.ExhibitionNameEn,
@@ -87,7 +265,7 @@ else
                 s.Title.ToLowerInvariant(),
                 s.Description,
                 s.DescriptionEn,
-                s.Topics.Select(t => new CreateTopicRequest(
+                s.IsQuiz ? [] : s.Topics.Select(t => new CreateTopicRequest(
                     t.Title,
                     t.TitleEn,
                     t.Description,
@@ -100,8 +278,10 @@ else
                     t.CalloutTextEn,
                     t.Quote,
                     t.QuoteEn)).ToList()
-            )).ToList()
-        );
+            )
+            { QuizId = s.IsQuiz ? s.QuizId : null }).ToList()
+        )
+        { ExhibitionId = id };
 
         var status = await ExhibitionService.CreateAsync(request);
         if (status != HttpStatusCode.Created)
@@ -118,7 +298,7 @@ else
     {
         if (file == null)
         {
-            return null;
+            return uploadedThemeId;
         }
 
         if (ReferenceEquals(file, uploadedThemeFile))
@@ -157,18 +337,20 @@ else
         }
     }
 
-    private static string? ValidatePublication(ExhibitionInputModel input)
+    private string? ValidatePublication(ExhibitionInputModel input)
     {
         if (string.IsNullOrWhiteSpace(input.ExhibitionName) || string.IsNullOrWhiteSpace(input.ExhibitionNameEn))
         {
             return "Udfyld udstillingsnavnet på dansk og engelsk.";
         }
 
-        if (input.ThemeFile == null)
+        if (input.ThemeFile == null && !uploadedThemeId.HasValue)
         {
             return "Vælg et temabillede.";
         }
 
+        var selectedQuizIds = new HashSet<Guid>();
+        var selectedDraftIds = new HashSet<Guid>();
         for (var i = 0; i < input.Subjects.Count; i++)
         {
             var subject = input.Subjects[i];
@@ -180,7 +362,18 @@ else
 
             if (subject.IsQuiz)
             {
-                return $"Subject {i + 1} er en quiz. Quizvalg kan gemmes i kladden, men publicering understøtter endnu kun subjects med emner.";
+                if (!subject.QuizId.HasValue && !subject.QuizDraftId.HasValue)
+                {
+                    return $"Vælg eller opret en quiz til subject {i + 1}.";
+                }
+
+                if ((subject.QuizId is Guid quizId && !selectedQuizIds.Add(quizId))
+                    || (subject.QuizDraftId is Guid quizDraftId && !selectedDraftIds.Add(quizDraftId)))
+                {
+                    return $"Vælg en anden quiz til subject {i + 1}. Quizzen er allerede valgt på et andet subject.";
+                }
+
+                continue;
             }
 
             if (subject.Topics.Count == 0)
