@@ -96,12 +96,11 @@ public class ExhibitionDraftController(
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to delete the exhibition draft")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Exhibition draft was not found")]
     public async Task<ActionResult> DeleteExhibitionDraft(
-    [Required][Description("A unique identifier for an exhibition draft")] Guid id,
-    [Required][Description("The object used to delete an exhibition draft")] DeleteExhibitionDraftRequest request)
+    [Required][Description("A unique identifier for an exhibition draft")] Guid id)
     {
         try
         {
-            await delete.HandleAsync(request.AsDeleteDraftCommand(id));
+            await delete.HandleAsync(id);
 
             return NoContent();
         }
