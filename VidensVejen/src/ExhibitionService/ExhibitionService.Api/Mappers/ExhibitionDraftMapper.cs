@@ -38,4 +38,13 @@ internal static class ExhibitionDraftMapper
 
         return output;
     }
+
+    internal static DeleteExhibitionDraftCommand AsDeleteDraftCommand(this DeleteExhibitionDraftRequest request, Guid exhibitionDraftId)
+    {
+        var output = new DeleteExhibitionDraftCommand(
+            exhibitionDraftId,
+            request.RowVersion);
+
+        return output;
+    }
 }
