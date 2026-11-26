@@ -120,11 +120,12 @@ public class QuizzesController(
     [ProducesResponseType(StatusCodes.Status204NoContent, Description = "Quiz was deleted successfully")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to delete the requested quiz")]
     public async Task<ActionResult> DeleteQuiz(
-        [Required][Description("A unique identifier for a quiz")] Guid id)
+        [Required][Description("A unique identifier for a quiz")] Guid id,
+        [Required][Description("The object used to delete a quiz draft")] DeleteQuizRequest request)
     {
         try
         {
-            await delete.HandleAsync(id);
+            await delete.HandleAsync(request.AsDeleteCommand(id));
 
             return NoContent();
         }

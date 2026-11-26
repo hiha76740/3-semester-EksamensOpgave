@@ -13,6 +13,7 @@ namespace GameService.FacadeLib.Commands.DTOs;
 /// <param name="EndMessageEn"></param>
 /// <param name="Instruction"></param>
 /// <param name="InstructionEn"></param>
+/// <param name="RowVersion"></param>
 public record UpdateQuizDraftCommand(
     Guid DraftId,
     string? Title,
@@ -23,5 +24,6 @@ public record UpdateQuizDraftCommand(
     string? EndMessage,
     string? EndMessageEn,
     string? Instruction,
-    string? InstructionEn
+    string? InstructionEn,
+    byte[] RowVersion
     );

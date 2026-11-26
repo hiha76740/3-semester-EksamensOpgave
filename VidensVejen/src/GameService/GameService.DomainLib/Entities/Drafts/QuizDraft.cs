@@ -57,6 +57,12 @@ public class QuizDraft
     /// <summary>
     /// 
     /// </summary>
+    public byte[] RowVersion { get; private set; } = [];
+
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <returns></returns>
     public static QuizDraft Create()
     {

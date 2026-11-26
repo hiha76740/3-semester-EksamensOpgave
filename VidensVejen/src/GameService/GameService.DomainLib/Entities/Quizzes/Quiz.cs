@@ -60,6 +60,12 @@ public class Quiz
     /// <summary>
     /// 
     /// </summary>
+    public byte[] RowVersion { get; private set; } = [];
+
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="title"></param>
     /// <param name="titleEn"></param>
     /// <param name="exhibitionId"></param>

@@ -54,4 +54,9 @@ public sealed class QuizInputModel
     /// Gets or sets the end message of the quiz in English.
     /// </summary>
     public string? EndMessageEn { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The row version returned when the quiz was last retrieved.
+    /// </summary>
+    public byte[] RowVersion { get; set; } = [];
 }

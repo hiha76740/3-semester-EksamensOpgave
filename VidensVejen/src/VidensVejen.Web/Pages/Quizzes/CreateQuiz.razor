@@ -283,7 +283,7 @@ else
                 question.Answers.Select(answer => new CreateChoiceRequest(
                     answer.Text, answer.TextEn, answer.IsCorrect,
                     answer.Feedback, answer.FeedbackEn)).ToList())).ToList(),
-            input.EndMessage, input.EndMessageEn, input.Instruction, input.InstructionEn);
+            input.EndMessage, input.EndMessageEn, input.Instruction, input.InstructionEn, input.RowVersion);
 
     private static UpdateQuizDraftRequest BuildDraftRequest(QuizInputModel input) =>
         new(input.Title, input.TitleEn, input.ExhibitionId, input.QuizLayout,
@@ -292,7 +292,7 @@ else
                 question.Answers.Select(answer => new UpdateChoiceDraftRequest(
                     answer.Text, answer.TextEn, answer.IsCorrect,
                     answer.Feedback, answer.FeedbackEn)).ToList())).ToList(),
-            input.EndMessage, input.EndMessageEn, input.Instruction, input.InstructionEn);
+            input.EndMessage, input.EndMessageEn, input.Instruction, input.InstructionEn, input.RowVersion);
 
     private async Task RunAsync(Func<Task> action, string failureMessage)
     {

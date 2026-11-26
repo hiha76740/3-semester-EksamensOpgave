@@ -1,3 +1,5 @@
+using GameService.FacadeLib.Commands.DTOs;
+
 namespace GameService.FacadeLib.Commands.Interfaces;
 
 /// <summary>
@@ -8,7 +10,7 @@ public interface IDeleteQuizHandler
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="command"></param>
     /// <returns></returns>
-    Task HandleAsync(Guid id);
+    Task HandleAsync(DeleteQuizCommand command);
 }

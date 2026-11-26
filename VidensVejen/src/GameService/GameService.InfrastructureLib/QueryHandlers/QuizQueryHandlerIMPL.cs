@@ -42,7 +42,8 @@ public class QuizQueryHandlerIMPL(GameDbContext db) : IQuizQueries
                     .ToList()))
             .ToList(),
             q.Instruction,
-            q.InstructionEn
+            q.InstructionEn,
+            q.RowVersion
             ))
             .ToListAsync();
     }
@@ -79,7 +80,8 @@ public class QuizQueryHandlerIMPL(GameDbContext db) : IQuizQueries
                     .ToList()))
             .ToList(),
             q.Instruction,
-            q.InstructionEn
+            q.InstructionEn,
+            q.RowVersion
             ))
             .FirstOrDefaultAsync();
     }
@@ -116,7 +118,8 @@ public class QuizQueryHandlerIMPL(GameDbContext db) : IQuizQueries
                     .ToList()))
             .ToList(),
             q.Instruction,
-            q.InstructionEn
+            q.InstructionEn,
+            q.RowVersion
             ))
             .ToListAsync();
     }

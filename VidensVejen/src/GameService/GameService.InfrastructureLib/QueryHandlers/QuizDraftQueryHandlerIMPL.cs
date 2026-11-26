@@ -43,7 +43,8 @@ public class QuizDraftQueryHandlerIMPL(GameDbContext db) : IQuizDraftQueries
                             .ToList()))
                     .ToList(),
                 d.Instruction,
-                d.InstructionEn
+                d.InstructionEn,
+                d.RowVersion
                 ))
             .FirstOrDefaultAsync();
     }
@@ -76,7 +77,8 @@ public class QuizDraftQueryHandlerIMPL(GameDbContext db) : IQuizDraftQueries
                             .ToList()))
                     .ToList(),
                 d.Instruction,
-                d.InstructionEn
+                d.InstructionEn,
+                d.RowVersion
                 ))
             .ToListAsync();
     }

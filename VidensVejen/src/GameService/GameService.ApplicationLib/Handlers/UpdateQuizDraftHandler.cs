@@ -41,6 +41,8 @@ public class UpdateQuizDraftHandler(
                 command.Instruction,
                 command.InstructionEn);
 
+            draftRepo.SetOriginalRowVersion(draft, command.RowVersion);
+
             await draftRepo.SaveAsync();
 
             if (logger.IsEnabled(LogLevel.Information))

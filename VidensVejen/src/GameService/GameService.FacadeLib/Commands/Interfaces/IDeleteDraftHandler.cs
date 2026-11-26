@@ -12,5 +12,5 @@ public interface IDeleteDraftHandler
     /// </summary>
     /// <param name="command"></param>
     /// <returns></returns>
-    Task HandleAsync(DeleteDraftCommand command);
+    Task HandleAsync(DeleteQuizDraftCommand command);
 }

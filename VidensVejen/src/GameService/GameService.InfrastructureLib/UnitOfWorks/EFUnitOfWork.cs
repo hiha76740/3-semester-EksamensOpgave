@@ -3,6 +3,7 @@ using GameService.InfrastructureLib.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using VidensVejen.BuildingBlocksLib.UnitOfWork;
+using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.InfrastructureLib.UnitOfWorks;
 
@@ -36,6 +37,13 @@ public class EFUnitOfWork(GameDbContext db) : IUnitOfWork
 
     async Task IUnitOfWork.SaveChangesAsync()
     {
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConcurrencyConflictException("The data was changed or deleted by another request", ex);
+        }
     }
 }

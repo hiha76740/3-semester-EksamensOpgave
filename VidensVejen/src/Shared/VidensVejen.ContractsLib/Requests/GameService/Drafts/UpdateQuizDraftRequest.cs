@@ -12,6 +12,7 @@ namespace VidensVejen.ContractsLib.Requests.GameService.Drafts;
 /// <param name="EndMessageEn"></param>
 /// <param name="Instruction"></param>
 /// <param name="InstructionEn"></param>
+/// <param name="RowVersion"></param>
 /// <example>
 /// {
 ///     "title": "Affaldshierakiet",
@@ -48,7 +49,8 @@ public record UpdateQuizDraftRequest(
     string? EndMessage,
     string? EndMessageEn,
     string? Instruction,
-    string? InstructionEn
+    string? InstructionEn,
+    byte[] RowVersion
     )
 {
     /// <summary>
@@ -95,4 +97,9 @@ public record UpdateQuizDraftRequest(
     /// Instruction of the quiz shown in English
     /// </summary>
     public string? InstructionEn { get; init; } = InstructionEn;
+
+    /// <summary>
+    /// The row version returned when the user was last retrieved.
+    /// </summary>
+    public byte[] RowVersion { get; init; } = RowVersion;
 }

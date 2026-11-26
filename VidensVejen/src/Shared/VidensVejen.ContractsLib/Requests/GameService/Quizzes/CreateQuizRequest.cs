@@ -13,6 +13,7 @@ namespace VidensVejen.ContractsLib.Requests.GameService.Quizzes;
 /// <param name="EndMessageEn"></param>
 /// <param name="Instruction"></param>
 /// <param name="InstructionEn"></param>
+/// <param name="DraftRowVersion"></param>
 /// <example>
 /// {
 ///     "draftId": "123e4567-e89b-12d3-a456-426614174000",
@@ -51,7 +52,8 @@ public record CreateQuizRequest(
     string? EndMessage,
     string? EndMessageEn,
     string Instruction,
-    string InstructionEn
+    string InstructionEn,
+    byte[] DraftRowVersion
     )
 {
     /// <summary>
@@ -103,4 +105,9 @@ public record CreateQuizRequest(
     /// Instruction of the quiz shown in English
     /// </summary>
     public string InstructionEn { get; init; } = InstructionEn;
+
+    /// <summary>
+    /// The RowVersion of the draft, when last recieved.
+    /// </summary>
+    public byte[] DraftRowVersion { get; init; } = DraftRowVersion;
 }

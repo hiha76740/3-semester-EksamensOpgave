@@ -55,6 +55,8 @@ public class CreateQuizHandler(
 
             await quizRepo.AddAsync(quiz);
 
+            draftRepo.SetOriginalRowVersion(draft, command.DraftRowVersion);
+
             draftRepo.Delete(draft);
 
             await unitOfWork.SaveChangesAsync();

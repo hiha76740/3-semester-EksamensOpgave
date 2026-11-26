@@ -13,6 +13,7 @@ namespace VidensVejen.ContractsLib.Responses.GameService;
 /// <param name="Questions"></param>
 /// <param name="Instruction"></param>
 /// <param name="InstructionEn"></param>
+/// <param name="RowVersion"></param>
 /// <example>
 /// {
 ///     "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -52,7 +53,8 @@ public record QuizResponse(
     string? EndMessageEn,
     List<QuestionResponse> Questions,
     string Instruction,
-    string InstructionEn
+    string InstructionEn,
+    byte[] RowVersion
     )
 {
     /// <summary>
@@ -104,4 +106,9 @@ public record QuizResponse(
     /// Instruction shown in English
     /// </summary>
     public string InstructionEn { get; init; } = InstructionEn;
+
+    /// <summary>
+    /// The row version returned when the user was last retrieved.
+    /// </summary>
+    public byte[] RowVersion { get; init; } = RowVersion;
 }

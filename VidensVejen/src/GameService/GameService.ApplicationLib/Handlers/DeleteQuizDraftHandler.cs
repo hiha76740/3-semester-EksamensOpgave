@@ -12,12 +12,12 @@ namespace GameService.ApplicationLib.Handlers;
 /// </summary>
 /// <param name="repo"></param>
 /// <param name="logger"></param>
-public class DeleteDraftHandler(
+public class DeleteQuizDraftHandler(
     IQuizDraftRepository repo,
-    ILogger<DeleteDraftHandler> logger
+    ILogger<DeleteQuizDraftHandler> logger
     ) : IDeleteDraftHandler
 {
-    async Task IDeleteDraftHandler.HandleAsync(DeleteDraftCommand command)
+    async Task IDeleteDraftHandler.HandleAsync(DeleteQuizDraftCommand command)
     {
         try
         {
@@ -31,6 +31,8 @@ public class DeleteDraftHandler(
 
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Deleting draft from auth database");
+
+            repo.SetOriginalRowVersion(draft, command.RowVersion);
 
             repo.Delete(draft);
 

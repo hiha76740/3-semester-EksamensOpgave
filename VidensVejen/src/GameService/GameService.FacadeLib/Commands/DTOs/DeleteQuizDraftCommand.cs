@@ -5,4 +5,4 @@ namespace GameService.FacadeLib.Commands.DTOs;
 /// </summary>
 /// <param name="DraftId"></param>
 /// <param name="RowVersion"></param>
-public record DeleteDraftCommand(Guid DraftId, byte[] RowVersion);
+public record DeleteQuizDraftCommand(Guid DraftId, byte[] RowVersion);

@@ -32,4 +32,11 @@ public interface IQuizDraftRepository
     /// </summary>
     /// <returns></returns>
     Task SaveAsync();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="draft"></param>
+    /// <param name="rowVersion"></param>
+    void SetOriginalRowVersion(QuizDraft draft, byte[] rowVersion);
 }

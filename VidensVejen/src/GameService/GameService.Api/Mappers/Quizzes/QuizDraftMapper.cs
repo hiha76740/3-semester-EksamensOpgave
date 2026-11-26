@@ -22,7 +22,8 @@ internal static class QuizDraftMapper
                 q => q.AsResponse())
             .ToList(),
             dto.Instruction,
-            dto.InstructionEn
+            dto.InstructionEn,
+            dto.RowVersion
             );
 
         return output;
@@ -68,15 +69,16 @@ internal static class QuizDraftMapper
             request.EndMessage,
             request.EndMessageEn,
             request.Instruction,
-            request.InstructionEn
+            request.InstructionEn,
+            request.RowVersion
             );
 
         return output;
     }
 
-    internal static DeleteDraftCommand AsDeleteCommand(this DeleteQuizDraftRequest request, Guid draftId)
+    internal static DeleteQuizDraftCommand AsDeleteCommand(this DeleteQuizDraftRequest request, Guid draftId)
     {
-        var output = new DeleteDraftCommand(
+        var output = new DeleteQuizDraftCommand(
             draftId,
             request.RowVersion
             );

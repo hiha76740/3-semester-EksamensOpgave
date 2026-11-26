@@ -49,5 +49,8 @@ internal sealed class QuizConfiguration : IEntityTypeConfiguration<Quiz>
 
         builder.Navigation(x => x.Questions)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Property(x => x.RowVersion)
+            .IsRowVersion();
     }
 }

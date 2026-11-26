@@ -45,5 +45,8 @@ internal sealed class QuizDraftConfiguration : IEntityTypeConfiguration<QuizDraf
 
         builder.Navigation(x => x.Questions)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Property(x => x.RowVersion)
+            .IsRowVersion();
     }
 }
