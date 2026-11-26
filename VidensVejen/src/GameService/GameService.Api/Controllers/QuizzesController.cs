@@ -21,7 +21,7 @@ public class QuizzesController(
     [HttpPost]
     [EndpointSummary("Creates a quiz.")]
     [EndpointDescription("Creates a quiz from the request and deletes the quiz draft in the same transaction.")]
-    [ProducesResponseType(StatusCodes.Status201Created, Description = "Quiz created successfully.")]
+    [ProducesResponseType(StatusCodes.Status200OK, Description = "Quiz created successfully.")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "The quiz does not meet the rules for publishing.")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Quiz draft was not found.")]
     public async Task<ActionResult> PublishQuiz(
