@@ -17,7 +17,7 @@ public class ExhibitionService(DaprClient daprClient) : IExhibitionService
 
     async Task<bool> IExhibitionService.ImageInUseAsync(ImageId imageId)
     {
-        using var response = await _client.GetAsync($"{_baseUrl}/inuse?id={imageId.Value}");
+        using var response = await _client.GetAsync($"{_baseUrl}/image/inuse?id={imageId.Value}");
 
         response.EnsureSuccessStatusCode();
 
