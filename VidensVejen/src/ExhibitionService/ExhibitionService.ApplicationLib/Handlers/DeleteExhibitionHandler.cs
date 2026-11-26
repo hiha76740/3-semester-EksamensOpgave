@@ -1,6 +1,5 @@
 using ExhibitionService.ApplicationLib.Repositories;
 using ExhibitionService.DomainLib.ValueObjects;
-using ExhibitionService.FacadeLib.Commands.DTOs;
 using ExhibitionService.FacadeLib.Commands.Interfaces;
 using Microsoft.Extensions.Logging;
 using VidensVejen.SharedKernelLib.Exceptions;
@@ -14,15 +13,15 @@ public class DeleteExhibitionHandler(
     IExhibitionRepository exhibitionRepo,
     ILogger<DeleteExhibitionHandler> logger) : IDeleteExhibitionHandler
 {
-    async Task IDeleteExhibitionHandler.HandleAsync(DeleteExhibitionCommand command)
+    async Task IDeleteExhibitionHandler.HandleAsync(Guid id)
     {
         try
         {
             if (logger.IsEnabled(LogLevel.Information))
-                logger.LogInformation("Beginning deletion of exhibition {ExhibitionId}", command.ExhibitionId);
+                logger.LogInformation("Beginning deletion of exhibition {ExhibitionId}", id);
 
 
-            var exhibitionId = new ExhibitionId(command.ExhibitionId);
+            var exhibitionId = new ExhibitionId(id);
 
             var exhibition = await exhibitionRepo.GetExhibitionById(exhibitionId)
                 ?? throw new NotFoundException("Exhibition not found");
