@@ -17,6 +17,8 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
 {
     private const string BaseUrl = "/exhibitions-api";
 
+    private const string DraftBaseUrl = "/exhibitions-drafts-api";
+
     async Task<IReadOnlyList<ExhibitionNameResponse>> IExhibitionService.GetAllNamesAsync()
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/names");
@@ -33,8 +35,7 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
         return names;
     }
 
-    async Task<HttpStatusCode> IExhibitionService.CreateAsync(
-        CreateExhibitionRequest exhibition)
+    async Task<HttpStatusCode> IExhibitionService.CreateAsync(CreateExhibitionRequest exhibition)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, BaseUrl)
         {
@@ -49,7 +50,7 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
 
     async Task<Guid> IExhibitionService.CreateDraftAsync()
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/draft");
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"{DraftBaseUrl}");
         request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
         using var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
@@ -65,7 +66,7 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
 
     async Task IExhibitionService.SaveDraftAsync(Guid draftId, SaveExhibitionDraftRequest draft)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Put, $"{BaseUrl}/draft/{draftId}")
+        using var request = new HttpRequestMessage(HttpMethod.Put, $"{DraftBaseUrl}/{draftId}")
         {
             Content = JsonContent.Create(draft)
         };
