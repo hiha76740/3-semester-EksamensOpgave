@@ -16,6 +16,7 @@ builder.Services.AddQueryDI();
 builder.Services.AddUnitOfWorkDI();
 builder.Services.AddBackgroundWorkerDI();
 builder.Services.AddEventPublisherDI();
+builder.Services.AddInternalServicesDI();
 builder.Services.AddDaprClient();
 
 builder.Services.AddControllers();
