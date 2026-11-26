@@ -21,6 +21,8 @@ public class CreateExhibitionHandler(
 {
     async Task ICreateExhibitionHandler.HandleAsync(CreateExhibitionCommand command)
     {
+        // TO DO: Update empty Exhibition from ExhibitionDraft
+
         try
         {
             if (logger.IsEnabled(LogLevel.Information))
