@@ -25,6 +25,7 @@
         <ProjectReference Include="..\..\..\src\GameService\GameService.DomainLib\GameService.DomainLib.csproj" />
         <ProjectReference Include="..\..\..\src\GameService\GameService.FacadeLib\GameService.FacadeLib.csproj" />
         <ProjectReference Include="..\..\..\src\GameService\GameService.ApplicationLib\GameService.ApplicationLib.csproj" />
+        <ProjectReference Include="..\..\..\src\Shared\VidensVejen.BuildingBlocksLib\VidensVejen.BuildingBlocksLib.csproj" />
     </ItemGroup>
 
 </Project>
