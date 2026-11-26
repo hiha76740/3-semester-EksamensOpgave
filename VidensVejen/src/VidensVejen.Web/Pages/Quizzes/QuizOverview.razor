@@ -87,14 +87,14 @@
     private Task DeleteDraftAsync(QuizDraftResponse draft) =>
         ConfirmDeletionAsync(canEdit, "kladde", draft.Title ?? "Kladde uden titel", async () =>
         {
-            await QuizService.DeleteDraftAsync(draft.Id);
+            await QuizService.DeleteDraftAsync(draft.Id, new DeleteQuizDraftRequest(draft.RowVersion));
             drafts = drafts.Where(item => item.Id != draft.Id).ToArray();
         });
 
     private Task DeletePublishedAsync(QuizResponse quiz) =>
         ConfirmDeletionAsync(canDelete, "publiceret quiz", quiz.Title, async () =>
         {
-            await QuizService.DeletePublishedAsync(quiz.Id);
+            await QuizService.DeletePublishedAsync(quiz.Id, new DeleteQuizRequest(quiz.RowVersion));
             published = published.Where(item => item.Id != quiz.Id).ToArray();
         });
 

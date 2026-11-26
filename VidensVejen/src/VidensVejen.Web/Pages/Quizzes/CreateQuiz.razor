@@ -95,6 +95,7 @@ else
     private QuizInputModel? model;
     private Guid? draftId;
     private bool isBusy;
+    private bool draftVersionNeedsReload;
     private readonly List<string> errors = [];
     private string? message;
 
@@ -113,6 +114,8 @@ else
 
         model = null;
         draftId = null;
+        draftVersionNeedsReload = false;
+        exhibitionsError = null;
         ClearMessages();
 
         var authentication = AuthenticationStateTask;
@@ -140,6 +143,7 @@ else
                 var draft = await QuizService.GetDraftAsync(id);
                 draftId = draft.Id;
                 model = QuizEditorMapper.FromDraft(draft);
+                model.RowVersion = draft.RowVersion;
             }, "Quizkladden kunne ikke hentes.");
         }
         else if (PublishedQuizId is Guid quizId)
@@ -186,8 +190,9 @@ else
             return;
         }
 
-        draftId = await QuizService.CreateDraftAsync();
-        model = new QuizInputModel();
+        var input = new QuizInputModel();
+        await EnsureDraftAsync(input);
+        model = input;
     }, "Quizkladden kunne ikke oprettes.");
 
     private Task SaveDraftAsync(QuizInputModel input) => RunAsync(async () =>
@@ -197,9 +202,18 @@ else
             return;
         }
 
-        var id = draftId ??= await QuizService.CreateDraftAsync();
+        if (!await EnsureDraftAsync(input))
+        {
+            return;
+        }
+
+        var id = draftId.GetValueOrDefault();
         await QuizService.SaveDraftAsync(id, BuildDraftRequest(input));
+
+        draftVersionNeedsReload = true;
         message = "Quizkladden er gemt.";
+        await LoadDraftVersionAsync(id, input);
+        draftVersionNeedsReload = false;
     }, "Quizkladden kunne ikke gemmes.");
 
     private Task Create(QuizInputModel input) => RunAsync(async () =>
@@ -227,6 +241,11 @@ else
         if (string.IsNullOrWhiteSpace(input.QuizLayout))
         {
             errors.Add("Vælg et layout til quizzen.");
+        }
+
+        if (input.Questions.Count == 0)
+        {
+            errors.Add("Quizzen skal have mindst ét spørgsmål.");
         }
 
         for (var i = 0; i < input.Questions.Count; i++)
@@ -262,8 +281,13 @@ else
             return;
         }
 
-        var id = draftId ??= await QuizService.CreateDraftAsync();
-        var status = await QuizService.PublishAsync(id, BuildRequest(input) with { DraftId = id });
+        if (!await EnsureDraftAsync(input))
+        {
+            return;
+        }
+
+        var id = draftId.GetValueOrDefault();
+        var status = await QuizService.PublishAsync(id, BuildRequest(id, input));
         if (status == HttpStatusCode.OK || status == HttpStatusCode.Created)
         {
             draftId = null;
@@ -276,8 +300,36 @@ else
         }
     }, "Publiceringen kunne ikke bekræftes.");
 
-    private static CreateQuizRequest BuildRequest(QuizInputModel input) =>
-        new(input.DraftId, input.Title, input.TitleEn, input.ExhibitionId.GetValueOrDefault(), input.QuizLayout,
+    private async Task<bool> EnsureDraftAsync(QuizInputModel input)
+    {
+        if (draftVersionNeedsReload)
+        {
+            errors.Add("Åbn quizkladden igen fra oversigten for at fortsætte.");
+            return false;
+        }
+
+        var id = draftId ??= await QuizService.CreateDraftAsync();
+        if (input.RowVersion.Length == 0)
+        {
+            await LoadDraftVersionAsync(id, input);
+        }
+
+        return true;
+    }
+
+    private async Task LoadDraftVersionAsync(Guid id, QuizInputModel input)
+    {
+        var draft = await QuizService.GetDraftAsync(id);
+        if (draft.RowVersion.Length == 0)
+        {
+            throw new System.Text.Json.JsonException("The quiz draft response is missing its row version.");
+        }
+
+        input.RowVersion = draft.RowVersion;
+    }
+
+    private static CreateQuizRequest BuildRequest(Guid draftId, QuizInputModel input) =>
+        new(draftId, input.Title, input.TitleEn, input.ExhibitionId.GetValueOrDefault(), input.QuizLayout,
             input.Questions.Select(question => new CreateQuestionRequest(
                 question.Text, question.TextEn,
                 question.Answers.Select(answer => new CreateChoiceRequest(
@@ -310,7 +362,14 @@ else
         catch (Exception exception) when (exception is HttpRequestException or System.Text.Json.JsonException
             or OperationCanceledException)
         {
-            errors.Add(failureMessage);
+            if (draftVersionNeedsReload)
+            {
+                errors.Add("Kladdens nye version kunne ikke hentes. Åbn kladden igen fra oversigten.");
+            }
+            else
+            {
+                errors.Add(failureMessage);
+            }
         }
         finally
         {
@@ -326,7 +385,7 @@ else
             return;
         }
 
-        model = new QuizInputModel();
+        model = new QuizInputModel { RowVersion = model?.RowVersion ?? [] };
         ClearMessages();
     }
 

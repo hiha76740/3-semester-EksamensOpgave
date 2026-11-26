@@ -37,8 +37,8 @@ public interface IQuizService
     Task<QuizResponse> GetPublishedAsync(Guid id);
 
     /// <summary>Deletes an unpublished draft.</summary>
-    Task DeleteDraftAsync(Guid id);
+    Task DeleteDraftAsync(Guid id, DeleteQuizDraftRequest request);
 
     /// <summary>Deletes a published quiz.</summary>
-    Task DeletePublishedAsync(Guid id);
+    Task DeletePublishedAsync(Guid id, DeleteQuizRequest request);
 }

@@ -80,14 +80,14 @@ public class QuizService(HttpClient httpClient) : IQuizService
         return GetAsync<QuizResponse>($"{BaseUrl}/{id:D}");
     }
 
-    Task IQuizService.DeleteDraftAsync(Guid id)
+    Task IQuizService.DeleteDraftAsync(Guid id, DeleteQuizDraftRequest request)
     {
-        return DeleteAsync($"{DraftUrl}/{id:D}");
+        return DeleteAsync($"{DraftUrl}/{id:D}", request);
     }
 
-    Task IQuizService.DeletePublishedAsync(Guid id)
+    Task IQuizService.DeletePublishedAsync(Guid id, DeleteQuizRequest request)
     {
-        return DeleteAsync($"{BaseUrl}/{id:D}");
+        return DeleteAsync($"{BaseUrl}/{id:D}", request);
     }
 
     private async Task<T> GetAsync<T>(string url) where T : class
@@ -100,9 +100,12 @@ public class QuizService(HttpClient httpClient) : IQuizService
             ?? throw new JsonException("The quiz response was empty.");
     }
 
-    private async Task DeleteAsync(string url)
+    private async Task DeleteAsync<T>(string url, T body)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Delete, url);
+        using var request = new HttpRequestMessage(HttpMethod.Delete, url)
+        {
+            Content = JsonContent.Create(body)
+        };
         request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
         using var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
