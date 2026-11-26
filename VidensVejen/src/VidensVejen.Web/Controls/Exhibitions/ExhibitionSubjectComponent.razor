@@ -1,4 +1,5 @@
 @inject DialogService Dialog
+@inject IQuizService QuizService
 
 <RadzenStack Gap="0.75rem">
     <RadzenFormField Text="Titel * (DA)">
@@ -14,13 +15,19 @@
         <RadzenTextArea @bind-Value="Model.DescriptionEn" Rows="3" />
     </RadzenFormField>
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-        <RadzenCheckBox TValue="bool" Name="@($"{Id}-quiz")" @bind-Value="Model.IsQuiz" />
+        <RadzenCheckBox TValue="bool" Name="@($"{Id}-quiz")" @bind-Value="Model.IsQuiz"
+                        @bind-Value:after="LoadQuizOptionsAsync" />
         <RadzenLabel Text="Dette subject er en quiz" Component="@($"{Id}-quiz")" />
     </RadzenStack>
     @if (Model.IsQuiz)
     {
+        @if (quizOptionsError)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">Quizzerne kunne ikke hentes.</RadzenAlert>
+            <RadzenButton Text="Prøv igen" Click="LoadQuizOptionsAsync" />
+        }
         <RadzenFormField Text="Quiz *">
-            <RadzenDropDown TValue="string" @key="quizPickerVersion" Data="@QuizOptions"
+            <RadzenDropDown TValue="string" @key="quizPickerVersion" Data="@quizOptions"
                             TextProperty="@nameof(QuizOption.Title)" ValueProperty="@nameof(QuizOption.Value)"
                             Value="@SelectedQuiz" Change="SelectQuizAsync" Placeholder="Vælg en quiz" />
         </RadzenFormField>
@@ -65,13 +72,41 @@
 
     private const string CreateNew = "new";
 
-    // Example data for the prototype. Replace with the available quizzes from GameService.
-    private static readonly IReadOnlyList<QuizOption> QuizOptions =
-    [
-        new("d520d7f7-2455-4b06-b835-4df14a3a2088", "Affaldssortering (demo)"),
-        new("512cb527-4b08-4ea8-a3f1-5fcf7b9313ca", "Vand og hav (demo)"),
-        new(CreateNew, "Lav en ny quiz")
-    ];
+    private IReadOnlyList<QuizOption> quizOptions = [new(CreateNew, "Lav en ny quiz")];
+    private bool quizOptionsLoaded;
+    private bool quizOptionsLoading;
+    private bool quizOptionsError;
+
+    protected override Task OnParametersSetAsync() => LoadQuizOptionsAsync();
+
+    private async Task LoadQuizOptionsAsync()
+    {
+        if (!Model.IsQuiz || quizOptionsLoaded || quizOptionsLoading)
+        {
+            return;
+        }
+
+        quizOptionsLoading = true;
+        quizOptionsError = false;
+        try
+        {
+            var quizzes = await QuizService.GetPublishedAsync();
+            quizOptions = quizzes.OrderBy(quiz => quiz.Title)
+                .Select(quiz => new QuizOption(quiz.Id.ToString(), quiz.Title))
+                .Append(new QuizOption(CreateNew, "Lav en ny quiz"))
+                .ToArray();
+            quizOptionsLoaded = true;
+        }
+        catch (Exception exception) when (exception is HttpRequestException or System.Text.Json.JsonException
+            or OperationCanceledException)
+        {
+            quizOptionsError = true;
+        }
+        finally
+        {
+            quizOptionsLoading = false;
+        }
+    }
 
     private string? SelectedQuiz => Model.QuizId?.ToString();
 
