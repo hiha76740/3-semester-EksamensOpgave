@@ -11,13 +11,19 @@ namespace ExhibitionService.InfrastructureLib.QueryHandlers;
 /// </summary>
 public class ExhibitionQueryHandlerIMPL(ExhibitionDbContext db) : IExhibitionQueries
 {
-    async Task<bool> IExhibitionQueries.CheckIfInUseAsync(Guid id)
+    async Task<bool> IExhibitionQueries.CheckIfImageInUseAsync(Guid id)
     {
         var imageId = new ImageId(id);
 
         return await db.Exhibitions
             .AsNoTracking()
             .AnyAsync(e => e.ThemeImageId == imageId);
+    }
+
+    Task<bool> IExhibitionQueries.CheckIfQuizInUseAsync(Guid id)
+    {
+        // TODO: Fix dette når vi ved hvordan vi skal tilknytte Exhibition til en quiz
+        throw new NotImplementedException();
     }
 
     async Task<IReadOnlyList<ExhibitionNameDto>> IExhibitionQueries.GetAllExhibitionNamesAsync()

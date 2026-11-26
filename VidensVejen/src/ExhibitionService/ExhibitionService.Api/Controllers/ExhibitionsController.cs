@@ -140,17 +140,38 @@ public class ExhibitionsController(
         }
     }
 
-    [HttpGet("inuse")]
+    [HttpGet("image/inuse")]
     [EndpointSummary("Check if image is in use")]
     [EndpointDescription("Checks if the requested image is in use by any exhibition ")]
     [ProducesResponseType<bool>(StatusCodes.Status200OK, "application/json", Description = "Returns true if image is in use")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while checking requested image")]
-    public async Task<ActionResult<bool>> CheckIfInUse(
+    public async Task<ActionResult<bool>> CheckIfImageInUse(
         [Required][Description("Unique identifier for a image")] Guid id)
     {
         try
         {
-            var inUse = await queries.CheckIfInUseAsync(id);
+            var inUse = await queries.CheckIfImageInUseAsync(id);
+
+            return Ok(inUse);
+        }
+        catch (Exception ex)
+        {
+
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet("quiz/inuse")]
+    [EndpointSummary("Check if image is in use")]
+    [EndpointDescription("Checks if the requested image is in use by any exhibition ")]
+    [ProducesResponseType<bool>(StatusCodes.Status200OK, "application/json", Description = "Returns true if image is in use")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while checking requested image")]
+    public async Task<ActionResult<bool>> CheckIfQuizInUse(
+        [Required][Description("Unique identifier for a quiz")] Guid id)
+    {
+        try
+        {
+            var inUse = await queries.CheckIfQuizInUseAsync(id);
 
             return Ok(inUse);
         }

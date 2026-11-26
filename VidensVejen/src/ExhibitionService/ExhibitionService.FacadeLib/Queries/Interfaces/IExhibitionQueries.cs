@@ -25,5 +25,12 @@ public interface IExhibitionQueries
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task<bool> CheckIfInUseAsync(Guid id);
+    Task<bool> CheckIfImageInUseAsync(Guid id);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    Task<bool> CheckIfQuizInUseAsync(Guid id);
 }
