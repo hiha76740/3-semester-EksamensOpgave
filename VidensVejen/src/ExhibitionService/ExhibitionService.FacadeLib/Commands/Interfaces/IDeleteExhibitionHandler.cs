@@ -1,5 +1,3 @@
-using ExhibitionService.FacadeLib.Commands.DTOs;
-
 namespace ExhibitionService.FacadeLib.Commands.Interfaces;
 
 /// <summary>
@@ -10,7 +8,7 @@ public interface IDeleteExhibitionHandler
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="command"></param>
+    /// <param name="id"></param>
     /// <returns></returns>
-    Task HandleAsync(DeleteExhibitionCommand command);
+    Task HandleAsync(Guid id);
 }
