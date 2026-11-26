@@ -12,9 +12,9 @@ namespace ExhibitionService.ApplicationLib.Handlers;
 /// </summary>
 public class DeleteExhibitionHandler(
     IExhibitionRepository exhibitionRepo,
-    ILogger<DeleteExhibitionHandler> logger) : IDeleteExibitionHandler
+    ILogger<DeleteExhibitionHandler> logger) : IDeleteExhibitionHandler
 {
-    async Task IDeleteExibitionHandler.HandleAsync(DeleteExhibitionCommand command)
+    async Task IDeleteExhibitionHandler.HandleAsync(DeleteExhibitionCommand command)
     {
         try
         {

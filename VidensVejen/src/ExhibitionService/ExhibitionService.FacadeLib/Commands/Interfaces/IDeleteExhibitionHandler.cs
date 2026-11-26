@@ -5,7 +5,7 @@ namespace ExhibitionService.FacadeLib.Commands.Interfaces;
 /// <summary>
 /// 
 /// </summary>
-public interface IDeleteExibitionHandler
+public interface IDeleteExhibitionHandler
 {
     /// <summary>
     /// 

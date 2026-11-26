@@ -15,7 +15,7 @@ namespace ExhibitionService.Api.Controllers;
 public class ExhibitionsController(
     ICreateExhibitionHandler create,
     IUpdateExhibitionHandler update,
-    IDeleteExibitionHandler delete,
+    IDeleteExhibitionHandler delete,
     IExhibitionQueries queries
     ) : ControllerBase
 {
