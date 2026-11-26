@@ -18,7 +18,10 @@ public static class HandlerDI
     {
         services.AddScoped<ICreateExhibitionHandler, CreateExhibitionHandler>();
         services.AddScoped<IUpdateExhibitionHandler, UpdateExhibitionHandler>();
+        services.AddScoped<IUpdateExhibitionDraftHandler, UpdateExhibitionDraftHandler>();
         services.AddScoped<IDeleteExhibitionHandler, DeleteExhibitionHandler>();
+        services.AddScoped<IDeleteExhibitionDraftHandler, DeleteExhibitionDraftHandler>();
+
 
         return services;
     }
