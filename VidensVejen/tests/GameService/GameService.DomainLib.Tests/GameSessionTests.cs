@@ -191,4 +191,29 @@ public class GameSessionTests
         Assert.NotNull(session.CompletedAt);
         Assert.InRange(session.CompletedAt.Value, before, DateTime.UtcNow);
     }
+
+    [Fact]
+    public void Finish_GivenAlreadyCompletedSession_ThrowsDomainException()
+    {
+        // Arrange
+        var quiz = Quiz.Create(
+            "Quiz", "Quiz EN", Guid.NewGuid(), "vertical", "Done", "Done EN",
+            [new NewQuestion("Question", "Question EN",
+                [new Choice("Yes", "Yes EN", true, null, null),
+                 new Choice("No", "No EN", false, null, null)])],
+            "Instructions", "Instructions EN");
+        var session = GameSession.Start(quiz);
+        session.Answer(quiz, quiz.Questions[0].Id.Value, 0);
+
+        var score = session.Finish(quiz);
+        var completedAt = session.CompletedAt;
+        Assert.NotNull(completedAt);
+        Assert.Equal(1, score.CorrectCount);
+        Assert.Equal(1, score.TotalCount);
+
+        // Act & Assert
+        Assert.Throws<DomainException>(() => session.Finish(quiz));
+        Assert.Equal(completedAt, session.CompletedAt);
+        Assert.Single(session.Answers);
+    }
 }
