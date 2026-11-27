@@ -83,6 +83,9 @@ public class GameSession
     /// <exception cref="DomainException"></exception>
     public SessionScore Finish(Quiz quiz)
     {
+        if (CompletedAt != null)
+            throw new DomainException("The session is already finished");
+
         if (_answers.Count != quiz.Questions.Count)
             throw new DomainException("All questions must be answered before the session can be finished");
 

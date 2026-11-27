@@ -74,7 +74,7 @@ public class SessionsController(
     [EndpointSummary("Finish a session")]
     [EndpointDescription("Finishes the session when every question is answered and returns the score")]
     [ProducesResponseType<SessionScoreResponse>(StatusCodes.Status200OK, "Application/json", Description = "Returns the number of correct answers out of all questions and the percentage")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Not every question is answered")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Not every question is answered or the session is already finished")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Session was not found")]
     public async Task<ActionResult<SessionScoreResponse>> FinishSession(
         [Required][Description("A unique identifier for the session")] Guid id)
