@@ -85,6 +85,9 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     b.Property<Guid>("ExhibitionId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
                     b.Property<Guid?>("QuizId")
                         .HasColumnType("uniqueidentifier");
 
@@ -194,6 +197,8 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                             b1.Property<string>("DescriptionEn")
                                 .IsRequired();
 
+                            b1.Property<int>("Position");
+
                             b1.Property<string>("Quote");
 
                             b1.Property<string>("QuoteEn");
@@ -249,6 +254,8 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                             b1.Property<string>("Description");
 
                             b1.Property<string>("DescriptionEn");
+
+                            b1.Property<int>("Position");
 
                             b1.Property<string>("Quote");
 
