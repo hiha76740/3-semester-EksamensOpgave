@@ -16,6 +16,15 @@ public interface IExhibitionService
     /// <returns></returns>
     Task<IReadOnlyList<ExhibitionNameResponse>> GetAllNamesAsync();
 
+    /// <summary>Gets the exhibition drafts for the overview.</summary>
+    Task<IReadOnlyList<ExhibitionDraftResponse>> GetDraftsAsync();
+
+    /// <summary>Deletes the specified exhibition draft.</summary>
+    Task DeleteDraftAsync(Guid draftId);
+
+    /// <summary>Deletes the specified published exhibition.</summary>
+    Task DeletePublishedAsync(Guid exhibitionId);
+
     /// <summary>Creates an exhibition with its theme image.</summary>
     /// <param name="exhibition">The exhibition and its content.</param>
     /// <returns>The status code returned by ExhibitionService.</returns>

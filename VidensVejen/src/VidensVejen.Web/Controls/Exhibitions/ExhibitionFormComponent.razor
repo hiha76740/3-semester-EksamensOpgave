@@ -42,10 +42,16 @@
             </RadzenAccordion>
 
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
-                <RadzenButton ButtonType="ButtonType.Button" Text="Gem kladde" Variant="Variant.Outlined"
-                              Click="@(() => SaveDraftCallback.InvokeAsync(Model))"
-                              Disabled="@IsBusy" />
-                <RadzenButton ButtonType="ButtonType.Submit" Text="@SubmitButtonText" Disabled="@IsBusy" />
+                @if (CanSaveDraft)
+                {
+                    <RadzenButton ButtonType="ButtonType.Button" Text="Gem kladde" Variant="Variant.Outlined"
+                                  Click="@(() => SaveDraftCallback.InvokeAsync(Model))"
+                                  Disabled="@IsBusy" />
+                }
+                @if (CanPublish)
+                {
+                    <RadzenButton ButtonType="ButtonType.Submit" Text="@SubmitButtonText" Disabled="@IsBusy" />
+                }
             </RadzenStack>
         </RadzenStack>
     </RadzenTemplateForm>
@@ -78,6 +84,12 @@
 
     [Parameter]
     public bool CanEditQuiz { get; set; }
+
+    [Parameter]
+    public bool CanSaveDraft { get; set; }
+
+    [Parameter]
+    public bool CanPublish { get; set; }
 
     private bool[] expandedSubjects = [];
     private string? themeError;

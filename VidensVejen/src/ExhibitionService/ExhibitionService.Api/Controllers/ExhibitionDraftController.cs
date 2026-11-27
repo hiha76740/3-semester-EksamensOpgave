@@ -21,6 +21,25 @@ public class ExhibitionDraftController(
     ) : ControllerBase
 {
 
+    [HttpGet]
+    [EndpointSummary("Get exhibition drafts")]
+    [EndpointDescription("Gets all exhibition drafts")]
+    [ProducesResponseType<IReadOnlyList<ExhibitionDraftResponse>>(StatusCodes.Status200OK, "Application/json", Description = "Returns all exhibition drafts")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to get all exhibition drafts")]
+    public async Task<ActionResult<IReadOnlyList<ExhibitionDraftResponse>>> GetExhibitionDrafts()
+    {
+        var list = await queries.GetAllExhibitionDrafts();
+
+        var response = new List<ExhibitionDraftResponse>();
+
+        foreach (var dto in list)
+        {
+            response.Add(dto.AsResponse());
+        }
+
+        return Ok(response);
+    }
+
     [HttpGet("{id:guid}")]
     [EndpointSummary("Get a single instance of an exhibition draft")]
     [EndpointDescription("Gets the details of an exhibition draft")]

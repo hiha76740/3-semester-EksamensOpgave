@@ -24,9 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controls\Exhibitions\" />
     <Folder Include="Models\Exhibitions\" />
-    <Folder Include="Pages\Exhibitions\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>
 

@@ -1,0 +1,133 @@
+@page "/exhibitions"
+
+@inject IExhibitionService ExhibitionService
+@inject DialogService Dialog
+@inject NavigationManager Navigation
+
+<PageTitle>Udstillinger</PageTitle>
+
+<RadzenStack Gap="1rem">
+    <RadzenText TextStyle="TextStyle.H2" Text="Udstillinger" />
+    @if (canEdit)
+    {
+        <RadzenButton Text="Opret udstilling" Icon="add" Style="align-self: flex-start;" Click="@(() => Navigation.NavigateTo("exhibition/create"))" />
+    }
+    @if (error != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
+    }
+    @if (isLoading)
+    {
+        <RadzenText role="status" Text="Henter udstillinger …" />
+    }
+    else if (canAccess)
+    {
+        <ExhibitionOverviewComponent Drafts="drafts" Published="published" ShowDrafts="showDrafts"
+                                     CanEdit="canEdit" CanPublish="canPublish" CanDeletePublished="canDelete"
+                                     DeleteDraft="DeleteDraftAsync" DeletePublished="DeletePublishedAsync"
+                                     IsDeleting="isDeleting" />
+    }
+    else
+    {
+        <RadzenText Text="Du har ikke adgang til udstillingsoversigten." />
+    }
+</RadzenStack>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private IReadOnlyList<ExhibitionDraftResponse> drafts = [];
+    private IReadOnlyList<ExhibitionNameResponse> published = [];
+    private bool canAccess;
+    private bool canEdit;
+    private bool canPublish;
+    private bool canDelete;
+    private bool showDrafts;
+    private bool isLoading = true;
+    private bool isDeleting;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            if (AuthenticationStateTask == null)
+            {
+                return;
+            }
+
+            var state = await AuthenticationStateTask;
+            var user = state.User;
+            canEdit = HasPermission(user, "Exhibition.Edit");
+            canPublish = HasPermission(user, "Exhibition.Create");
+            canDelete = HasPermission(user, "Exhibition.Delete");
+            showDrafts = canEdit || canPublish || HasPermission(user, "Exhibition.Read");
+            canAccess = showDrafts || canDelete;
+            if (canAccess)
+            {
+                published = await ExhibitionService.GetAllNamesAsync();
+            }
+
+            if (showDrafts)
+            {
+                var publishedIds = published.Select(exhibition => exhibition.Id).ToHashSet();
+                drafts = (await ExhibitionService.GetDraftsAsync())
+                    .Where(draft => !publishedIds.Contains(draft.Id))
+                    .ToArray();
+            }
+        }
+        catch (Exception exception) when (exception is HttpRequestException or JsonException or OperationCanceledException)
+        {
+            error = "Udstillingsoversigten kunne ikke hentes.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private Task DeleteDraftAsync(ExhibitionDraftResponse draft) =>
+        ConfirmDeletionAsync(canEdit, "kladde", ExhibitionOverviewComponent.GetDraftName(draft), async () =>
+        {
+            await ExhibitionService.DeleteDraftAsync(draft.Id);
+            drafts = drafts.Where(item => item.Id != draft.Id).ToArray();
+        });
+
+    private Task DeletePublishedAsync(ExhibitionNameResponse exhibition) =>
+        ConfirmDeletionAsync(canDelete, "publiceret udstilling", exhibition.Name, async () =>
+        {
+            await ExhibitionService.DeletePublishedAsync(exhibition.Id);
+            published = published.Where(item => item.Id != exhibition.Id).ToArray();
+        });
+
+    private async Task ConfirmDeletionAsync(bool allowed, string type, string title, Func<Task> delete)
+    {
+        if (!allowed || isDeleting)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        error = null;
+        try
+        {
+            if (await Dialog.Confirm($"Vil du slette denne {type}: {title}?", "Bekræft sletning",
+                new ConfirmOptions { OkButtonText = "Slet", CancelButtonText = "Annullér" }) == true)
+            {
+                await delete();
+            }
+        }
+        catch (Exception exception) when (exception is HttpRequestException or OperationCanceledException)
+        {
+            error = "Sletningen kunne ikke bekræftes. Genindlæs oversigten for at se den aktuelle status.";
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+
+    private static bool HasPermission(ClaimsPrincipal user, string permission) =>
+        user.Identity?.IsAuthenticated == true && user.HasClaim(CustomClaimTypes.Permission, permission);
+}

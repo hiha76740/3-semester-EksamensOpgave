@@ -68,7 +68,7 @@ public class QuizDraftsController(
     [EndpointSummary("Get quiz drafts")]
     [EndpointDescription("Gets all quiz drafts")]
     [ProducesResponseType<List<QuizDraftResponse>>(StatusCodes.Status200OK, "Application/json", Description = "Returns all quiz drafts")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to get the quiz drafts")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to get all quiz drafts")]
     public async Task<ActionResult<List<QuizDraftResponse>>> GetQuizDrafts()
     {
         try

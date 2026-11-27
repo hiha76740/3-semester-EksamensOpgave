@@ -35,6 +35,35 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
         return names;
     }
 
+    async Task<IReadOnlyList<ExhibitionDraftResponse>> IExhibitionService.GetDraftsAsync()
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, DraftBaseUrl);
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<IReadOnlyList<ExhibitionDraftResponse>>()
+            ?? throw new JsonException("The exhibition drafts response was empty.");
+    }
+
+    Task IExhibitionService.DeleteDraftAsync(Guid draftId)
+    {
+        return DeleteAsync($"{DraftBaseUrl}/{draftId:D}");
+    }
+
+    Task IExhibitionService.DeletePublishedAsync(Guid exhibitionId)
+    {
+        return DeleteAsync($"{BaseUrl}/{exhibitionId:D}");
+    }
+
+    private async Task DeleteAsync(string url)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Delete, url);
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+    }
+
     async Task<HttpStatusCode> IExhibitionService.CreateAsync(CreateExhibitionRequest exhibition)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, BaseUrl)

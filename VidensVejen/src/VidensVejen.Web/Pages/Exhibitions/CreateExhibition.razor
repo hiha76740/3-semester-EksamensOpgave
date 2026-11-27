@@ -1,7 +1,5 @@
 @page "/exhibition/create"
 @page "/exhibition/drafts/{ExistingDraftId:guid}"
-@using System.Text.Json
-@using Microsoft.AspNetCore.Components.Forms
 
 @inject IImageService ImageService
 @inject IExhibitionService ExhibitionService
@@ -11,10 +9,15 @@
 
 <PageTitle>Opret udstilling</PageTitle>
 
-@if (model != null)
+@if (accessDenied)
+{
+    <RadzenText Text="Du har ikke adgang til udstillingskladden." />
+}
+else if (model != null)
 {
     <ExhibitionFormComponent @key="model" Model="model" ExhibitionId="draftId.GetValueOrDefault()" CanEditQuiz="canEditQuiz" SubmitCallback="Create" SubmitButtonText="Publicér"
-                             SaveDraftCallback="SaveDraftAsync" IsBusy="isBusy"
+                             SaveDraftCallback="SaveDraftAsync" CanSaveDraft="canEditExhibition"
+                             CanPublish="canPublishExhibition" IsBusy="isBusy"
                              Error="@error" Message="@message" />
 }
 else
@@ -40,6 +43,9 @@ else
     [CascadingParameter]
     private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
 
+    private bool accessDenied = true;
+    private bool canEditExhibition;
+    private bool canPublishExhibition;
     private bool canPublishQuiz;
     private bool canEditQuiz;
     private ExhibitionInputModel? model;
@@ -61,10 +67,20 @@ else
         if (authentication != null)
         {
             var user = (await authentication).User;
+            canEditExhibition = user.Identity?.IsAuthenticated == true
+                && user.HasClaim(CustomClaimTypes.Permission, "Exhibition.Edit");
+            canPublishExhibition = user.Identity?.IsAuthenticated == true
+                && user.HasClaim(CustomClaimTypes.Permission, "Exhibition.Create");
             canEditQuiz = user.Identity?.IsAuthenticated == true
                 && user.HasClaim(CustomClaimTypes.Permission, "Game.Edit");
             canPublishQuiz = user.Identity?.IsAuthenticated == true
                 && user.HasClaim(CustomClaimTypes.Permission, "Game.Create");
+        }
+
+        accessDenied = !canEditExhibition && !(canPublishExhibition && ExistingDraftId.HasValue);
+        if (accessDenied)
+        {
+            return;
         }
 
         model = null;
@@ -79,6 +95,11 @@ else
 
     private async Task StartDraftAsync()
     {
+        if (!canEditExhibition)
+        {
+            return;
+        }
+
         Guid? newId = null;
         await RunAsync(async () =>
         {
@@ -162,7 +183,7 @@ else
 
     private Task SaveDraftAsync(ExhibitionInputModel input) => RunAsync(async () =>
     {
-        if (draftId is Guid id)
+        if (canEditExhibition && draftId is Guid id)
         {
             var imageId = await ResolveThemeIdAsync(input.ThemeFile);
             await PersistDraftAsync(id, input, imageId);
@@ -192,7 +213,7 @@ else
 
     public Task Create(ExhibitionInputModel input) => RunAsync(async () =>
     {
-        if (draftId is not Guid id)
+        if (!canPublishExhibition || draftId is not Guid id)
         {
             return;
         }

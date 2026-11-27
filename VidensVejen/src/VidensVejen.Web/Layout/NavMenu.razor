@@ -4,12 +4,18 @@
             <RadzenIcon Icon="home" aria-hidden="true" />
             Forside
         </NavLink>
-        <NavLink class="vidensvejen-nav-link" href="exhibition/create" Match="NavLinkMatch.All">
-            <RadzenIcon Icon="layers" aria-hidden="true" />
-            Udstillinger
-        </NavLink>
         <AuthorizeView>
             <Authorized Context="auth">
+                @if (auth.User.HasClaim(CustomClaimTypes.Permission, "Exhibition.Read")
+                    || auth.User.HasClaim(CustomClaimTypes.Permission, "Exhibition.Edit")
+                    || auth.User.HasClaim(CustomClaimTypes.Permission, "Exhibition.Create")
+                    || auth.User.HasClaim(CustomClaimTypes.Permission, "Exhibition.Delete"))
+                {
+                    <NavLink class="vidensvejen-nav-link" href="exhibitions" Match="NavLinkMatch.All">
+                        <RadzenIcon Icon="layers" aria-hidden="true" />
+                        Udstillinger
+                    </NavLink>
+                }
                 @if (auth.User.HasClaim(CustomClaimTypes.Permission, "Game.Read")
                     || auth.User.HasClaim(CustomClaimTypes.Permission, "Game.Edit")
                     || auth.User.HasClaim(CustomClaimTypes.Permission, "Game.Create")

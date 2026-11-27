@@ -1,0 +1,67 @@
+@inject NavigationManager Navigation
+
+@if (ShowDrafts)
+{
+    <RadzenText TextStyle="TextStyle.H3" Text="Kladder" />
+    <RadzenDataGrid TItem="ExhibitionDraftResponse" Data="@Drafts" AllowPaging="true" PageSize="15"
+                    EmptyText="Der er ingen udstillingskladder.">
+        <Columns>
+            <RadzenDataGridColumn TItem="ExhibitionDraftResponse" Title="Navn" Property="@nameof(ExhibitionDraftResponse.Name)">
+                <Template Context="draft">@GetDraftName(draft)</Template>
+            </RadzenDataGridColumn>
+            @if (CanEdit || CanPublish)
+            {
+                <RadzenDataGridColumn TItem="ExhibitionDraftResponse" Title="Handlinger">
+                    <Template Context="draft">
+                        <RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap">
+                            @if (CanEdit)
+                            {
+                                <RadzenButton Text="Ændre" Icon="edit" Variant="Variant.Outlined"
+                                              Click="@(() => Navigation.NavigateTo($"exhibition/drafts/{draft.Id:D}"))" />
+                                <RadzenButton Text="Slet" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Outlined"
+                                              Disabled="@IsDeleting" Click="@(() => DeleteDraft.InvokeAsync(draft))" />
+                            }
+                            @if (CanPublish)
+                            {
+                                <RadzenButton Text="Publicér" Icon="publish" Variant="Variant.Outlined"
+                                              Click="@(() => Navigation.NavigateTo($"exhibition/drafts/{draft.Id:D}"))" />
+                            }
+                        </RadzenStack>
+                    </Template>
+                </RadzenDataGridColumn>
+            }
+        </Columns>
+    </RadzenDataGrid>
+}
+
+<RadzenText TextStyle="TextStyle.H3" Text="Publicerede udstillinger" />
+<RadzenDataGrid TItem="ExhibitionNameResponse" Data="@Published" AllowPaging="true" PageSize="15"
+                EmptyText="Der er ingen publicerede udstillinger.">
+    <Columns>
+        <RadzenDataGridColumn TItem="ExhibitionNameResponse" Title="Navn" Property="@nameof(ExhibitionNameResponse.Name)" />
+        @if (CanDeletePublished)
+        {
+            <RadzenDataGridColumn TItem="ExhibitionNameResponse" Title="Handlinger">
+                <Template Context="exhibition">
+                    <RadzenButton Text="Slet" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Outlined"
+                                  Disabled="@IsDeleting" Click="@(() => DeletePublished.InvokeAsync(exhibition))" />
+                </Template>
+            </RadzenDataGridColumn>
+        }
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    [Parameter] public IReadOnlyList<ExhibitionDraftResponse> Drafts { get; set; } = [];
+    [Parameter] public IReadOnlyList<ExhibitionNameResponse> Published { get; set; } = [];
+    [Parameter] public bool ShowDrafts { get; set; }
+    [Parameter] public bool CanEdit { get; set; }
+    [Parameter] public bool CanPublish { get; set; }
+    [Parameter] public bool CanDeletePublished { get; set; }
+    [Parameter] public bool IsDeleting { get; set; }
+    [Parameter] public EventCallback<ExhibitionDraftResponse> DeleteDraft { get; set; }
+    [Parameter] public EventCallback<ExhibitionNameResponse> DeletePublished { get; set; }
+
+    internal static string GetDraftName(ExhibitionDraftResponse draft) =>
+        string.IsNullOrWhiteSpace(draft.Name) ? "Kladde uden navn" : draft.Name;
+}
