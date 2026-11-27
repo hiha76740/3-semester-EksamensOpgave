@@ -73,9 +73,16 @@ public class QuizDraftsController(
     {
         try
         {
-            var dtos = await queries.GetQuizDraftsAsync();
+            var list = await queries.GetQuizDraftsAsync();
 
-            return Ok(dtos.Select(d => d.AsResponse()).ToList());
+            var response = new List<QuizDraftResponse>();
+
+            foreach (var dto in list)
+            {
+                response.Add(dto.AsResponse());
+            }
+
+            return Ok(response);
         }
         catch (Exception ex)
         {

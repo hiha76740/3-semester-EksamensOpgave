@@ -80,9 +80,16 @@ public class QuizzesController(
     {
         try
         {
-            var dtos = await queries.GetQuizzesByExhibitionAsync(exhibitionId);
+            var list = await queries.GetQuizzesByExhibitionAsync(exhibitionId);
 
-            return Ok(dtos.Select(d => d.AsResponse()).ToList());
+            var response = new List<QuizResponse>();
+
+            foreach (var dto in list)
+            {
+                response.Add(dto.AsResponse());
+            }
+
+            return Ok(response);
         }
         catch (Exception ex)
         {
