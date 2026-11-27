@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExhibitionService.InfrastructureLib.Migrations
 {
     [DbContext(typeof(ExhibitionDbContext))]
-    [Migration("20261125054238_AddExhibitionDrafts")]
-    partial class AddExhibitionDrafts
+    [Migration("20261127122308_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,12 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<Guid>("ThemeImageId")
                         .HasColumnType("uniqueidentifier");
 
@@ -58,6 +64,15 @@ namespace ExhibitionService.InfrastructureLib.Migrations
 
                     b.Property<string>("NameEn")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid?>("SourceExhibitionId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("ThemeImageId")
                         .HasColumnType("uniqueidentifier");
@@ -79,9 +94,16 @@ namespace ExhibitionService.InfrastructureLib.Migrations
 
                     b.Property<string>("DescriptionEn")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(700)
+                        .HasColumnType("nvarchar(700)");
 
                     b.Property<Guid>("ExhibitionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("QuizId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Slug")
@@ -95,7 +117,8 @@ namespace ExhibitionService.InfrastructureLib.Migrations
 
                     b.Property<string>("TitleEn")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -114,9 +137,22 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                         .HasColumnType("nvarchar(700)");
 
                     b.Property<string>("DescriptionEn")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(700)
+                        .HasColumnType("nvarchar(700)");
 
-                    b.Property<Guid?>("ExhibitionDraftId")
+                    b.Property<Guid>("ExhibitionDraftId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsQuiz")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("QuizDraftId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("QuizId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Slug")
@@ -127,13 +163,43 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("TitleEn")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ExhibitionDraftId");
 
                     b.ToTable("SubjectDrafts");
+                });
+
+            modelBuilder.Entity("VidensVejen.BuildingBlocksLib.Messaging.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("PublishedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Topic")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Outbox");
                 });
 
             modelBuilder.Entity("ExhibitionService.DomainLib.Entities.Subject", b =>
@@ -175,6 +241,8 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                             b1.Property<string>("DescriptionEn")
                                 .IsRequired();
 
+                            b1.Property<int>("Position");
+
                             b1.Property<string>("Quote");
 
                             b1.Property<string>("QuoteEn");
@@ -205,7 +273,8 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     b.HasOne("ExhibitionService.DomainLib.Entities.ExhibitionDraft", null)
                         .WithMany("SubjectDrafts")
                         .HasForeignKey("ExhibitionDraftId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.OwnsMany("ExhibitionService.DomainLib.ValueObjects.TopicDraft", "TopicDrafts", b1 =>
                         {
@@ -229,6 +298,8 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                             b1.Property<string>("Description");
 
                             b1.Property<string>("DescriptionEn");
+
+                            b1.Property<int>("Position");
 
                             b1.Property<string>("Quote");
 

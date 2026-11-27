@@ -30,5 +30,8 @@ internal sealed class ExhibitionConfiguration : IEntityTypeConfiguration<Exhibit
             .HasForeignKey("ExhibitionId")
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(x => x.RowVersion)
+            .IsRowVersion();
     }
 }

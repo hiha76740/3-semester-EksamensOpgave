@@ -37,8 +37,10 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<Guid>("ThemeImageId")
                         .HasColumnType("uniqueidentifier");
@@ -61,8 +63,10 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<Guid?>("SourceExhibitionId")
                         .HasColumnType("uniqueidentifier");

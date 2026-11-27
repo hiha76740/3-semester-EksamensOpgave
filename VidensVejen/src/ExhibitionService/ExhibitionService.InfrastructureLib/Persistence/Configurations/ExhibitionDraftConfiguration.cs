@@ -35,5 +35,8 @@ internal sealed class ExhibitionDraftConfiguration : IEntityTypeConfiguration<Ex
             .HasForeignKey("ExhibitionDraftId")
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(x => x.RowVersion)
+            .IsRowVersion();
     }
 }
