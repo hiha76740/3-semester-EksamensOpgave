@@ -12,11 +12,11 @@ using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace GameService.ApplicationLib.Tests;
 
-public class CreateQuizTests
+public class PublishQuizTests
 {
-    private static CreateQuizCommand CreateCommand(Guid draftId)
+    private static PublishQuizCommand PublishCommand(Guid draftId)
     {
-        return new CreateQuizCommand(draftId, "Quiz", "Quiz EN", Guid.NewGuid(), "vertical",
+        return new PublishQuizCommand(draftId, "Quiz", "Quiz EN", Guid.NewGuid(), "vertical",
             [new CreateQuestionCommand("Question", "Question EN",
                 [new CreateChoiceCommand("Yes", "Yes EN", true, "Correct", "Correct EN"),
                  new CreateChoiceCommand("No", "No EN", false, "Incorrect", "Incorrect EN")])],
@@ -29,7 +29,7 @@ public class CreateQuizTests
         // Arrange
         var draft = QuizDraft.Create();
         draft.Update("Old draft title", null, null, null, null, null, null, "Instructions", "Instructions EN");
-        var command = CreateCommand(draft.Id.Value);
+        var command = PublishCommand(draft.Id.Value);
         var drafts = new Mock<IQuizDraftRepository>(MockBehavior.Strict);
         var quizzes = new Mock<IQuizRepository>(MockBehavior.Strict);
         var unitOfWork = new Mock<IUnitOfWork>(MockBehavior.Strict);
@@ -43,8 +43,8 @@ public class CreateQuizTests
         drafts.InSequence(sequence).Setup(r => r.Delete(draft));
         unitOfWork.InSequence(sequence).Setup(u => u.SaveChangesAsync()).Returns(Task.CompletedTask);
         unitOfWork.InSequence(sequence).Setup(u => u.Commit());
-        ICreateQuizHandler handler = new CreateQuizHandler(
-            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<CreateQuizHandler>.Instance);
+        IPublishQuizHandler handler = new PublishQuizHandler(
+            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<PublishQuizHandler>.Instance);
 
         // Act
         await handler.HandleAsync(command);
@@ -96,13 +96,13 @@ public class CreateQuizTests
     public async Task Handle_GivenUnknownDraft_RollsBackWithoutWriting()
     {
         // Arrange
-        var command = CreateCommand(Guid.NewGuid());
+        var command = PublishCommand(Guid.NewGuid());
         var drafts = new Mock<IQuizDraftRepository>();
         drafts.Setup(r => r.GetDraftByIdAsync(new QuizDraftId(command.DraftId))).ReturnsAsync((QuizDraft?)null);
         var quizzes = new Mock<IQuizRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
-        ICreateQuizHandler handler = new CreateQuizHandler(
-            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<CreateQuizHandler>.Instance);
+        IPublishQuizHandler handler = new PublishQuizHandler(
+            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<PublishQuizHandler>.Instance);
 
         // Act
         await Assert.ThrowsAsync<NotFoundException>(() => handler.HandleAsync(command));
@@ -123,13 +123,13 @@ public class CreateQuizTests
     {
         // Arrange
         var draft = QuizDraft.Create();
-        var command = CreateCommand(draft.Id.Value) with { Questions = [] };
+        var command = PublishCommand(draft.Id.Value) with { Questions = [] };
         var drafts = new Mock<IQuizDraftRepository>();
         drafts.Setup(r => r.GetDraftByIdAsync(draft.Id)).ReturnsAsync(draft);
         var quizzes = new Mock<IQuizRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
-        ICreateQuizHandler handler = new CreateQuizHandler(
-            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<CreateQuizHandler>.Instance);
+        IPublishQuizHandler handler = new PublishQuizHandler(
+            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<PublishQuizHandler>.Instance);
 
         // Act
         await Assert.ThrowsAsync<DomainException>(() => handler.HandleAsync(command));
@@ -148,15 +148,15 @@ public class CreateQuizTests
     {
         // Arrange
         var draft = QuizDraft.Create();
-        var command = CreateCommand(draft.Id.Value);
+        var command = PublishCommand(draft.Id.Value);
         var drafts = new Mock<IQuizDraftRepository>();
         drafts.Setup(r => r.GetDraftByIdAsync(draft.Id)).ReturnsAsync(draft);
         var quizzes = new Mock<IQuizRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         var expected = new InvalidOperationException("Add failed");
         quizzes.Setup(r => r.AddAsync(It.IsAny<Quiz>())).ThrowsAsync(expected);
-        ICreateQuizHandler handler = new CreateQuizHandler(
-            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<CreateQuizHandler>.Instance);
+        IPublishQuizHandler handler = new PublishQuizHandler(
+            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<PublishQuizHandler>.Instance);
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(command));
@@ -175,15 +175,15 @@ public class CreateQuizTests
     {
         // Arrange
         var draft = QuizDraft.Create();
-        var command = CreateCommand(draft.Id.Value);
+        var command = PublishCommand(draft.Id.Value);
         var drafts = new Mock<IQuizDraftRepository>();
         drafts.Setup(r => r.GetDraftByIdAsync(draft.Id)).ReturnsAsync(draft);
         var quizzes = new Mock<IQuizRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         var expected = new InvalidOperationException("DeleteDraft failed");
         drafts.Setup(r => r.Delete(draft)).Throws(expected);
-        ICreateQuizHandler handler = new CreateQuizHandler(
-            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<CreateQuizHandler>.Instance);
+        IPublishQuizHandler handler = new PublishQuizHandler(
+            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<PublishQuizHandler>.Instance);
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(command));
@@ -203,15 +203,15 @@ public class CreateQuizTests
     {
         // Arrange
         var draft = QuizDraft.Create();
-        var command = CreateCommand(draft.Id.Value);
+        var command = PublishCommand(draft.Id.Value);
         var drafts = new Mock<IQuizDraftRepository>();
         drafts.Setup(r => r.GetDraftByIdAsync(draft.Id)).ReturnsAsync(draft);
         var quizzes = new Mock<IQuizRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         var expected = new InvalidOperationException("Save failed");
         unitOfWork.Setup(u => u.SaveChangesAsync()).ThrowsAsync(expected);
-        ICreateQuizHandler handler = new CreateQuizHandler(
-            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<CreateQuizHandler>.Instance);
+        IPublishQuizHandler handler = new PublishQuizHandler(
+            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<PublishQuizHandler>.Instance);
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(command));
@@ -231,15 +231,15 @@ public class CreateQuizTests
     {
         // Arrange
         var draft = QuizDraft.Create();
-        var command = CreateCommand(draft.Id.Value);
+        var command = PublishCommand(draft.Id.Value);
         var drafts = new Mock<IQuizDraftRepository>();
         drafts.Setup(r => r.GetDraftByIdAsync(draft.Id)).ReturnsAsync(draft);
         var quizzes = new Mock<IQuizRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         var expected = new InvalidOperationException("Commit failed");
         unitOfWork.Setup(u => u.Commit()).Throws(expected);
-        ICreateQuizHandler handler = new CreateQuizHandler(
-            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<CreateQuizHandler>.Instance);
+        IPublishQuizHandler handler = new PublishQuizHandler(
+            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<PublishQuizHandler>.Instance);
 
         // Act
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(command));
@@ -261,14 +261,14 @@ public class CreateQuizTests
     {
         // Arrange
         var draft = QuizDraft.Create();
-        var command = CreateCommand(draft.Id.Value);
+        var command = PublishCommand(draft.Id.Value);
         command = english ? (command with { InstructionEn = "" }) : (command with { Instruction = "" });
         var drafts = new Mock<IQuizDraftRepository>();
         drafts.Setup(r => r.GetDraftByIdAsync(draft.Id)).ReturnsAsync(draft);
         var quizzes = new Mock<IQuizRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
-        ICreateQuizHandler handler = new CreateQuizHandler(
-            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<CreateQuizHandler>.Instance);
+        IPublishQuizHandler handler = new PublishQuizHandler(
+            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<PublishQuizHandler>.Instance);
 
         // Act
         await Assert.ThrowsAsync<DomainException>(() => handler.HandleAsync(command));
@@ -287,15 +287,15 @@ public class CreateQuizTests
     {
         // Arrange
         var draft = QuizDraft.Create();
-        var command = CreateCommand(draft.Id.Value);
+        var command = PublishCommand(draft.Id.Value);
         var drafts = new Mock<IQuizDraftRepository>();
         drafts.Setup(r => r.GetDraftByIdAsync(draft.Id)).ReturnsAsync(draft);
         var quizzes = new Mock<IQuizRepository>();
         var unitOfWork = new Mock<IUnitOfWork>();
         var expected = new InvalidOperationException("RowVersion failed");
         drafts.Setup(r => r.SetOriginalRowVersion(draft, command.DraftRowVersion)).Throws(expected);
-        ICreateQuizHandler handler = new CreateQuizHandler(
-            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<CreateQuizHandler>.Instance);
+        IPublishQuizHandler handler = new PublishQuizHandler(
+            drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<PublishQuizHandler>.Instance);
 
         // Act
         var actual = await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleAsync(command));

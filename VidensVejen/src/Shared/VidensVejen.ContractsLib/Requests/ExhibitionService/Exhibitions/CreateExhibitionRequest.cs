@@ -3,12 +3,14 @@ namespace VidensVejen.ContractsLib.Requests.ExhibitionService.Exhibitions;
 /// <summary>
 /// 
 /// </summary>
+/// <param name="Id"></param>
 /// <param name="ExhibitionName"></param>
 /// <param name="ExhibitionNameEn"></param>
 /// <param name="ThemeImageId"></param>
 /// <param name="Subjects"></param>
 /// <example>
 /// {
+///     "id": "123e4567-e89b-12d3-a456-426614174000",
 ///     "exhibitionName": "Vand og hav",
 ///     "exhibitionNameEn": "Water and sea"
 ///     "themeImageId": "123e4567-e89b-12d3-a456-426614174000",
@@ -40,6 +42,7 @@ namespace VidensVejen.ContractsLib.Requests.ExhibitionService.Exhibitions;
 /// }
 /// </example>
 public record CreateExhibitionRequest(
+    Guid Id,
     string ExhibitionName,
     string ExhibitionNameEn,
     Guid ThemeImageId,
@@ -47,7 +50,7 @@ public record CreateExhibitionRequest(
     )
 {
     /// <summary>Gets the identifier reserved for the exhibition by its draft.</summary>
-    public Guid? ExhibitionId { get; init; }
+    public Guid Id { get; init; } = Id;
 
     /// <summary>
     /// The name of the exhibition.

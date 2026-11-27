@@ -7,17 +7,17 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// <param name="Slug"></param>
 /// <param name="Title"></param>
 /// <param name="Description"></param>
+/// <param name="QuizId"></param>
 /// <param name="Topics"></param>
 public record SubjectResponse(
     Guid Id,
     string Slug,
     string Title,
     string Description,
+    Guid? QuizId,
     IReadOnlyList<TopicResponse> Topics
     )
 {
-    /// <summary>Gets the identifier of the published quiz.</summary>
-    public Guid? QuizId { get; init; }
 
     /// <summary>
     /// A unique identifier for the subject.
@@ -38,6 +38,11 @@ public record SubjectResponse(
     /// The description of the subject.
     /// </summary>
     public string Description { get; init; } = Description;
+
+    /// <summary>
+    /// Gets the identifier of the published quiz.
+    /// </summary>
+    public Guid? QuizId { get; init; } = QuizId;
 
     /// <summary>
     /// A list of topics the subject has associated.

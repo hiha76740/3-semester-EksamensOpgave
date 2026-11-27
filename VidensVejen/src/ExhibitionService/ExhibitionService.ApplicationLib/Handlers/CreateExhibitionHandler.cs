@@ -65,10 +65,14 @@ public class CreateExhibitionHandler(
                     subjectCommand.Slug,
                     subjectCommand.Description,
                     subjectCommand.DescriptionEn,
+                    subjectCommand.QuizId,
                     topics));
             }
 
+            var exhibitionId = new ExhibitionId(command.Id);
+
             var exhibition = Exhibition.Create(
+                exhibitionId,
                 command.ExhibtionName,
                 command.ExhibitionNameEn,
                 imageId,

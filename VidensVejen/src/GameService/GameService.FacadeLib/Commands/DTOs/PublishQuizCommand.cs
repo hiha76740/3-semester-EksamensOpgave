@@ -14,7 +14,7 @@ namespace GameService.FacadeLib.Commands.DTOs;
 /// <param name="Instruction"></param>
 /// <param name="InstructionEn"></param>
 /// <param name="DraftRowVersion"></param>
-public record CreateQuizCommand(
+public record PublishQuizCommand(
     Guid DraftId,
     string Title,
     string TitleEn,

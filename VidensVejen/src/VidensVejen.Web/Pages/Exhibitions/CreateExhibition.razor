@@ -256,6 +256,7 @@ else
         }
 
         var request = new CreateExhibitionRequest(
+            id,
             input.ExhibitionName,
             input.ExhibitionNameEn,
             imageId.Value,
@@ -265,6 +266,7 @@ else
                 s.Title.ToLowerInvariant(),
                 s.Description,
                 s.DescriptionEn,
+                s.QuizId = s.IsQuiz ? s.QuizId : null,
                 s.IsQuiz ? [] : s.Topics.Select(t => new CreateTopicRequest(
                     t.Title,
                     t.TitleEn,
@@ -278,10 +280,8 @@ else
                     t.CalloutTextEn,
                     t.Quote,
                     t.QuoteEn)).ToList()
-            )
-            { QuizId = s.IsQuiz ? s.QuizId : null }).ToList()
-        )
-        { ExhibitionId = id };
+            )).ToList()
+        );
 
         var status = await ExhibitionService.CreateAsync(request);
         if (status != HttpStatusCode.Created)

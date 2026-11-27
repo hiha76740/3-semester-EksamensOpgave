@@ -18,14 +18,14 @@ namespace GameService.ApplicationLib.Handlers;
 /// <param name="quizRepo"></param>
 /// <param name="unitOfWork"></param>
 /// <param name="logger"></param>
-public class CreateQuizHandler(
+public class PublishQuizHandler(
     IQuizDraftRepository draftRepo,
     IQuizRepository quizRepo,
     IUnitOfWork unitOfWork,
-    ILogger<CreateQuizHandler> logger
-    ) : ICreateQuizHandler
+    ILogger<PublishQuizHandler> logger
+    ) : IPublishQuizHandler
 {
-    async Task ICreateQuizHandler.HandleAsync(CreateQuizCommand command)
+    async Task<Guid> IPublishQuizHandler.HandleAsync(PublishQuizCommand command)
     {
         unitOfWork.BeginTransaction(IsolationLevel.Serializable);
 
@@ -64,6 +64,8 @@ public class CreateQuizHandler(
 
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Quiz {QuizId} saved in database and draft {DraftId} deleted from database", quiz.Id.Value, command.DraftId);
+
+            return quiz.Id.Value;
         }
         catch (Exception ex)
         {

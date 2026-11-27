@@ -7,8 +7,9 @@ using Microsoft.EntityFrameworkCore;
 namespace ExhibitionService.InfrastructureLib.QueryHandlers;
 
 /// <summary>
-/// 
+/// Provides database-backed queries for exhibitions.
 /// </summary>
+/// <param name="db">The exhibition database context.</param>
 public class ExhibitionQueryHandlerIMPL(ExhibitionDbContext db) : IExhibitionQueries
 {
     async Task<bool> IExhibitionQueries.CheckIfImageInUseAsync(Guid id)
@@ -20,10 +21,11 @@ public class ExhibitionQueryHandlerIMPL(ExhibitionDbContext db) : IExhibitionQue
             .AnyAsync(e => e.ThemeImageId == imageId);
     }
 
-    Task<bool> IExhibitionQueries.CheckIfQuizInUseAsync(Guid id)
+    async Task<bool> IExhibitionQueries.CheckIfQuizInUseAsync(Guid id)
     {
-        // TODO: Fix dette når vi ved hvordan vi skal tilknytte Exhibition til en quiz
-        throw new NotImplementedException();
+        var quizId = new QuizId(id);
+
+        return await db.Subjects.AnyAsync(s => s.QuizId == quizId);
     }
 
     async Task<IReadOnlyList<ExhibitionNameDto>> IExhibitionQueries.GetAllExhibitionNamesAsync()
@@ -51,6 +53,7 @@ public class ExhibitionQueryHandlerIMPL(ExhibitionDbContext db) : IExhibitionQue
                     s.Slug,
                     s.Title,
                     s.Description,
+                    s.QuizId == null ? null : s.QuizId.Value,
                     s.Topics.Select(t => new TopicDto(
                         t.Title,
                         t.Description,

@@ -8,13 +8,48 @@ using Microsoft.EntityFrameworkCore;
 namespace ExhibitionService.InfrastructureLib.QueryHandlers;
 
 /// <summary>
-/// 
+/// Provides query operations for retrieving exhibition drafts.
 /// </summary>
+/// <param name="db">The database context used to query exhibition drafts.</param>
 public class ExhibitionDraftQueryHandlerIMPL(ExhibitionDbContext db) : IExhibitionDraftQueries
 {
-    Task<IReadOnlyList<ExhibitionDraftDto>> IExhibitionDraftQueries.GetAllExhibitionDrafts()
+    async Task<IReadOnlyList<ExhibitionDraftDto>> IExhibitionDraftQueries.GetAllExhibitionDrafts()
     {
-        throw new NotImplementedException();
+        return await db.ExhibitionDrafts
+                .AsNoTracking()
+                .Select(ed => new ExhibitionDraftDto(
+                    ed.Id.Value,
+                    ed.Name,
+                    ed.NameEn,
+                    ed.SubjectDrafts
+                        .Select(sd => new SubjectDraftDto(
+                            sd.Id.Value,
+                            sd.Title,
+                            sd.TitleEn,
+                            sd.Slug,
+                            sd.Description,
+                            sd.DescriptionEn,
+                            sd.QuizId == null ? null : sd.QuizId.Value,
+                            sd.QuizDraftId == null ? null : sd.QuizDraftId.Value,
+                            sd.IsQuiz,
+                            sd.TopicDrafts
+                                .Select(td => new TopicDraftDto(
+                                    td.Title,
+                                    td.TitleEn,
+                                    td.Description,
+                                    td.DescriptionEn,
+                                    td.Body,
+                                    td.BodyEn,
+                                    td.CalloutLabel,
+                                    td.CalloutLabelEn,
+                                    td.CalloutText,
+                                    td.CalloutTextEn,
+                                    td.Quote,
+                                    td.QuoteEn))
+                                .ToList()))
+                        .ToList(),
+                    ed.ThemeImageId == null ? null : ed.ThemeImageId.Value))
+                .ToListAsync();
     }
 
     async Task<ExhibitionDraftDto?> IExhibitionDraftQueries.GetExhibitionDraftByIdAsync(Guid id)
@@ -36,6 +71,9 @@ public class ExhibitionDraftQueryHandlerIMPL(ExhibitionDbContext db) : IExhibiti
                             sd.Slug,
                             sd.Description,
                             sd.DescriptionEn,
+                            sd.QuizId == null ? null : sd.QuizId.Value,
+                            sd.QuizDraftId == null ? null : sd.QuizDraftId.Value,
+                            sd.IsQuiz,
                             sd.TopicDrafts
                                 .Select(td => new TopicDraftDto(
                                     td.Title,
@@ -52,9 +90,7 @@ public class ExhibitionDraftQueryHandlerIMPL(ExhibitionDbContext db) : IExhibiti
                                     td.QuoteEn))
                                 .ToList()))
                         .ToList(),
-                    ed.ThemeImageId == null
-                        ? null
-                        : ed.ThemeImageId.Value))
+                    ed.ThemeImageId == null ? null : ed.ThemeImageId.Value))
                 .FirstOrDefaultAsync();
     }
 }

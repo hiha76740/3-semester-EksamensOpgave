@@ -9,6 +9,9 @@ namespace ExhibitionService.FacadeLib.Commands.DTOs;
 /// <param name="Slug"></param>
 /// <param name="Description"></param>
 /// <param name="DescriptionEn"></param>
+/// <param name="QuizId"></param>
+/// <param name="QuizDraftId"></param>
+/// <param name="IsQuiz"></param>
 /// <param name="TopicDrafts"></param>
 public record UpdateSubjectDraftCommand(
     Guid Id,
@@ -17,5 +20,8 @@ public record UpdateSubjectDraftCommand(
     string? Slug,
     string? Description,
     string? DescriptionEn,
+    Guid? QuizId,
+    Guid? QuizDraftId,
+    bool IsQuiz,
     List<UpdateTopicDraftCommand> TopicDrafts
     );

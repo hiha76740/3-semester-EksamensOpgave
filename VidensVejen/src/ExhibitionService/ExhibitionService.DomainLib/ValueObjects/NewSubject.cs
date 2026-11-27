@@ -8,6 +8,7 @@ namespace ExhibitionService.DomainLib.ValueObjects;
 /// <param name="Slug"></param>
 /// <param name="Description"></param>
 /// <param name="DescriptionEn"></param>
+/// <param name="QuizId"></param>
 /// <param name="Topics"></param>
 public record NewSubject(
     string Title,
@@ -15,4 +16,5 @@ public record NewSubject(
     string Slug,
     string Description,
     string DescriptionEn,
+    Guid? QuizId,
     List<NewTopic> Topics);

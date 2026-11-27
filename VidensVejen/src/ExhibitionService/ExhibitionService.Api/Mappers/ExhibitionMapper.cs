@@ -39,6 +39,7 @@ internal static class ExhibitionMapper
     internal static CreateExhibitionCommand AsCreateCommand(this CreateExhibitionRequest request)
     {
         var output = new CreateExhibitionCommand(
+            request.Id,
             request.ExhibitionName,
             request.ExhibitionNameEn,
             request.ThemeImageId,

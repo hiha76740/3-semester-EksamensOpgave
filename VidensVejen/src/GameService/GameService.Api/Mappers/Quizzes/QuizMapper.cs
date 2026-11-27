@@ -7,9 +7,9 @@ namespace GameService.Api.Mappers.Quizzes;
 
 internal static class QuizMapper
 {
-    internal static CreateQuizCommand AsCreateCommand(this CreateQuizRequest request, Guid draftId)
+    internal static PublishQuizCommand AsPublishCommand(this CreateQuizRequest request, Guid draftId)
     {
-        var output = new CreateQuizCommand(
+        var output = new PublishQuizCommand(
             draftId,
             request.Title,
             request.TitleEn,

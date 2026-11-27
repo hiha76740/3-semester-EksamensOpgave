@@ -16,6 +16,9 @@ internal static class SubjectDraftMapper
             dto.Slug,
             dto.Description,
             dto.DescriptionEn,
+            dto.QuizId,
+            dto.QuizDraftId,
+            dto.IsQuiz,
             dto.Topics
             .Select(
                 t => t.AsResponse())
@@ -34,6 +37,9 @@ internal static class SubjectDraftMapper
             request.Slug,
             request.Description,
             request.DescriptionEn,
+            request.QuizId,
+            request.QuizDraftId,
+            request.IsQuiz,
             request.TopicDrafts
             .Select(
                 td => td.AsUpdateDraftCommand())

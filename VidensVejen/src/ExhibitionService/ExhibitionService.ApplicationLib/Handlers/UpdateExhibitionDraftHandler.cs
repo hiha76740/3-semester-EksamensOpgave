@@ -66,9 +66,11 @@ public class UpdateExhibitionDraftHandler(
                     subjectCommand.Slug,
                     subjectCommand.Description,
                     subjectCommand.DescriptionEn,
+                    subjectCommand.QuizId,
+                    subjectCommand.QuizDraftId,
+                    subjectCommand.IsQuiz,
                     topicDrafts));
             }
-
 
             exhibitionDraft.UpdateExhibitionDraft(
                 command.ExhibtionName,

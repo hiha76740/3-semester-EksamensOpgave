@@ -63,15 +63,31 @@ public class ExhibitionDraft
         NameEn = exhibitionNameEn;
         ThemeImageId = themeImageId;
 
+        _subjectDrafts.Clear();
+
         foreach (var subjectDraft in subjectDrafts ?? [])
         {
+            QuizId? quizId = null;
+            QuizDraftId? quizDraftId = null;
+
+            if (subjectDraft.QuizId.HasValue)
+                quizId = new QuizId(subjectDraft.QuizId.Value);
+
+            if (subjectDraft.QuizDraftId.HasValue)
+                quizDraftId = new QuizDraftId(subjectDraft.QuizDraftId.Value);
+
             var subject = new SubjectDraft(
                 subjectDraft.Title,
                 subjectDraft.TitleEn,
                 subjectDraft.Slug,
                 subjectDraft.Description,
                 subjectDraft.DescriptionEn,
-                subjectDraft.Topics);
+                quizId,
+                quizDraftId,
+                subjectDraft.IsQuiz,
+                _subjectDrafts.Count,
+                subjectDraft.Topics
+                );
 
             _subjectDrafts.Add(subject);
         }

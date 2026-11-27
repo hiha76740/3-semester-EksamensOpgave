@@ -28,6 +28,7 @@ internal sealed class ExhibitionDraftConfiguration : IEntityTypeConfiguration<Ex
         builder.HasMany(ed => ed.SubjectDrafts)
             .WithOne()
             .HasForeignKey("ExhibitionDraftId")
+            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

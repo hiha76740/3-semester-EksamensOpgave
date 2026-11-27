@@ -76,9 +76,13 @@ namespace ExhibitionService.InfrastructureLib.Migrations
 
                     b.Property<string>("DescriptionEn")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(700)
+                        .HasColumnType("nvarchar(700)");
 
                     b.Property<Guid>("ExhibitionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("QuizId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Slug")
@@ -92,7 +96,8 @@ namespace ExhibitionService.InfrastructureLib.Migrations
 
                     b.Property<string>("TitleEn")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -111,9 +116,22 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                         .HasColumnType("nvarchar(700)");
 
                     b.Property<string>("DescriptionEn")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(700)
+                        .HasColumnType("nvarchar(700)");
 
-                    b.Property<Guid?>("ExhibitionDraftId")
+                    b.Property<Guid>("ExhibitionDraftId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsQuiz")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("QuizDraftId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("QuizId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Slug")
@@ -124,7 +142,8 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("TitleEn")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -202,7 +221,8 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     b.HasOne("ExhibitionService.DomainLib.Entities.ExhibitionDraft", null)
                         .WithMany("SubjectDrafts")
                         .HasForeignKey("ExhibitionDraftId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.OwnsMany("ExhibitionService.DomainLib.ValueObjects.TopicDraft", "TopicDrafts", b1 =>
                         {

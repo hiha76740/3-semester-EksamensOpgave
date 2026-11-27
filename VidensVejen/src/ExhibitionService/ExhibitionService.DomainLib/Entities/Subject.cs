@@ -21,6 +21,11 @@ public class Subject
     /// <summary>
     /// 
     /// </summary>
+    public QuizId? QuizId { get; private set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public string TitleEn { get; private set; } = string.Empty;
 
 
@@ -53,6 +58,7 @@ public class Subject
         string slug,
         string description,
         string descriptionEn,
+        QuizId? quizId,
         List<NewTopic> topics
         )
     {
@@ -71,7 +77,7 @@ public class Subject
         if (string.IsNullOrWhiteSpace(slug))
             throw new DomainException("Could not set slug, no value.");
 
-        if (topics == null || topics.Count == 0)
+        if ((quizId == null && topics == null) || topics.Count == 0)
             throw new DomainException("A subject must have at least one topic");
 
         Id = new SubjectId(Guid.NewGuid());
@@ -80,6 +86,7 @@ public class Subject
         Description = description;
         DescriptionEn = descriptionEn;
         Slug = slug;
+        QuizId = quizId;
 
         foreach (var topic in topics)
         {

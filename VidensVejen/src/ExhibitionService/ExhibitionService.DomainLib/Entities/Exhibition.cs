@@ -38,6 +38,7 @@ public class Exhibition
     /// <summary>
     /// 
     /// </summary>
+    /// <param name="id"></param>
     /// <param name="exhibitionName"></param>
     /// <param name="exhibitionNameEn"></param>
     /// <param name="themeImageId"></param>
@@ -45,11 +46,15 @@ public class Exhibition
     /// <returns></returns>
     /// <exception cref="DomainException"></exception>
     public static Exhibition Create(
-    string exhibitionName,
-    string exhibitionNameEn,
-    ImageId themeImageId,
-    List<NewSubject> subjects)
+        ExhibitionId id,
+        string exhibitionName,
+        string exhibitionNameEn,
+        ImageId themeImageId,
+        List<NewSubject> subjects)
     {
+        if (id == null)
+            throw new DomainException("Could not set Id, no value");
+
         if (string.IsNullOrWhiteSpace(exhibitionName))
             throw new DomainException("Exhibition must have a name.");
 
@@ -59,7 +64,7 @@ public class Exhibition
         if (subjects.Count == 0)
             throw new DomainException("An exhibition must have at least one subject");
 
-        var exhibition = new Exhibition(exhibitionName, exhibitionNameEn, themeImageId, subjects);
+        var exhibition = new Exhibition(id, exhibitionName, exhibitionNameEn, themeImageId, subjects);
 
         return exhibition;
     }
@@ -67,12 +72,20 @@ public class Exhibition
 
     private void AddSubject(NewSubject newSubject)
     {
+        QuizId? quizId = null;
+
+        if (newSubject.QuizId.HasValue)
+        {
+            quizId = new QuizId(newSubject.QuizId.Value);
+        }
+
         var subject = new Subject(
             newSubject.Title,
             newSubject.TitleEn,
             newSubject.Slug,
             newSubject.Description,
             newSubject.DescriptionEn,
+            quizId,
             newSubject.Topics
             );
 
@@ -80,9 +93,9 @@ public class Exhibition
     }
 
 
-    private Exhibition(string exhibitionName, string exhibitionNameEn, ImageId themeImageId, List<NewSubject> subjects)
+    private Exhibition(ExhibitionId id, string exhibitionName, string exhibitionNameEn, ImageId themeImageId, List<NewSubject> subjects)
     {
-        Id = new ExhibitionId(Guid.NewGuid());
+        Id = id;
         Name = exhibitionName;
         NameEn = exhibitionNameEn;
         ThemeImageId = themeImageId;

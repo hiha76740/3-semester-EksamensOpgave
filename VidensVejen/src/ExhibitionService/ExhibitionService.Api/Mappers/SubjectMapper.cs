@@ -14,6 +14,7 @@ internal static class SubjectMapper
             dto.Slug,
             dto.Title,
             dto.Description,
+            dto.QuizId,
             dto.Topics
             .Select(
                 t => t.AsResponse())
@@ -46,6 +47,7 @@ internal static class SubjectMapper
             request.Slug,
             request.Description,
             request.DescriptionEn,
+            request.QuizId,
             request.Topics
             .Select(
                 t => t.AsCreateCommand())

@@ -13,26 +13,28 @@ namespace GameService.Api.Controllers;
 [Route("/v1/games/quizzes")]
 [ApiController]
 public class QuizzesController(
-    ICreateQuizHandler publish,
+    IPublishQuizHandler publish,
     IDeleteQuizHandler delete,
     IQuizQueries queries
     ) : ControllerBase
 {
     [HttpPost]
-    [EndpointSummary("Creates a quiz.")]
-    [EndpointDescription("Creates a quiz from the request and deletes the quiz draft in the same transaction.")]
-    [ProducesResponseType(StatusCodes.Status200OK, Description = "Quiz created successfully.")]
+    [EndpointSummary("Publish a quiz.")]
+    [EndpointDescription("Publish a quiz from the request and deletes the quiz draft in the same transaction.")]
+    [ProducesResponseType(StatusCodes.Status200OK, Description = "Quiz published successfully.")]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "The quiz does not meet the rules for publishing.")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Quiz draft was not found.")]
     public async Task<ActionResult> PublishQuiz(
-        [Required][FromQuery][Description("A unique identifier for the quiz draft that is published")] Guid quizDraftId,
+        [Required][FromQuery][Description("A unique identifier for the quiz draft")] Guid quizDraftId,
         [Required][Description("Object used to publish a quiz")] CreateQuizRequest request)
     {
         try
         {
-            await publish.HandleAsync(request.AsCreateCommand(quizDraftId));
+            var id = await publish.HandleAsync(request.AsPublishCommand(quizDraftId));
 
-            return Ok();
+            var response = new QuizIdResponse(id);
+
+            return Ok(response);
         }
         catch (NotFoundException ex)
         {

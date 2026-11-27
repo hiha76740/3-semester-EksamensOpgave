@@ -8,6 +8,7 @@ namespace VidensVejen.ContractsLib.Requests.ExhibitionService.Exhibitions;
 /// <param name="Slug"></param>
 /// <param name="Description"></param>
 /// <param name="DescriptionEn"></param>
+/// <param name="QuizId"></param>
 /// <param name="Topics"></param>
 public record CreateSubjectRequest(
     string Title,
@@ -15,12 +16,10 @@ public record CreateSubjectRequest(
     string Slug,
     string Description,
     string DescriptionEn,
+    Guid? QuizId,
     List<CreateTopicRequest> Topics
     )
 {
-    /// <summary>Gets the identifier of the published quiz.</summary>
-    public Guid? QuizId { get; init; }
-
     /// <summary>
     /// The title of the subject.
     /// </summary>
@@ -45,6 +44,11 @@ public record CreateSubjectRequest(
     /// The description of the subject.
     /// </summary>
     public string DescriptionEn { get; init; } = DescriptionEn;
+
+    /// <summary>
+    /// Gets the identifier of the published quiz.
+    /// </summary>
+    public Guid? QuizId { get; init; } = QuizId;
 
     /// <summary>
     /// The list of topics you want under the subject.

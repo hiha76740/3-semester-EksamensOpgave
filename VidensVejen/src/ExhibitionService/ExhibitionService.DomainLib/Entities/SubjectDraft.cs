@@ -38,6 +38,26 @@ public class SubjectDraft
     public string? DescriptionEn { get; private set; }
 
 
+    /// <summary>
+    /// Gets the published quiz identifier.
+    /// </summary>
+    public QuizId? QuizId { get; private set; }
+
+    /// <summary>
+    /// Gets the quiz draft identifier.
+    /// </summary>
+    public QuizDraftId? QuizDraftId { get; private set; }
+
+    /// <summary>
+    /// Gets whether the subject is a quiz.
+    /// </summary>
+    public bool IsQuiz { get; private set; }
+
+    /// <summary>
+    /// Gets the position of the subject in its exhibition draft.
+    /// </summary>
+    public int Position { get; private set; }
+
     private readonly List<TopicDraft> _topicDrafts = [];
     /// <summary>
     /// 
@@ -51,15 +71,23 @@ public class SubjectDraft
         string? slug,
         string? description,
         string? descriptionEn,
+        QuizId? quizId,
+        QuizDraftId? quizDraftId,
+        bool isQuiz,
+        int position,
         List<NewTopicDraft>? topicDrafts)
     {
 
         Id = new SubjectDraftId(Guid.NewGuid());
         Title = title;
         TitleEn = titleEn;
+        Slug = slug;
         Description = description;
         DescriptionEn = descriptionEn;
-        Slug = slug;
+        QuizId = quizId;
+        QuizDraftId = quizDraftId;
+        IsQuiz = isQuiz;
+        Position = position;
 
         foreach (var topicDraft in topicDrafts ?? [])
         {

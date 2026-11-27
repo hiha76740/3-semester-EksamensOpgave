@@ -8,6 +8,7 @@ namespace ExhibitionService.FacadeLib.Commands.DTOs;
 /// <param name="Slug"></param>
 /// <param name="Description"></param>
 /// <param name="DescriptionEn"></param>
+/// <param name="QuizId"></param>
 /// <param name="Topics"></param>
 public record CreateSubjectCommand(
     string Title,
@@ -15,5 +16,6 @@ public record CreateSubjectCommand(
     string Slug,
     string Description,
     string DescriptionEn,
+    Guid? QuizId,
     List<CreateTopicCommand> Topics
     );

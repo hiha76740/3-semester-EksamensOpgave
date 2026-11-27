@@ -10,6 +10,9 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// <param name="Slug"></param>
 /// <param name="Description"></param>
 /// <param name="DescriptionEn"></param>
+/// <param name="QuizId"></param>
+/// <param name="QuizDraftId"></param>
+/// <param name="IsQuiz"></param>
 /// <param name="TopicDrafts"></param>
 public record SubjectDraftResponse(
     Guid Id,
@@ -18,17 +21,12 @@ public record SubjectDraftResponse(
     string? Slug,
     string? Description,
     string? DescriptionEn,
+    Guid? QuizId,
+    Guid? QuizDraftId,
+    bool IsQuiz,
     List<TopicDraftResponse> TopicDrafts
     )
 {
-    /// <summary>Gets the identifier of the published quiz.</summary>
-    public Guid? QuizId { get; init; }
-
-    /// <summary>Gets the identifier of the quiz draft.</summary>
-    public Guid? QuizDraftId { get; init; }
-
-    /// <summary>Gets whether this subject is intended to contain a quiz.</summary>
-    public bool IsQuiz { get; init; }
 
     /// <summary>
     /// A unique identifier for the Subject draft.
@@ -59,6 +57,21 @@ public record SubjectDraftResponse(
     /// The description of the subject draft.
     /// </summary>
     public string? DescriptionEn { get; init; } = DescriptionEn;
+
+    /// <summary>
+    /// Gets the identifier of the published quiz.
+    /// </summary>
+    public Guid? QuizId { get; init; } = QuizId;
+
+    /// <summary>
+    /// Gets the identifier of the quiz draft.
+    /// </summary>
+    public Guid? QuizDraftId { get; init; } = QuizDraftId;
+
+    /// <summary>
+    /// Gets whether this subject is intended to contain a quiz.
+    /// </summary>
+    public bool IsQuiz { get; init; } = IsQuiz;
 
     /// <summary>
     /// The list of topic drafts you want under the subject draft.
