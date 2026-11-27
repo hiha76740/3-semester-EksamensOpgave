@@ -17,7 +17,8 @@ internal static class ExhibitionMapper
             dto.Subjects
             .Select(
                 s => s.AsResponse())
-            .ToList()
+            .ToList(),
+            dto.RowVersion
             );
 
         return output;

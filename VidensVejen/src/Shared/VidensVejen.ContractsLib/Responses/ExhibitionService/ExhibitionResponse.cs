@@ -7,6 +7,7 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// <param name="Title"></param>
 /// <param name="TitleEn"></param>
 /// <param name="Subjects"></param>
+/// <param name="RowVersion"></param>
 /// <param name="ThemeImageId"></param>
 /// <example>
 /// {
@@ -38,7 +39,8 @@ public record ExhibitionResponse(
     string Title,
     string TitleEn,
     Guid ThemeImageId,
-    IReadOnlyList<SubjectResponse> Subjects
+    IReadOnlyList<SubjectResponse> Subjects,
+    byte[] RowVersion
     )
 {
     /// <summary>
@@ -65,4 +67,9 @@ public record ExhibitionResponse(
     /// A list of subjects the exhibition has associated.
     /// </summary>
     public IReadOnlyList<SubjectResponse> Subjects { get; init; } = Subjects;
+
+    /// <summary>
+    /// The row version returned when the user was last retrieved.
+    /// </summary>
+    public byte[] RowVersion { get; init; } = RowVersion;
 }
