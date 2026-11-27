@@ -11,7 +11,6 @@ services:
     networks:
         - frontend-admin-net
         
-        #SKAL LAVES!!!
     volumes:
         - ./certs:/etc/nginx/certs:ro
         
@@ -35,7 +34,6 @@ services:
     networks:
         - frontend-kiosk-net
         
-        #SKAL LAVES!!!
     volumes:
         - ./certs:/etc/nginx/certs:ro
         
