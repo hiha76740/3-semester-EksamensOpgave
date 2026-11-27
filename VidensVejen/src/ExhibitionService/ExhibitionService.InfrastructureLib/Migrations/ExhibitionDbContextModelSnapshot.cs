@@ -27,6 +27,9 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("LastModifiedAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -55,6 +58,9 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("LastModifiedAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -70,6 +76,9 @@ namespace ExhibitionService.InfrastructureLib.Migrations
 
                     b.Property<Guid?>("SourceExhibitionId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("SourceRowVersion")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<Guid?>("ThemeImageId")
                         .HasColumnType("uniqueidentifier");

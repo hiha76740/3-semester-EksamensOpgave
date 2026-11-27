@@ -41,6 +41,11 @@ public class Exhibition
     public byte[] RowVersion { get; private set; } = [];
 
     /// <summary>
+    /// Gets the timestamp updated when aggregate content changes.
+    /// </summary>
+    public DateTime LastModifiedAtUtc { get; private set; }
+
+    /// <summary>
     /// 
     /// </summary>
     /// <param name="id"></param>
@@ -85,6 +90,7 @@ public class Exhibition
             throw new DomainException("The revision belongs to a different exhibition.");
         }
 
+        LastModifiedAtUtc = DateTime.UtcNow;
         Name = revision.Name;
         NameEn = revision.NameEn;
         ThemeImageId = revision.ThemeImageId;

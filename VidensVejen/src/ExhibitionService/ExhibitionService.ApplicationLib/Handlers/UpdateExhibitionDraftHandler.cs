@@ -17,7 +17,7 @@ public class UpdateExhibitionDraftHandler(
     IExhibitionDraftRepository exhibitionDraftRepo,
     ILogger<UpdateExhibitionDraftHandler> logger) : IUpdateExhibitionDraftHandler
 {
-    async Task IUpdateExhibitionDraftHandler.HandleAsync(UpdateExhibitionDraftCommand command)
+    async Task<byte[]> IUpdateExhibitionDraftHandler.HandleAsync(UpdateExhibitionDraftCommand command)
     {
         try
         {
@@ -37,6 +37,7 @@ public class UpdateExhibitionDraftHandler(
 
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Exhibition draft {Id} successfully updated ", exhibitionDraft.Id.Value);
+            return exhibitionDraft.RowVersion;
         }
         catch (Exception ex)
         {

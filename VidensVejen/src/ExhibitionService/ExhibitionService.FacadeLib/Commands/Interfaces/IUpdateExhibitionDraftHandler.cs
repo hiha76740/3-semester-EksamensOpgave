@@ -12,5 +12,5 @@ public interface IUpdateExhibitionDraftHandler
     /// </summary>
     /// <param name="command"></param>
     /// <returns></returns>
-    Task HandleAsync(UpdateExhibitionDraftCommand command);
+    Task<byte[]> HandleAsync(UpdateExhibitionDraftCommand command);
 }

@@ -16,5 +16,5 @@ public interface ICreateExhibitionDraftHandler
     /// <summary>
     /// Saves the initial content of a draft linked to a published exhibition.
     /// </summary>
-    Task<Guid> CreateRevisionAsync(UpdateExhibitionDraftCommand command);
+    Task<(Guid Id, byte[] RowVersion)> CreateRevisionAsync(UpdateExhibitionDraftCommand command);
 }

@@ -108,14 +108,14 @@
     private Task DeleteDraftAsync(ExhibitionDraftResponse draft) =>
         ConfirmDeletionAsync(canEdit, "kladde", ExhibitionOverviewComponent.GetDraftName(draft), async () =>
         {
-            await ExhibitionService.DeleteDraftAsync(draft.Id);
+            await ExhibitionService.DeleteDraftAsync(draft.Id, draft.RowVersion);
             drafts = drafts.Where(item => item.Id != draft.Id).ToArray();
         });
 
     private Task DeletePublishedAsync(ExhibitionNameResponse exhibition) =>
         ConfirmDeletionAsync(canDelete, "publiceret udstilling", exhibition.Name, async () =>
         {
-            await ExhibitionService.DeletePublishedAsync(exhibition.Id);
+            await ExhibitionService.DeletePublishedAsync(exhibition.Id, exhibition.RowVersion);
             published = published.Where(item => item.Id != exhibition.Id).ToArray();
         });
 

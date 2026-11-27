@@ -38,11 +38,16 @@ public class ExhibitionDraft
     public ExhibitionId? SourceExhibitionId { get; private set; }
 
     /// <summary>
+    /// Gets the version of the published exhibition used as the base.
+    /// </summary>
+    public byte[]? SourceRowVersion { get; private set; }
+
+    /// <summary>
     /// Creates a draft linked to the published exhibition it will update.
     /// </summary>
-    public static ExhibitionDraft CreateRevision(ExhibitionId sourceId)
+    public static ExhibitionDraft CreateRevision(ExhibitionId sourceId, byte[] sourceRowVersion)
     {
-        return new ExhibitionDraft { SourceExhibitionId = sourceId };
+        return new ExhibitionDraft { SourceExhibitionId = sourceId, SourceRowVersion = sourceRowVersion.ToArray() };
     }
 
     private readonly List<SubjectDraft> _subjectDrafts = [];
@@ -51,6 +56,11 @@ public class ExhibitionDraft
     /// 
     /// </summary>
     public byte[] RowVersion { get; private set; } = [];
+
+    /// <summary>
+    /// Gets the timestamp updated when aggregate content changes.
+    /// </summary>
+    public DateTime LastModifiedAtUtc { get; private set; }
 
 
     /// <summary>
@@ -77,6 +87,7 @@ public class ExhibitionDraft
         ImageId? themeImageId,
         List<NewSubjectDraft>? subjectDrafts)
     {
+        LastModifiedAtUtc = DateTime.UtcNow;
         Name = exhibitionName;
         NameEn = exhibitionNameEn;
         ThemeImageId = themeImageId;

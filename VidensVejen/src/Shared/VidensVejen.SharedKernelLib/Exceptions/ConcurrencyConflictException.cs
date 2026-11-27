@@ -5,6 +5,6 @@ namespace VidensVejen.SharedKernelLib.Exceptions;
 /// </summary>
 /// <param name="message"></param>
 /// <param name="innerException"></param>
-public class ConcurrencyConflictException(string message, Exception innerException) : Exception(message, innerException)
+public class ConcurrencyConflictException(string message, Exception? innerException = null) : Exception(message, innerException)
 {
 }

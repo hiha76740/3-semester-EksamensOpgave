@@ -34,7 +34,8 @@ internal static class ExhibitionMapper
             request.Subjects
             .Select(
                 s => s.AsCreateCommand())
-            .ToList()
+            .ToList(),
+            request.RowVersion
             );
 
         return output;
@@ -44,7 +45,8 @@ internal static class ExhibitionMapper
     {
         var output = new ExhibitionNameResponse(
             dto.Id,
-            dto.Name
+            dto.Name,
+            dto.RowVersion
             );
 
         return output;

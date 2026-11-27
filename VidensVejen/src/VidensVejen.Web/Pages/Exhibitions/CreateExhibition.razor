@@ -165,6 +165,7 @@ else
         {
             ExhibitionName = exhibition.Title,
             ExhibitionNameEn = exhibition.TitleEn ?? string.Empty,
+            RowVersion = exhibition.RowVersion,
             Subjects = subjects
         };
     }, "Udstillingen kunne ikke hentes.");
@@ -287,7 +288,7 @@ else
         var request = BuildDraftRequest(input, imageId);
         if (draftId is Guid id)
         {
-            await ExhibitionService.SaveDraftAsync(id, request);
+            input.RowVersion = await ExhibitionService.SaveDraftAsync(id, request);
             return id;
         }
 
@@ -296,9 +297,10 @@ else
             throw new InvalidOperationException("The source exhibition is missing.");
         }
 
-        var createdId = await ExhibitionService.CreateRevisionDraftAsync(sourceId, request);
-        draftId = createdId;
-        return createdId;
+        var created = await ExhibitionService.CreateRevisionDraftAsync(sourceId, request);
+        draftId = created.Id;
+        input.RowVersion = created.RowVersion;
+        return created.Id;
     }
 
     private UpdateExhibitionDraftRequest BuildDraftRequest(ExhibitionInputModel input, Guid? imageId)
@@ -399,7 +401,7 @@ else
             var response = await QuizService.PublishAsync(quizDraftId, QuizEditorMapper.BuildRequest(quizDraftId, quiz));
             subject.QuizId = response.QuizId;
             subject.QuizDraftId = null;
-            await ExhibitionService.SaveDraftAsync(id, BuildDraftRequest(input, imageId));
+            input.RowVersion = await ExhibitionService.SaveDraftAsync(id, BuildDraftRequest(input, imageId));
         }
 
         var request = new CreateExhibitionRequest(
@@ -426,8 +428,10 @@ else
                     t.CalloutText,
                     t.CalloutTextEn,
                     t.Quote,
-                    t.QuoteEn)).ToList()
-            )).ToList()
+                    t.QuoteEn
+                )).ToList()
+            )).ToList(),
+            input.RowVersion
         );
 
         if (sourceExhibitionId.HasValue)

@@ -22,18 +22,24 @@ public class CreateExhibitionDraftHandler(
         return SaveAsync(ExhibitionDraft.Create());
     }
 
-    async Task<Guid> ICreateExhibitionDraftHandler.CreateRevisionAsync(UpdateExhibitionDraftCommand command)
+    async Task<(Guid Id, byte[] RowVersion)> ICreateExhibitionDraftHandler.CreateRevisionAsync(UpdateExhibitionDraftCommand command)
     {
         var id = new ExhibitionId(command.Id);
 
         var exhibition = await exhibitionRepo.GetExhibitionById(id)
             ?? throw new NotFoundException("Exhibition was not found.");
 
-        var draft = ExhibitionDraft.CreateRevision(exhibition.Id);
+        if (!exhibition.RowVersion.AsSpan().SequenceEqual(command.RowVersion))
+        {
+            throw new ConcurrencyConflictException("The published exhibition has changed.");
+        }
+
+        var draft = ExhibitionDraft.CreateRevision(exhibition.Id, exhibition.RowVersion);
 
         HandlerHelper.Apply(draft, command);
 
-        return await SaveAsync(draft);
+        var draftId = await SaveAsync(draft);
+        return (draftId, draft.RowVersion);
     }
 
     private async Task<Guid> SaveAsync(ExhibitionDraft exhibitionDraft)

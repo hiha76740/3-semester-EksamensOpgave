@@ -6,6 +6,7 @@ using ExhibitionService.FacadeLib.Commands.DTOs;
 using ExhibitionService.FacadeLib.Commands.Interfaces;
 using Microsoft.Extensions.Logging;
 using VidensVejen.SharedKernelLib.Exceptions;
+using VidensVejen.BuildingBlocksLib.UnitOfWork;
 
 namespace ExhibitionService.ApplicationLib.Handlers;
 
@@ -15,12 +16,14 @@ namespace ExhibitionService.ApplicationLib.Handlers;
 /// <param name="exhibitionRepo"></param>
 /// <param name="exhibitionDraftRepo"></param>
 /// <param name="imageService"></param>
+/// <param name="unitOfWork">Saves the exhibition and consumes the revision draft together.</param>
 /// <param name="logger"></param>
 public class CreateExhibitionHandler(
     IExhibitionRepository exhibitionRepo,
     IExhibitionDraftRepository exhibitionDraftRepo,
     IImageService imageService,
-    ILogger<CreateExhibitionHandler> logger) : ICreateExhibitionHandler
+    ILogger<CreateExhibitionHandler> logger,
+    IUnitOfWork unitOfWork) : ICreateExhibitionHandler
 {
     Task ICreateExhibitionHandler.HandleAsync(CreateExhibitionCommand command)
     {
@@ -40,6 +43,18 @@ public class CreateExhibitionHandler(
         var sourceId = new ExhibitionId(draft.SourceExhibitionId.Value);
         var exhibition = await exhibitionRepo.GetExhibitionById(sourceId)
             ?? throw new NotFoundException("The original exhibition was not found.");
+
+        if (draft.SourceRowVersion == null ||
+            !exhibition.RowVersion.AsSpan().SequenceEqual(draft.SourceRowVersion))
+        {
+            throw new ConcurrencyConflictException("The original exhibition has changed. Create a new revision from the current version.");
+        }
+
+        if (command.DraftRowVersion == null ||
+            !draft.RowVersion.AsSpan().SequenceEqual(command.DraftRowVersion))
+        {
+            throw new ConcurrencyConflictException("The exhibition draft has changed.");
+        }
 
         await SavePublicationAsync(command, exhibition, draft);
     }
@@ -108,13 +123,13 @@ public class CreateExhibitionHandler(
             {
                 original.ApplyRevision(exhibition);
                 exhibitionDraftRepo.Delete(revisionDraft);
+                await unitOfWork.SaveChangesAsync();
             }
             else
             {
                 await exhibitionRepo.AddAsync(exhibition);
+                await exhibitionRepo.SaveAsync();
             }
-
-            await exhibitionRepo.SaveAsync();
 
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Exhibition {Id} saved in database successfully", exhibition.Id.Value);

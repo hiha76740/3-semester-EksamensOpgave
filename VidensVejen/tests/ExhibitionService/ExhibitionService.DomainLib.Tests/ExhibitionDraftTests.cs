@@ -26,7 +26,7 @@ public class ExhibitionDraftTests
     {
         // Arrange
         var sourceId = new ExhibitionId(Guid.NewGuid());
-        var draft = ExhibitionDraft.CreateRevision(sourceId);
+        var draft = ExhibitionDraft.CreateRevision(sourceId, []);
         var id = draft.Id;
         draft.UpdateExhibitionDraft("Name", "Name EN", new ImageId(Guid.NewGuid()),
             [new NewSubjectDraft(null, null, null, null, null, null, null, false, [])]);

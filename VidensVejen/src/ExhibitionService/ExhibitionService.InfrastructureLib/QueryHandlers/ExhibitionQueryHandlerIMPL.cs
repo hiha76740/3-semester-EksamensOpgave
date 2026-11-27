@@ -34,7 +34,8 @@ public class ExhibitionQueryHandlerIMPL(ExhibitionDbContext db) : IExhibitionQue
             .AsNoTracking()
             .Select(e => new ExhibitionNameDto(
                 e.Id.Value,
-                e.Name))
+                e.Name,
+                e.RowVersion))
             .ToListAsync();
     }
 

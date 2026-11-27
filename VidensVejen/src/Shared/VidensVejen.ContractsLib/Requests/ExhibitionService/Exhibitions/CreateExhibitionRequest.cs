@@ -8,6 +8,7 @@ namespace VidensVejen.ContractsLib.Requests.ExhibitionService.Exhibitions;
 /// <param name="ExhibitionNameEn"></param>
 /// <param name="ThemeImageId"></param>
 /// <param name="Subjects"></param>
+/// <param name="RowVersion"></param>
 /// <example>
 /// {
 ///     "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -46,7 +47,8 @@ public record CreateExhibitionRequest(
     string ExhibitionName,
     string ExhibitionNameEn,
     Guid ThemeImageId,
-    List<CreateSubjectRequest> Subjects
+    List<CreateSubjectRequest> Subjects,
+    byte[] RowVersion
     )
 {
     /// <summary>
@@ -73,4 +75,9 @@ public record CreateExhibitionRequest(
     /// List of the subjects objects you want exhibition to have
     /// </summary>
     public List<CreateSubjectRequest> Subjects { get; init; } = Subjects;
+
+    /// <summary>
+    /// The row version returned when the user was last retrieved.
+    /// </summary>
+    public byte[] RowVersion { get; init; } = RowVersion;
 }

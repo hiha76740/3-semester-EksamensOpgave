@@ -46,19 +46,22 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
             ?? throw new JsonException("The exhibition drafts response was empty.");
     }
 
-    Task IExhibitionService.DeleteDraftAsync(Guid draftId)
+    Task IExhibitionService.DeleteDraftAsync(Guid draftId, byte[] rowVersion)
     {
-        return DeleteAsync($"{DraftBaseUrl}/{draftId:D}");
+        return DeleteAsync($"{DraftBaseUrl}/{draftId:D}", new DeleteExhibitionDraftRequest(rowVersion));
     }
 
-    Task IExhibitionService.DeletePublishedAsync(Guid exhibitionId)
+    Task IExhibitionService.DeletePublishedAsync(Guid exhibitionId, byte[] rowVersion)
     {
-        return DeleteAsync($"{BaseUrl}/{exhibitionId:D}");
+        return DeleteAsync($"{BaseUrl}/{exhibitionId:D}", new DeleteExhibitionRequest(rowVersion));
     }
 
-    private async Task DeleteAsync(string url)
+    private async Task DeleteAsync<TRequest>(string url, TRequest body)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Delete, url);
+        using var request = new HttpRequestMessage(HttpMethod.Delete, url)
+        {
+            Content = JsonContent.Create(body)
+        };
         request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
         using var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
@@ -93,9 +96,18 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
             ?? throw new JsonException("The published exhibition response was empty.");
     }
 
-    Task<Guid> IExhibitionService.CreateRevisionDraftAsync(Guid exhibitionId, UpdateExhibitionDraftRequest draft)
+    async Task<CreatedExhibitionRevisionResponse> IExhibitionService.CreateRevisionDraftAsync(Guid exhibitionId, UpdateExhibitionDraftRequest draft)
     {
-        return CreateDraftAsync($"{DraftBaseUrl}/from-exhibition/{exhibitionId:D}", draft);
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"{DraftBaseUrl}/from-exhibition/{exhibitionId:D}")
+        {
+            Content = JsonContent.Create(draft)
+        };
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<CreatedExhibitionRevisionResponse>()
+            ?? throw new JsonException("The created revision draft response was empty.");
     }
 
     async Task IExhibitionService.PublishRevisionAsync(Guid draftId, CreateExhibitionRequest exhibition)
@@ -109,14 +121,9 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
         response.EnsureSuccessStatusCode();
     }
 
-    private async Task<Guid> CreateDraftAsync(string url, UpdateExhibitionDraftRequest? draft = null)
+    private async Task<Guid> CreateDraftAsync(string url)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, url);
-        if (draft != null)
-        {
-            request.Content = JsonContent.Create(draft);
-        }
-
         request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
         using var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
@@ -141,7 +148,7 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
             ?? throw new JsonException("The exhibition draft response was empty.");
     }
 
-    async Task IExhibitionService.SaveDraftAsync(Guid draftId, UpdateExhibitionDraftRequest draft)
+    async Task<byte[]> IExhibitionService.SaveDraftAsync(Guid draftId, UpdateExhibitionDraftRequest draft)
     {
         using var request = new HttpRequestMessage(HttpMethod.Put, $"{DraftBaseUrl}/{draftId}")
         {
@@ -150,5 +157,7 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
         request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
         using var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<byte[]>()
+            ?? throw new JsonException("The draft version was empty.");
     }
 }

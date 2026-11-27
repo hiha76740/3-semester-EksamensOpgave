@@ -20,10 +20,10 @@ public interface IExhibitionService
     Task<IReadOnlyList<ExhibitionDraftResponse>> GetDraftsAsync();
 
     /// <summary>Deletes the specified exhibition draft.</summary>
-    Task DeleteDraftAsync(Guid draftId);
+    Task DeleteDraftAsync(Guid draftId, byte[] rowVersion);
 
     /// <summary>Deletes the specified published exhibition.</summary>
-    Task DeletePublishedAsync(Guid exhibitionId);
+    Task DeletePublishedAsync(Guid exhibitionId, byte[] rowVersion);
 
     /// <summary>Creates an exhibition with its theme image.</summary>
     /// <param name="exhibition">The exhibition and its content.</param>
@@ -37,7 +37,7 @@ public interface IExhibitionService
     Task<ExhibitionResponse> GetPublishedAsync(Guid exhibitionId);
 
     /// <summary>Saves a new edit draft with its original exhibition reference.</summary>
-    Task<Guid> CreateRevisionDraftAsync(Guid exhibitionId, UpdateExhibitionDraftRequest draft);
+    Task<CreatedExhibitionRevisionResponse> CreateRevisionDraftAsync(Guid exhibitionId, UpdateExhibitionDraftRequest draft);
 
     /// <summary>Publishes the edit draft over the original exhibition.</summary>
     Task PublishRevisionAsync(Guid draftId, CreateExhibitionRequest exhibition);
@@ -46,5 +46,5 @@ public interface IExhibitionService
     Task<ExhibitionDraftResponse> GetDraftAsync(Guid draftId);
 
     /// <summary>Replaces all saved fields of the specified draft.</summary>
-    Task SaveDraftAsync(Guid draftId, UpdateExhibitionDraftRequest draft);
+    Task<byte[]> SaveDraftAsync(Guid draftId, UpdateExhibitionDraftRequest draft);
 }
