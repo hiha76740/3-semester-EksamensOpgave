@@ -22,6 +22,7 @@ public class ExhibitionDraftQueryHandlerIMPL(ExhibitionDbContext db) : IExhibiti
                     ed.Name,
                     ed.NameEn,
                     ed.SubjectDrafts
+                        .OrderBy(sd => sd.Position)
                         .Select(sd => new SubjectDraftDto(
                             sd.Id.Value,
                             sd.Title,
@@ -33,6 +34,7 @@ public class ExhibitionDraftQueryHandlerIMPL(ExhibitionDbContext db) : IExhibiti
                             sd.QuizDraftId == null ? null : sd.QuizDraftId.Value,
                             sd.IsQuiz,
                             sd.TopicDrafts
+                                .OrderBy(td => td.Position)
                                 .Select(td => new TopicDraftDto(
                                     td.Title,
                                     td.TitleEn,
@@ -66,6 +68,7 @@ public class ExhibitionDraftQueryHandlerIMPL(ExhibitionDbContext db) : IExhibiti
                     ed.Name,
                     ed.NameEn,
                     ed.SubjectDrafts
+                        .OrderBy(sd => sd.Position)
                         .Select(sd => new SubjectDraftDto(
                             sd.Id.Value,
                             sd.Title,
@@ -77,6 +80,7 @@ public class ExhibitionDraftQueryHandlerIMPL(ExhibitionDbContext db) : IExhibiti
                             sd.QuizDraftId == null ? null : sd.QuizDraftId.Value,
                             sd.IsQuiz,
                             sd.TopicDrafts
+                                .OrderBy(td => td.Position)
                                 .Select(td => new TopicDraftDto(
                                     td.Title,
                                     td.TitleEn,

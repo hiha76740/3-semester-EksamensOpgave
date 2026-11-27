@@ -103,6 +103,7 @@ public class Exhibition
             newSubject.Description,
             newSubject.DescriptionEn,
             quizId,
+            _subjects.Count,
             newSubject.Topics
             );
 

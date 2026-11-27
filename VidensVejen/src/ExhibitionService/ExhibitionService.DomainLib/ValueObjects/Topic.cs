@@ -67,6 +67,11 @@ public record Topic
     /// </summary>
     public string? QuoteEn { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Gets the position of the topic in its subject.
+    /// </summary>
+    public int Position { get; private set; }
+
 
     internal Topic(
         string title,
@@ -80,7 +85,8 @@ public record Topic
         string calloutText,
         string calloutTextEn,
         string? quote,
-        string? quoteEn
+        string? quoteEn,
+        int position
         )
     {
 
@@ -126,6 +132,7 @@ public record Topic
         CalloutTextEn = calloutTextEn;
         Quote = quote;
         QuoteEn = quoteEn;
+        Position = position;
     }
 }
 

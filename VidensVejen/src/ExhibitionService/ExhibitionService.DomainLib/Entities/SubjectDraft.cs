@@ -103,7 +103,9 @@ public class SubjectDraft
                 topicDraft.CalloutText,
                 topicDraft.CalloutTextEn,
                 topicDraft.Quote,
-                topicDraft.QuoteEn);
+                topicDraft.QuoteEn,
+                _topicDrafts.Count
+                );
 
             _topicDrafts.Add(topic);
         }

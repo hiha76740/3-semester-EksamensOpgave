@@ -65,6 +65,11 @@ public record TopicDraft
     /// </summary>
     public string? QuoteEn { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Gets the position of the topic in its subject draft.
+    /// </summary>
+    public int Position { get; private set; }
+
 
     internal TopicDraft(
         string? title,
@@ -78,7 +83,9 @@ public record TopicDraft
         string? calloutText,
         string? calloutTextEn,
         string? quote,
-        string? quoteEn)
+        string? quoteEn,
+        int position
+        )
     {
         Title = title;
         TitleEn = titleEn;
@@ -92,5 +99,6 @@ public record TopicDraft
         CalloutTextEn = calloutTextEn;
         Quote = quote;
         QuoteEn = quoteEn;
+        Position = position;
     }
 }

@@ -49,7 +49,9 @@ public class ExhibitionQueryHandlerIMPL(ExhibitionDbContext db) : IExhibitionQue
                 e.Id.Value,
                 e.Name,
                 e.NameEn,
-                e.Subjects.Select(s => new SubjectDto(
+                e.Subjects
+                .OrderBy(s => s.Position)
+                .Select(s => new SubjectDto(
                     s.Id.Value,
                     s.Slug,
                     s.Title,
@@ -57,7 +59,9 @@ public class ExhibitionQueryHandlerIMPL(ExhibitionDbContext db) : IExhibitionQue
                     s.Description,
                     s.DescriptionEn,
                     s.QuizId == null ? null : s.QuizId.Value,
-                    s.Topics.Select(t => new TopicDto(
+                    s.Topics
+                    .OrderBy(t => t.Position)
+                    .Select(t => new TopicDto(
                         t.Title,
                         t.TitleEn,
                         t.Description,

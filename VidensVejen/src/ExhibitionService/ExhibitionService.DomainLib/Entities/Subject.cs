@@ -44,6 +44,11 @@ public class Subject
     /// </summary>
     public string DescriptionEn { get; private set; } = string.Empty;
 
+    /// <summary>
+    /// Gets the position of the subject in its exhibition.
+    /// </summary>
+    public int Position { get; private set; }
+
 
     private readonly List<Topic> _topics = [];
     /// <summary>
@@ -59,6 +64,7 @@ public class Subject
         string description,
         string descriptionEn,
         QuizId? quizId,
+        int position,
         List<NewTopic> topics
         )
     {
@@ -87,6 +93,7 @@ public class Subject
         DescriptionEn = descriptionEn;
         Slug = slug;
         QuizId = quizId;
+        Position = position;
 
         foreach (var topic in topics)
         {
@@ -109,7 +116,8 @@ public class Subject
             newTopic.CalloutText,
             newTopic.CalloutTextEn,
             newTopic.Qoute,
-            newTopic.QouteEn
+            newTopic.QouteEn,
+            _topics.Count
             );
 
         _topics.Add(topic);
