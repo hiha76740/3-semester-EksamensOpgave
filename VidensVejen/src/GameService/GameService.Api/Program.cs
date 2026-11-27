@@ -15,6 +15,7 @@ builder.Services.AddRepositoryDI();
 builder.Services.AddQueryDI();
 builder.Services.AddUnitOfWorkDI();
 builder.Services.AddBackgroundWorkerDI();
+builder.Services.AddInboxStrategiesDI();
 builder.Services.AddEventPublisherDI();
 builder.Services.AddInternalServicesDI();
 builder.Services.AddDaprClient();

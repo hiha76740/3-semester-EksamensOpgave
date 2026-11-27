@@ -11,9 +11,9 @@ namespace GameService.InfrastructureLib.Services;
 /// <param name="daprClient"></param>
 public class ExhibitionService(DaprClient daprClient) : IExhibitionService
 {
-    private readonly HttpClient _client = daprClient.CreateInvokableHttpClient("exhibition-api");
+    private readonly HttpClient _client = daprClient.CreateInvokableHttpClient("exhibitionservice-api");
 
-    private readonly string _baseUrl = "/v1/exhibition";
+    private readonly string _baseUrl = "/v1/exhibitions";
 
     async Task<bool> IExhibitionService.QuizInUseAsync(QuizId quizId)
     {

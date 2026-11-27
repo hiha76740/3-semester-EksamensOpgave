@@ -1,5 +1,6 @@
 using GameService.ApplicationLib.Repositories;
 using GameService.DomainLib.Entities.Quizzes;
+using GameService.DomainLib.ValueObjects;
 using GameService.InfrastructureLib.Persistence;
 using Microsoft.EntityFrameworkCore;
 using VidensVejen.SharedKernelLib.Exceptions;
@@ -20,6 +21,14 @@ public class QuizRepository(GameDbContext db) : IQuizRepository
     void IQuizRepository.Delete(Quiz quiz)
     {
         db.Remove(quiz);
+    }
+
+    async Task<IReadOnlyList<Quiz>> IQuizRepository.GetAllForExhibitionAsync(ExhibitionId id)
+    {
+        return await db.Quizzes
+            .Include(q => q.Questions)
+            .Where(q => q.ExhibitionId == id)
+            .ToListAsync();
     }
 
     async Task<Quiz?> IQuizRepository.GetQuizByIdAsync(QuizId id)

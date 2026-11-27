@@ -183,6 +183,35 @@ namespace GameService.InfrastructureLib.Migrations
                     b.ToTable("GameSessions");
                 });
 
+            modelBuilder.Entity("VidensVejen.BuildingBlocksLib.Messaging.Inbox.InboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ProccessedOnUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("RecievedOnUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Topic")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Inbox");
+                });
+
             modelBuilder.Entity("VidensVejen.BuildingBlocksLib.Messaging.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")

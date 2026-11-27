@@ -1,3 +1,4 @@
+using GameService.InfrastructureLib.Messaging.Inbox;
 using GameService.InfrastructureLib.Messaging.Outbox;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,6 +17,7 @@ public static class BackgroundWorkerDI
     public static IServiceCollection AddBackgroundWorkerDI(this IServiceCollection services)
     {
         services.AddHostedService<OutboxWorker>();
+        services.AddHostedService<InboxWorker>();
 
         return services;
     }

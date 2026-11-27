@@ -6,6 +6,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Shared\VidensVejen.BuildingBlocksLib\VidensVejen.BuildingBlocksLib.csproj" />
     <ProjectReference Include="..\ExhibitionService.DomainLib\ExhibitionService.DomainLib.csproj" />
     <ProjectReference Include="..\ExhibitionService.FacadeLib\ExhibitionService.FacadeLib.csproj" />
     <ProjectReference Include="..\..\Shared\VidensVejen.SharedKernelLib\VidensVejen.SharedKernelLib.csproj" />

@@ -158,6 +158,35 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     b.ToTable("SubjectDrafts");
                 });
 
+            modelBuilder.Entity("VidensVejen.BuildingBlocksLib.Messaging.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("PublishedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Topic")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Outbox");
+                });
+
             modelBuilder.Entity("ExhibitionService.DomainLib.Entities.Subject", b =>
                 {
                     b.HasOne("ExhibitionService.DomainLib.Entities.Exhibition", null)

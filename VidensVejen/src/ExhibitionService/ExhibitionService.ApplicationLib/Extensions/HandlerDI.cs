@@ -22,7 +22,6 @@ public static class HandlerDI
         services.AddScoped<IDeleteExhibitionHandler, DeleteExhibitionHandler>();
         services.AddScoped<IDeleteExhibitionDraftHandler, DeleteExhibitionDraftHandler>();
 
-
         return services;
     }
 }

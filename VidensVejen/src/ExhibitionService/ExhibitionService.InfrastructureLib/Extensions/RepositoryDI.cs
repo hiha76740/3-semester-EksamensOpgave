@@ -1,6 +1,7 @@
 using ExhibitionService.ApplicationLib.Repositories;
 using ExhibitionService.InfrastructureLib.Repositories;
 using Microsoft.Extensions.DependencyInjection;
+using VidensVejen.BuildingBlocksLib.Messaging.Outbox;
 
 namespace ExhibitionService.InfrastructureLib.Extensions;
 
@@ -18,6 +19,7 @@ public static class RepositoryDI
     {
         services.AddScoped<IExhibitionRepository, ExhibitionRepository>();
         services.AddScoped<IExhibitionDraftRepository, ExhibitionDraftRepository>();
+        services.AddScoped<IOutboxRepository, OutboxRepository>();
 
         return services;
     }

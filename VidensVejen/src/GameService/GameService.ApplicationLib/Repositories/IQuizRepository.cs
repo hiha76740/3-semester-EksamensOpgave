@@ -1,4 +1,5 @@
 using GameService.DomainLib.Entities.Quizzes;
+using GameService.DomainLib.ValueObjects;
 
 namespace GameService.ApplicationLib.Repositories;
 
@@ -19,6 +20,13 @@ public interface IQuizRepository
     /// </summary>
     /// <param name="quiz"></param>
     void Delete(Quiz quiz);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    Task<IReadOnlyList<Quiz>> GetAllForExhibitionAsync(ExhibitionId id);
 
     /// <summary>
     /// 
