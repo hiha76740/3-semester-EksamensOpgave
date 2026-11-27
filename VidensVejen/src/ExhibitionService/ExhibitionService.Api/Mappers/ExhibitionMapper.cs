@@ -23,20 +23,6 @@ internal static class ExhibitionMapper
         return output;
     }
 
-    internal static UpdateExhibitionCommand AsUpdateCommand(this UpdateExhibitionRequest request, Guid id)
-    {
-        var output = new UpdateExhibitionCommand(
-            id,
-            request.ExhibitionName,
-            request.Subjects
-            .Select(
-                s => s.AsUpdateCommand())
-            .ToList()
-            );
-
-        return output;
-    }
-
     internal static CreateExhibitionCommand AsCreateCommand(this CreateExhibitionRequest request)
     {
         var output = new CreateExhibitionCommand(

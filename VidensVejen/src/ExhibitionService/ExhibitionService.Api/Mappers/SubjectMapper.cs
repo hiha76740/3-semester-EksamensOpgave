@@ -26,21 +26,6 @@ internal static class SubjectMapper
         return output;
     }
 
-    internal static UpdateSubjectCommand AsUpdateCommand(this UpdateSubjectRequest request)
-    {
-        var output = new UpdateSubjectCommand(
-            request.Id,
-            request.Title,
-            request.Description,
-            request.Topics
-            .Select(
-                t => t.AsUpdateCommand())
-            .ToList()
-            );
-
-        return output;
-    }
-
     internal static CreateSubjectCommand AsCreateCommand(this CreateSubjectRequest request)
     {
         var output = new CreateSubjectCommand(

@@ -27,21 +27,6 @@ internal static class TopicMapper
         return output;
     }
 
-    internal static UpdateTopicCommand AsUpdateCommand(this UpdateTopicRequest request)
-    {
-        var output = new UpdateTopicCommand(
-            request.Id,
-            request.Title,
-            request.Description,
-            request.Body,
-            request.CalloutLabel,
-            request.CalloutText,
-            request.Qoute
-            );
-
-        return output;
-    }
-
     internal static CreateTopicCommand AsCreateCommand(this CreateTopicRequest request)
     {
         var output = new CreateTopicCommand(
