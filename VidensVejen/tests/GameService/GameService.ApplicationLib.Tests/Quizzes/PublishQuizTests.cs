@@ -10,7 +10,7 @@ using Moq;
 using VidensVejen.BuildingBlocksLib.UnitOfWork;
 using VidensVejen.SharedKernelLib.Exceptions;
 
-namespace GameService.ApplicationLib.Tests;
+namespace GameService.ApplicationLib.Tests.Quizzes;
 
 public class PublishQuizTests
 {
@@ -47,10 +47,11 @@ public class PublishQuizTests
             drafts.Object, quizzes.Object, unitOfWork.Object, NullLogger<PublishQuizHandler>.Instance);
 
         // Act
-        await handler.HandleAsync(command);
+        var quizId = await handler.HandleAsync(command);
 
         // Assert
         Assert.NotNull(savedQuiz);
+        Assert.Equal(savedQuiz.Id.Value, quizId);
         Assert.NotEqual(Guid.Empty, savedQuiz.Id.Value);
         Assert.Equal(command.Title, savedQuiz.Title);
         Assert.Equal(command.TitleEn, savedQuiz.TitleEn);

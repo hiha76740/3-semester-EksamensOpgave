@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using VidensVejen.SharedKernelLib.Exceptions;
 
-namespace GameService.ApplicationLib.Tests;
+namespace GameService.ApplicationLib.Tests.Drafts;
 
 public class DeleteQuizDraftTests
 {

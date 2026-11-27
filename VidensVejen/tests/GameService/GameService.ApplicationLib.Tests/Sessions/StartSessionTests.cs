@@ -7,7 +7,7 @@ using GameService.FacadeLib.Commands.Interfaces;
 using Moq;
 using VidensVejen.SharedKernelLib.Exceptions;
 
-namespace GameService.ApplicationLib.Tests;
+namespace GameService.ApplicationLib.Tests.Sessions;
 
 public class StartSessionTests
 {

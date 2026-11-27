@@ -10,7 +10,7 @@ using VidensVejen.BuildingBlocksLib.Messaging.Outbox;
 using VidensVejen.ContractsLib.Events;
 using VidensVejen.SharedKernelLib.Exceptions;
 
-namespace GameService.ApplicationLib.Tests;
+namespace GameService.ApplicationLib.Tests.Sessions;
 
 public class FinishSessionTests
 {

@@ -5,7 +5,7 @@ using GameService.FacadeLib.Commands.Interfaces;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
-namespace GameService.ApplicationLib.Tests;
+namespace GameService.ApplicationLib.Tests.Drafts;
 
 public class CreateQuizDraftTests
 {

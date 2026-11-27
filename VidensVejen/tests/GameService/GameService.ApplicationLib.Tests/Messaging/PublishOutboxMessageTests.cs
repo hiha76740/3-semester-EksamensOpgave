@@ -6,7 +6,7 @@ using VidensVejen.BuildingBlocksLib.Messaging.Publisher;
 using VidensVejen.BuildingBlocksLib.UnitOfWork;
 using VidensVejen.ContractsLib.Events;
 
-namespace GameService.ApplicationLib.Tests;
+namespace GameService.ApplicationLib.Tests.Messaging;
 
 public class PublishOutboxMessageTests
 {
