@@ -35,9 +35,13 @@ else
     {
         <RadzenButton Text="Hent udstilling" Click="LoadPublishedAsync" IsBusy="@isBusy" />
     }
+    else if (error != null)
+    {
+        <RadzenButton Text="Prøv igen" Click="StartDraftAsync" />
+    }
     else
     {
-        <RadzenButton Text="Opret udstilling" Icon="add" Click="StartDraftAsync" IsBusy="@isBusy" />
+        <RadzenText role="status" Text="Opretter udstillingskladde …" />
     }
 }
 
@@ -70,7 +74,7 @@ else
     protected override async Task OnParametersSetAsync()
     {
         var route = (ExistingDraftId, PublishedExhibitionId);
-        if (loadedRoute == route && model != null)
+        if (loadedRoute == route)
         {
             return;
         }
@@ -110,6 +114,10 @@ else
         else if (PublishedExhibitionId.HasValue)
         {
             await LoadPublishedAsync();
+        }
+        else
+        {
+            await StartDraftAsync();
         }
     }
 
@@ -175,7 +183,7 @@ else
         }, "Kladden kunne ikke oprettes.");
         if (newId is Guid id)
         {
-            NavigationManager.NavigateTo($"exhibition/drafts/{id:D}");
+            NavigationManager.NavigateTo($"exhibition/drafts/{id:D}", replace: true);
         }
     }
 
