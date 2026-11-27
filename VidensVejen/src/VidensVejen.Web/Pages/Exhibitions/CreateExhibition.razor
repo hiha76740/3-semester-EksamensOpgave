@@ -243,7 +243,8 @@ else
         {
             ExhibitionName = draft.Name ?? string.Empty,
             ExhibitionNameEn = draft.NameEn ?? string.Empty,
-            Subjects = subjects
+            Subjects = subjects,
+            RowVersion = draft.RowVersion
         };
     }, "Kladden kunne ikke hentes.");
 
@@ -303,19 +304,37 @@ else
     private UpdateExhibitionDraftRequest BuildDraftRequest(ExhibitionInputModel input, Guid? imageId)
     {
         return new UpdateExhibitionDraftRequest(
-            input.ExhibitionName, input.ExhibitionNameEn, imageId,
-            input.Subjects.Select(subject => new UpdateSubjectDraftRequest(
-                Guid.Empty, subject.Title, subject.TitleEn, GetSubjectSlug(subject),
-                subject.Description, subject.DescriptionEn,
+            input.ExhibitionName,
+            input.ExhibitionNameEn,
+            imageId,
+            input.Subjects
+            .Select(subject => new UpdateSubjectDraftRequest(
+                Guid.Empty,
+                subject.Title,
+                subject.TitleEn,
+                GetSubjectSlug(subject),
+                subject.Description,
+                subject.DescriptionEn,
+                subject.QuizId,
+                subject.QuizDraftId,
+                subject.IsQuiz,
                 subject.Topics.Select(topic => new UpdateTopicDraftRequest(
-                    topic.Title, topic.TitleEn, topic.Description, topic.DescriptionEn,
-                    topic.Body, topic.BodyEn, topic.CalloutLabel, topic.CalloutLabelEn,
-                    topic.CalloutText, topic.CalloutTextEn, topic.Quote, topic.QuoteEn)).ToList())
-            {
-                IsQuiz = subject.IsQuiz,
-                QuizId = subject.IsQuiz ? subject.QuizId : null,
-                QuizDraftId = subject.IsQuiz ? subject.QuizDraftId : null
-            }).ToList());
+                    topic.Title,
+                    topic.TitleEn,
+                    topic.Description,
+                    topic.DescriptionEn,
+                    topic.Body,
+                    topic.BodyEn,
+                    topic.CalloutLabel,
+                    topic.CalloutLabelEn,
+                    topic.CalloutText,
+                    topic.CalloutTextEn,
+                    topic.Quote,
+                    topic.QuoteEn
+                )).ToList()
+            )).ToList(),
+            input.RowVersion
+        );
     }
 
     public Task Create(ExhibitionInputModel input) => RunAsync(async () =>

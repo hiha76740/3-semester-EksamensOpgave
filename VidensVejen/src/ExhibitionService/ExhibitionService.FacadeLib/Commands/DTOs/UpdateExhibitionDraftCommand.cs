@@ -8,10 +8,12 @@ namespace ExhibitionService.FacadeLib.Commands.DTOs;
 /// <param name="ExhibitionNameEn"></param>
 /// <param name="ThemeImageId"></param>
 /// <param name="SubjectDrafts"></param>
+/// <param name="RowVersion"></param>
 public record UpdateExhibitionDraftCommand(
     Guid Id,
     string? ExhibtionName,
     string? ExhibitionNameEn,
     Guid? ThemeImageId,
-    List<UpdateSubjectDraftCommand> SubjectDrafts
+    List<UpdateSubjectDraftCommand> SubjectDrafts,
+    byte[] RowVersion
     );

@@ -31,6 +31,8 @@ public class UpdateExhibitionDraftHandler(
 
             HandlerHelper.Apply(exhibitionDraft, command);
 
+            exhibitionDraftRepo.SetOriginalRowVersion(exhibitionDraft, command.RowVersion);
+
             await exhibitionDraftRepo.SaveAsync();
 
             if (logger.IsEnabled(LogLevel.Information))

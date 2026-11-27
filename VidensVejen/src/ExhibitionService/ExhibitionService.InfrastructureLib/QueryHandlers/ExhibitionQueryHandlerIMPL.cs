@@ -77,7 +77,9 @@ public class ExhibitionQueryHandlerIMPL(ExhibitionDbContext db) : IExhibitionQue
                         ))
                     .ToList()))
                 .ToList(),
-                e.ThemeImageId.Value))
+                e.ThemeImageId.Value,
+                e.RowVersion
+                ))
             .FirstOrDefaultAsync();
     }
 }

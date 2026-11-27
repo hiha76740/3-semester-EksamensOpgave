@@ -48,11 +48,11 @@ public class ExhibitionsController(
     [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to delete the requested exhibition")]
     [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Exhibition was not found")]
     public async Task<ActionResult> DeleteExhibition(
-        [Required][Description("A unique identifier for a exhibition")] Guid id)
+        [Required][Description("A unique identifier for a exhibition")] Guid id, DeleteExhibitionRequest request)
     {
         try
         {
-            await delete.HandleAsync(id);
+            await delete.HandleAsync(request.AsDeleteCommand(id));
 
             return NoContent();
         }

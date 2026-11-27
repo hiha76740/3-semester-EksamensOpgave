@@ -22,15 +22,17 @@ public class CreateExhibitionDraftHandler(
         return SaveAsync(ExhibitionDraft.Create());
     }
 
-    async Task<Guid> ICreateExhibitionDraftHandler.CreateRevisionAsync(UpdateExhibitionDraftCommand content)
+    async Task<Guid> ICreateExhibitionDraftHandler.CreateRevisionAsync(UpdateExhibitionDraftCommand command)
     {
-        var id = new ExhibitionId(content.Id);
+        var id = new ExhibitionId(command.Id);
 
         var exhibition = await exhibitionRepo.GetExhibitionById(id)
             ?? throw new NotFoundException("Exhibition was not found.");
 
         var draft = ExhibitionDraft.CreateRevision(exhibition.Id);
-        HandlerHelper.Apply(draft, content);
+
+        HandlerHelper.Apply(draft, command);
+
         return await SaveAsync(draft);
     }
 

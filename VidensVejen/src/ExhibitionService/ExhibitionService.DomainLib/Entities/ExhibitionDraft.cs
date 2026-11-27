@@ -47,6 +47,11 @@ public class ExhibitionDraft
 
     private readonly List<SubjectDraft> _subjectDrafts = [];
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public byte[] RowVersion { get; private set; } = [];
+
 
     /// <summary>
     /// 

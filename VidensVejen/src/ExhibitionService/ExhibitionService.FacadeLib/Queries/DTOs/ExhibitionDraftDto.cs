@@ -9,10 +9,13 @@ namespace ExhibitionService.FacadeLib.Queries.DTOs;
 /// <param name="SubjectDrafts"></param>
 /// <param name="ThemeImageId"></param>
 /// <param name="SourceExhibitionId"></param>
+/// <param name="RowVersion"></param>
 public record ExhibitionDraftDto(
     Guid Id,
     string? Name,
     string? NameEn,
     IReadOnlyList<SubjectDraftDto> SubjectDrafts,
     Guid? ThemeImageId,
-    Guid? SourceExhibitionId);
+    Guid? SourceExhibitionId,
+    byte[] RowVersion
+    );

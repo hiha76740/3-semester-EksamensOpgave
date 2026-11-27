@@ -2,6 +2,7 @@ using System.Data;
 using System.Text.Json;
 using ExhibitionService.ApplicationLib.Repositories;
 using ExhibitionService.DomainLib.ValueObjects;
+using ExhibitionService.FacadeLib.Commands.DTOs;
 using ExhibitionService.FacadeLib.Commands.Interfaces;
 using Microsoft.Extensions.Logging;
 using VidensVejen.BuildingBlocksLib.Messaging.Outbox;
@@ -24,16 +25,16 @@ public class DeleteExhibitionHandler(
     IUnitOfWork unitOfWork,
     ILogger<DeleteExhibitionHandler> logger) : IDeleteExhibitionHandler
 {
-    async Task IDeleteExhibitionHandler.HandleAsync(Guid id)
+    async Task IDeleteExhibitionHandler.HandleAsync(DeleteExhibitionCommand command)
     {
         unitOfWork.BeginTransaction(IsolationLevel.Serializable);
 
         try
         {
             if (logger.IsEnabled(LogLevel.Information))
-                logger.LogInformation("Beginning deletion of exhibition {ExhibitionId}", id);
+                logger.LogInformation("Beginning deletion of exhibition {ExhibitionId}", command.ExhibitionId);
 
-            var exhibitionId = new ExhibitionId(id);
+            var exhibitionId = new ExhibitionId(command.ExhibitionId);
 
             var exhibition = await exhibitionRepo.GetExhibitionById(exhibitionId)
                 ?? throw new NotFoundException("Exhibition not found");
@@ -43,6 +44,7 @@ public class DeleteExhibitionHandler(
 
             exhibitionRepo.Delete(exhibition);
 
+            exhibitionRepo.SetOriginalRowVersion(exhibition, command.RowVersion);
 
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Exhibition {Id} was successfully deleted from exhibition database", exhibition.Id.Value);

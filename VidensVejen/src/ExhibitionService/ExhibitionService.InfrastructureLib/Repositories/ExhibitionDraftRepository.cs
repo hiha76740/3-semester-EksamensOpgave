@@ -3,6 +3,7 @@ using ExhibitionService.DomainLib.Entities;
 using ExhibitionService.DomainLib.ValueObjects;
 using ExhibitionService.InfrastructureLib.Persistence;
 using Microsoft.EntityFrameworkCore;
+using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace ExhibitionService.InfrastructureLib.Repositories;
 
@@ -31,6 +32,20 @@ public class ExhibitionDraftRepository(ExhibitionDbContext db) : IExhibitionDraf
 
     async Task IExhibitionDraftRepository.SaveAsync()
     {
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            throw new ConcurrencyConflictException("The data was changed or deleted by another request", ex);
+        }
+    }
+
+    void IExhibitionDraftRepository.SetOriginalRowVersion(ExhibitionDraft exhibitionDraft, byte[] originalRowVersion)
+    {
+        db.Entry(exhibitionDraft)
+            .Property(u => u.RowVersion)
+            .OriginalValue = originalRowVersion;
     }
 }

@@ -1,5 +1,6 @@
 using ExhibitionService.ApplicationLib.Repositories;
 using ExhibitionService.DomainLib.ValueObjects;
+using ExhibitionService.FacadeLib.Commands.DTOs;
 using ExhibitionService.FacadeLib.Commands.Interfaces;
 using Microsoft.Extensions.Logging;
 using VidensVejen.SharedKernelLib.Exceptions;
@@ -13,15 +14,15 @@ public class DeleteExhibitionDraftHandler(
     IExhibitionDraftRepository exhibitionDraftRepo,
     ILogger<DeleteExhibitionDraftHandler> logger) : IDeleteExhibitionDraftHandler
 {
-    async Task IDeleteExhibitionDraftHandler.HandleAsync(Guid id)
+    async Task IDeleteExhibitionDraftHandler.HandleAsync(DeleteExhibitionDraftCommand command)
     {
         try
         {
             if (logger.IsEnabled(LogLevel.Information))
-                logger.LogInformation("Beginning deletion of exhibition draft {ExhibitionDraftId}", id);
+                logger.LogInformation("Beginning deletion of exhibition draft {ExhibitionDraftId}", command.ExhibitionDraftId);
 
 
-            var exhibitionDraftId = new ExhibitionDraftId(id);
+            var exhibitionDraftId = new ExhibitionDraftId(command.ExhibitionDraftId);
 
             var exhibition = await exhibitionDraftRepo.GetExhibitionDraftByIdAsync(exhibitionDraftId)
                 ?? throw new NotFoundException("Exhibition draft not found");
@@ -32,6 +33,8 @@ public class DeleteExhibitionDraftHandler(
 
 
             exhibitionDraftRepo.Delete(exhibition);
+
+            exhibitionDraftRepo.SetOriginalRowVersion(exhibition, command.RowVersion);
 
             await exhibitionDraftRepo.SaveAsync();
 

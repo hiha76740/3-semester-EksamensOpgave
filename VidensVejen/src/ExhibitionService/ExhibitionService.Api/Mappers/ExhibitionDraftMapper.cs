@@ -18,7 +18,8 @@ internal static class ExhibitionDraftMapper
             .Select(
                 sd => sd.AsResponse())
             .ToList(),
-            dto.SourceExhibitionId
+            dto.SourceExhibitionId,
+            dto.RowVersion
             );
 
         return output;
@@ -34,7 +35,8 @@ internal static class ExhibitionDraftMapper
             request.SubjectDrafts
             .Select(
                 sd => sd.AsUpdateDraftCommand())
-            .ToList()
+            .ToList(),
+            request.RowVersion
             );
 
         return output;

@@ -51,7 +51,8 @@ public class ExhibitionDraftQueryHandlerIMPL(ExhibitionDbContext db) : IExhibiti
                                 .ToList()))
                         .ToList(),
                     ed.ThemeImageId == null ? null : ed.ThemeImageId.Value,
-                    ed.SourceExhibitionId == null ? null : ed.SourceExhibitionId.Value
+                    ed.SourceExhibitionId == null ? null : ed.SourceExhibitionId.Value,
+                    ed.RowVersion
                     ))
                 .ToListAsync();
     }
@@ -97,7 +98,8 @@ public class ExhibitionDraftQueryHandlerIMPL(ExhibitionDbContext db) : IExhibiti
                                 .ToList()))
                         .ToList(),
                     ed.ThemeImageId == null ? null : ed.ThemeImageId.Value,
-                    ed.SourceExhibitionId == null ? null : ed.SourceExhibitionId.Value
+                    ed.SourceExhibitionId == null ? null : ed.SourceExhibitionId.Value,
+                    ed.RowVersion
                     ))
                 .FirstOrDefaultAsync();
     }

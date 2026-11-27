@@ -33,4 +33,12 @@ public interface IExhibitionDraftRepository
     /// </summary>
     /// <returns></returns>
     Task SaveAsync();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="exhibitionDraft"></param>
+    /// <param name="originalRowVersion"></param>
+    /// <returns></returns>
+    void SetOriginalRowVersion(ExhibitionDraft exhibitionDraft, byte[] originalRowVersion);
 }

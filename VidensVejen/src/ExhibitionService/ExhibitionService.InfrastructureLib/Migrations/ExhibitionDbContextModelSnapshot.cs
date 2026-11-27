@@ -36,6 +36,10 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
                     b.Property<Guid>("ThemeImageId")
                         .HasColumnType("uniqueidentifier");
 
@@ -55,6 +59,10 @@ namespace ExhibitionService.InfrastructureLib.Migrations
 
                     b.Property<string>("NameEn")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<Guid?>("SourceExhibitionId")
                         .HasColumnType("uniqueidentifier");

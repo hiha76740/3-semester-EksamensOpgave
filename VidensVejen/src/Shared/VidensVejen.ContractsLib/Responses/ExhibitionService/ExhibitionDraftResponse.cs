@@ -9,6 +9,7 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// <param name="ThemeImageId"></param>
 /// <param name="SubjectDrafts"></param>
 /// <param name="SourceExhibitionId"></param>
+/// <param name="RowVersion"></param>
 ///  <example>
 /// {
 ///     "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -49,7 +50,8 @@ public record ExhibitionDraftResponse(
     string? NameEn,
     Guid? ThemeImageId,
     IReadOnlyList<SubjectDraftResponse> SubjectDrafts,
-    Guid? SourceExhibitionId
+    Guid? SourceExhibitionId,
+    byte[] RowVersion
     )
 {
     /// <summary>
@@ -81,5 +83,10 @@ public record ExhibitionDraftResponse(
     /// A unique identifier for the source exhibition.
     /// </summary>
     public Guid? SourceExhibitionId { get; init; } = SourceExhibitionId;
+
+    /// <summary>
+    /// The row version returned when the user was last retrieved.
+    /// </summary>
+    public byte[] RowVersion { get; init; } = RowVersion;
 }
 

@@ -7,6 +7,7 @@ namespace VidensVejen.ContractsLib.Requests.ExhibitionService.Drafts;
 /// <param name="NameEn"></param>
 /// <param name="ThemeImageId"></param>
 /// <param name="SubjectDrafts"></param>
+/// <param name="RowVersion"></param>
 /// <example>
 /// {
 ///     "name": "Vand og hav",
@@ -44,7 +45,8 @@ public record UpdateExhibitionDraftRequest(
     string? Name,
     string? NameEn,
     Guid? ThemeImageId,
-    List<UpdateSubjectDraftRequest> SubjectDrafts
+    List<UpdateSubjectDraftRequest> SubjectDrafts,
+    byte[] RowVersion
     )
 {
     /// <summary>
@@ -66,4 +68,9 @@ public record UpdateExhibitionDraftRequest(
     /// List of the subjects objects you want the exhibition draft to have
     /// </summary>
     public List<UpdateSubjectDraftRequest> SubjectDrafts { get; init; } = SubjectDrafts;
+
+    /// <summary>
+    /// The row version returned when the user was last retrieved.
+    /// </summary>
+    public byte[] RowVersion { get; init; } = RowVersion;
 }

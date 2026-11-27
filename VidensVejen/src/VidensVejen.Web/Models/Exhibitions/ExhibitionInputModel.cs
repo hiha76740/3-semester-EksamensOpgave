@@ -32,4 +32,9 @@ public sealed class ExhibitionInputModel
     /// </summary>
     public IReadOnlyList<ExhibitionSubjectInputModel> Subjects { get; init; } =
         [new(), new(), new(), new()];
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public byte[] RowVersion { get; set; } = [];
 }

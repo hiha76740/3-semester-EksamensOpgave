@@ -9,6 +9,9 @@ namespace VidensVejen.ContractsLib.Requests.ExhibitionService.Drafts;
 /// <param name="Slug"></param>
 /// <param name="Description"></param>
 /// <param name="DescriptionEn"></param>
+/// <param name="QuizId"></param>
+/// <param name="QuizDraftId"></param>
+/// <param name="IsQuiz"></param>
 /// <param name="TopicDrafts"></param>
 public record UpdateSubjectDraftRequest(
     Guid Id,
@@ -17,18 +20,21 @@ public record UpdateSubjectDraftRequest(
     string? Slug,
     string? Description,
     string? DescriptionEn,
+    Guid? QuizId,
+    Guid? QuizDraftId,
+    bool IsQuiz,
     List<UpdateTopicDraftRequest> TopicDrafts
     )
 
 {
     /// <summary>Gets the identifier of the published quiz.</summary>
-    public Guid? QuizId { get; init; }
+    public Guid? QuizId { get; init; } = QuizId;
 
     /// <summary>Gets the identifier of the quiz draft.</summary>
-    public Guid? QuizDraftId { get; init; }
+    public Guid? QuizDraftId { get; init; } = QuizDraftId;
 
     /// <summary>Gets whether this subject is intended to contain a quiz.</summary>
-    public bool IsQuiz { get; init; }
+    public bool IsQuiz { get; init; } = IsQuiz;
 
     /// <summary>
     /// A unique identifier for the subject draft.

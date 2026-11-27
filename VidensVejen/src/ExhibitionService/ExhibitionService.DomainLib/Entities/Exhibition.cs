@@ -38,6 +38,11 @@ public class Exhibition
     /// <summary>
     /// 
     /// </summary>
+    public byte[] RowVersion { get; private set; } = [];
+
+    /// <summary>
+    /// 
+    /// </summary>
     /// <param name="id"></param>
     /// <param name="exhibitionName"></param>
     /// <param name="exhibitionNameEn"></param>
