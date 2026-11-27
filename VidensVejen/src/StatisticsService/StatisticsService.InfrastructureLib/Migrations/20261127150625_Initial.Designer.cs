@@ -12,7 +12,7 @@ using StatisticsService.InfrastructureLib.Persistence;
 namespace StatisticsService.InfrastructureLib.Migrations
 {
     [DbContext(typeof(StatisticsDbContext))]
-    [Migration("20261125135446_Initial")]
+    [Migration("20261127150625_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

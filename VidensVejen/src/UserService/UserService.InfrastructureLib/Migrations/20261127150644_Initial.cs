@@ -50,7 +50,8 @@ namespace UserService.InfrastructureLib.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Firstname = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Surname = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EmailAddress = table.Column<string>(type: "nvarchar(254)", maxLength: 254, nullable: false)
+                    EmailAddress = table.Column<string>(type: "nvarchar(254)", maxLength: 254, nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {

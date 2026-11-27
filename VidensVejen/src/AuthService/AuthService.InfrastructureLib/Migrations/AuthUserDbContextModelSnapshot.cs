@@ -74,7 +74,7 @@ namespace AuthService.InfrastructureLib.Migrations
                         new
                         {
                             Id = new Guid("f595c2a6-13b0-438c-bc63-c08fff41ddc4"),
-                            Name = "Exhibition.Create"
+                            Name = "Exhibition.Publish"
                         },
                         new
                         {
@@ -94,7 +94,7 @@ namespace AuthService.InfrastructureLib.Migrations
                         new
                         {
                             Id = new Guid("35ae0b5a-36cf-4242-a7f3-f10a616e6626"),
-                            Name = "Game.Create"
+                            Name = "Game.Publish"
                         },
                         new
                         {

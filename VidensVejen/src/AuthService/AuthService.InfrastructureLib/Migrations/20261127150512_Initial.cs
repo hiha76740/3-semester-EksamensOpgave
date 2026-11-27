@@ -22,7 +22,8 @@ namespace AuthService.InfrastructureLib.Migrations
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -104,19 +105,17 @@ namespace AuthService.InfrastructureLib.Migrations
                 {
                     { new Guid("0fb02b10-29ea-4616-83d8-5e7870e24c3f"), "Exhibition.Delete" },
                     { new Guid("1d4d28b2-edc2-4aaa-be9e-e855f4dd7cd3"), "Exhibition.Edit" },
-                    { new Guid("1eff118c-87f2-45f6-8f1e-2a4ce1f1ccff"), "AuthUser.Read" },
-                    { new Guid("227910aa-2f9f-4e37-a598-2ee40440a674"), "User.Edit" },
-                    { new Guid("35ae0b5a-36cf-4242-a7f3-f10a616e6626"), "Game.Create" },
-                    { new Guid("389ee76d-5478-43a4-a5f9-94a9f8133eb9"), "AuthUser.Edit" },
+                    { new Guid("1eff118c-87f2-45f6-8f1e-2a4ce1f1ccff"), "User.Read" },
+                    { new Guid("35ae0b5a-36cf-4242-a7f3-f10a616e6626"), "Game.Publish" },
+                    { new Guid("389ee76d-5478-43a4-a5f9-94a9f8133eb9"), "User.Edit" },
                     { new Guid("420dedfe-0bed-40ab-b036-63fbe52fbbab"), "Exhibition.Read" },
                     { new Guid("577779d0-f015-4827-8535-0318210db489"), "Game.Delete" },
-                    { new Guid("68a14b26-15d6-4831-a876-221b01260c6b"), "AuthUser.Create" },
-                    { new Guid("a560a50a-a7ed-4938-8924-8707464fd16c"), "User.Read" },
+                    { new Guid("68a14b26-15d6-4831-a876-221b01260c6b"), "User.Create" },
                     { new Guid("a5d70bf0-67d1-4a14-bf0b-2857d3307e11"), "Game.Edit" },
-                    { new Guid("ab46c03f-4440-4ef9-8137-9dc09f82b94c"), "AuthUser.Delete" },
+                    { new Guid("ab46c03f-4440-4ef9-8137-9dc09f82b94c"), "User.Delete" },
                     { new Guid("e48eb056-2c92-4642-90a9-dd685edb7222"), "Image.Upload" },
                     { new Guid("efcc418e-1113-4d82-b67e-3f6efc06765d"), "Game.Read" },
-                    { new Guid("f595c2a6-13b0-438c-bc63-c08fff41ddc4"), "Exhibition.Create" },
+                    { new Guid("f595c2a6-13b0-438c-bc63-c08fff41ddc4"), "Exhibition.Publish" },
                     { new Guid("f5ad63ca-85e0-40f8-9315-f6f7cd088408"), "Image.Delete" }
                 });
 

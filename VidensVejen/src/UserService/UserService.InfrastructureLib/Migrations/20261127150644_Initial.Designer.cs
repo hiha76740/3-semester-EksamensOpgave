@@ -12,7 +12,7 @@ using UserService.InfrastructureLib.Persistence;
 namespace UserService.InfrastructureLib.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20261116164755_Initial")]
+    [Migration("20261127150644_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -38,6 +38,12 @@ namespace UserService.InfrastructureLib.Migrations
                     b.Property<string>("Firstname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
 
                     b.Property<string>("Surname")
                         .IsRequired()

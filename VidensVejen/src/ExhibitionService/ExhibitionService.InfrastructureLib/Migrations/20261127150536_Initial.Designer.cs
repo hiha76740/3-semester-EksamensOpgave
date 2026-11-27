@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExhibitionService.InfrastructureLib.Migrations
 {
     [DbContext(typeof(ExhibitionDbContext))]
-    [Migration("20261127122308_Initial")]
+    [Migration("20261127150536_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -29,6 +29,9 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedAtUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -58,6 +61,9 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("LastModifiedAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -73,6 +79,9 @@ namespace ExhibitionService.InfrastructureLib.Migrations
 
                     b.Property<Guid?>("SourceExhibitionId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("SourceRowVersion")
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<Guid?>("ThemeImageId")
                         .HasColumnType("uniqueidentifier");

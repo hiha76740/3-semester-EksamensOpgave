@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ImageService.InfrastructureLib.Migrations
 {
     [DbContext(typeof(ImageDbContext))]
-    [Migration("20261124080022_Initial")]
+    [Migration("20261127150609_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

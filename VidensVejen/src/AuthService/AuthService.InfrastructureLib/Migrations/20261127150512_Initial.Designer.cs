@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthService.InfrastructureLib.Migrations
 {
     [DbContext(typeof(AuthUserDbContext))]
-    [Migration("20261123162905_AddedRowVersion")]
-    partial class AddedRowVersion
+    [Migration("20261127150512_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,27 +57,27 @@ namespace AuthService.InfrastructureLib.Migrations
                         new
                         {
                             Id = new Guid("68a14b26-15d6-4831-a876-221b01260c6b"),
-                            Name = "AuthUser.Create"
+                            Name = "User.Create"
                         },
                         new
                         {
                             Id = new Guid("389ee76d-5478-43a4-a5f9-94a9f8133eb9"),
-                            Name = "AuthUser.Edit"
+                            Name = "User.Edit"
                         },
                         new
                         {
                             Id = new Guid("ab46c03f-4440-4ef9-8137-9dc09f82b94c"),
-                            Name = "AuthUser.Delete"
+                            Name = "User.Delete"
                         },
                         new
                         {
                             Id = new Guid("1eff118c-87f2-45f6-8f1e-2a4ce1f1ccff"),
-                            Name = "AuthUser.Read"
+                            Name = "User.Read"
                         },
                         new
                         {
                             Id = new Guid("f595c2a6-13b0-438c-bc63-c08fff41ddc4"),
-                            Name = "Exhibition.Create"
+                            Name = "Exhibition.Publish"
                         },
                         new
                         {
@@ -97,7 +97,7 @@ namespace AuthService.InfrastructureLib.Migrations
                         new
                         {
                             Id = new Guid("35ae0b5a-36cf-4242-a7f3-f10a616e6626"),
-                            Name = "Game.Create"
+                            Name = "Game.Publish"
                         },
                         new
                         {
@@ -123,16 +123,6 @@ namespace AuthService.InfrastructureLib.Migrations
                         {
                             Id = new Guid("f5ad63ca-85e0-40f8-9315-f6f7cd088408"),
                             Name = "Image.Delete"
-                        },
-                        new
-                        {
-                            Id = new Guid("227910aa-2f9f-4e37-a598-2ee40440a674"),
-                            Name = "User.Edit"
-                        },
-                        new
-                        {
-                            Id = new Guid("a560a50a-a7ed-4938-8924-8707464fd16c"),
-                            Name = "User.Read"
                         });
                 });
 

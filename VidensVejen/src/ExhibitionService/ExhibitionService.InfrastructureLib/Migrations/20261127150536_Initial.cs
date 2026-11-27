@@ -20,7 +20,9 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     NameEn = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ThemeImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     SourceExhibitionId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    SourceRowVersion = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
+                    LastModifiedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -35,7 +37,8 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     NameEn = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ThemeImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
+                    LastModifiedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
