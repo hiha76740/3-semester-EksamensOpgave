@@ -95,9 +95,9 @@ public class ExhibitionDraftController(
     {
         try
         {
-            await create.CreateRevisionAsync(request.AsUpdateDraftCommand(exhibitionId));
+            var id = await create.CreateRevisionAsync(request.AsUpdateDraftCommand(exhibitionId));
 
-            return Ok();
+            return Ok(id);
         }
         catch (NotFoundException ex)
         {
