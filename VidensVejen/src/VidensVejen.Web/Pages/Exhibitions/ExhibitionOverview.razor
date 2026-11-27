@@ -61,7 +61,7 @@
             var state = await AuthenticationStateTask;
             var user = state.User;
             canEdit = HasPermission(user, "Exhibition.Edit");
-            canPublish = HasPermission(user, "Exhibition.Create");
+            canPublish = HasPermission(user, "Exhibition.Publish");
             canDelete = HasPermission(user, "Exhibition.Delete");
             showDrafts = canEdit || canPublish || HasPermission(user, "Exhibition.Read");
             canAccess = showDrafts || canDelete;

@@ -86,7 +86,7 @@ else
             canEditExhibition = user.Identity?.IsAuthenticated == true
                 && user.HasClaim(CustomClaimTypes.Permission, "Exhibition.Edit");
             canPublishExhibition = user.Identity?.IsAuthenticated == true
-                && user.HasClaim(CustomClaimTypes.Permission, "Exhibition.Create");
+                && user.HasClaim(CustomClaimTypes.Permission, "Exhibition.Publish");
             canEditQuiz = user.Identity?.IsAuthenticated == true
                 && user.HasClaim(CustomClaimTypes.Permission, "Game.Edit");
             canPublishQuiz = user.Identity?.IsAuthenticated == true
