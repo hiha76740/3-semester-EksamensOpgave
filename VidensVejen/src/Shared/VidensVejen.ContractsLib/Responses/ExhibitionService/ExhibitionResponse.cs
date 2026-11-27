@@ -5,6 +5,7 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// </summary>
 /// <param name="Id"></param>
 /// <param name="Title"></param>
+/// <param name="TitleEn"></param>
 /// <param name="Subjects"></param>
 /// <param name="ThemeImageId"></param>
 /// <example>
@@ -35,6 +36,7 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 public record ExhibitionResponse(
     Guid Id,
     string Title,
+    string TitleEn,
     Guid ThemeImageId,
     IReadOnlyList<SubjectResponse> Subjects
     )
@@ -45,9 +47,14 @@ public record ExhibitionResponse(
     public Guid Id { get; init; } = Id;
 
     /// <summary>
-    /// The title of the exhibition.
+    /// The title of the exhibition shown in Danish.
     /// </summary>
     public string Title { get; init; } = Title;
+
+    /// <summary>
+    /// The title of the exhibition shown in English.
+    /// </summary>
+    public string TitleEn { get; init; } = TitleEn;
 
     /// <summary>
     /// The url of the theme.

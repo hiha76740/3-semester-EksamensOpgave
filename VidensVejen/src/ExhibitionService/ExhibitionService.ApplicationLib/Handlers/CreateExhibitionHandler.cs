@@ -5,6 +5,7 @@ using ExhibitionService.DomainLib.ValueObjects;
 using ExhibitionService.FacadeLib.Commands.DTOs;
 using ExhibitionService.FacadeLib.Commands.Interfaces;
 using Microsoft.Extensions.Logging;
+using VidensVejen.SharedKernelLib.Exceptions;
 
 namespace ExhibitionService.ApplicationLib.Handlers;
 
@@ -12,17 +13,39 @@ namespace ExhibitionService.ApplicationLib.Handlers;
 /// 
 /// </summary>
 /// <param name="exhibitionRepo"></param>
+/// <param name="exhibitionDraftRepo"></param>
 /// <param name="imageService"></param>
 /// <param name="logger"></param>
 public class CreateExhibitionHandler(
     IExhibitionRepository exhibitionRepo,
+    IExhibitionDraftRepository exhibitionDraftRepo,
     IImageService imageService,
     ILogger<CreateExhibitionHandler> logger) : ICreateExhibitionHandler
 {
-    async Task ICreateExhibitionHandler.HandleAsync(CreateExhibitionCommand command)
+    Task ICreateExhibitionHandler.HandleAsync(CreateExhibitionCommand command)
     {
-        // TO DO: Update empty Exhibition from ExhibitionDraft
+        return SavePublicationAsync(command, null, null);
+    }
 
+    async Task ICreateExhibitionHandler.PublishRevisionAsync(Guid draftId, CreateExhibitionCommand command)
+    {
+        var draft = await exhibitionDraftRepo.GetExhibitionDraftByIdAsync(new ExhibitionDraftId(draftId))
+            ?? throw new NotFoundException("Exhibition draft was not found.");
+
+        if (draft.SourceExhibitionId == null)
+        {
+            throw new DomainException("This draft does not revise a published exhibition.");
+        }
+
+        var sourceId = new ExhibitionId(draft.SourceExhibitionId.Value);
+        var exhibition = await exhibitionRepo.GetExhibitionById(sourceId)
+            ?? throw new NotFoundException("The original exhibition was not found.");
+
+        await SavePublicationAsync(command, exhibition, draft);
+    }
+
+    private async Task SavePublicationAsync(CreateExhibitionCommand command, Exhibition? original, ExhibitionDraft? revisionDraft)
+    {
         try
         {
             if (logger.IsEnabled(LogLevel.Information))
@@ -69,7 +92,7 @@ public class CreateExhibitionHandler(
                     topics));
             }
 
-            var exhibitionId = new ExhibitionId(command.Id);
+            var exhibitionId = original?.Id ?? new ExhibitionId(command.Id);
 
             var exhibition = Exhibition.Create(
                 exhibitionId,
@@ -81,7 +104,16 @@ public class CreateExhibitionHandler(
             if (logger.IsEnabled(LogLevel.Information))
                 logger.LogInformation("Exhibition created with id: {ExhibitionId}", exhibition.Id.Value);
 
-            await exhibitionRepo.AddAsync(exhibition);
+            if (original != null && revisionDraft != null)
+            {
+                original.ApplyRevision(exhibition);
+                exhibitionDraftRepo.Delete(revisionDraft);
+            }
+            else
+            {
+                await exhibitionRepo.AddAsync(exhibition);
+            }
+
             await exhibitionRepo.SaveAsync();
 
             if (logger.IsEnabled(LogLevel.Information))

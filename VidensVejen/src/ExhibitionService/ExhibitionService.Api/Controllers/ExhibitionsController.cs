@@ -14,7 +14,6 @@ namespace ExhibitionService.Api.Controllers;
 [ApiController]
 public class ExhibitionsController(
     ICreateExhibitionHandler create,
-    IUpdateExhibitionHandler update,
     IDeleteExhibitionHandler delete,
     IExhibitionQueries queries
     ) : ControllerBase
@@ -35,32 +34,6 @@ public class ExhibitionsController(
                 return NotFound("Exhibition was not found");
 
             return Ok(dto.AsResponse());
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
-
-    [HttpPut("{id:guid}")]
-    [EndpointSummary("Update a single instance of a exhibition")]
-    [EndpointDescription("Updates the details of a exhibition")]
-    [ProducesResponseType<ExhibitionResponse>(StatusCodes.Status200OK, "application/json", Description = "Returns the updated instance of the requested exhibition")]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to update the requested exhibition")]
-    [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Exhibition was not found")]
-    public async Task<ActionResult<ExhibitionResponse>> UpdateExhibition(
-        [Required][Description("A unique identifier for a exhibition")] Guid id,
-        [Required][Description("The object used for updating Exhibition, Subject and Topics")] UpdateExhibitionRequest request)
-    {
-        try
-        {
-            var dto = await update.HandleAsync(request.AsUpdateCommand(id));
-
-            return Ok(dto.AsResponse());
-        }
-        catch (NotFoundException ex)
-        {
-            return NotFound(ex.Message);
         }
         catch (Exception ex)
         {

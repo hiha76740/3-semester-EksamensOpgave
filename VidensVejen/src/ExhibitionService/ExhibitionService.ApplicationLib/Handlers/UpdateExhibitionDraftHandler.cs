@@ -1,3 +1,4 @@
+using ExhibitionService.ApplicationLib.Helpers;
 using ExhibitionService.ApplicationLib.Repositories;
 using ExhibitionService.DomainLib.ValueObjects;
 using ExhibitionService.FacadeLib.Commands.DTOs;
@@ -25,58 +26,10 @@ public class UpdateExhibitionDraftHandler(
 
             var id = new ExhibitionDraftId(command.Id);
 
-            ImageId? themeImageId = null;
-
-            if (command.ThemeImageId.HasValue)
-            {
-                themeImageId = new ImageId(command.ThemeImageId.Value);
-            }
-
-
             var exhibitionDraft = await exhibitionDraftRepo.GetExhibitionDraftByIdAsync(id)
                 ?? throw new NotFoundException("Exhibition draft not found");
 
-
-            var subjectDrafts = new List<NewSubjectDraft>();
-
-            foreach (var subjectCommand in command.SubjectDrafts ?? [])
-            {
-                var topicDrafts = new List<NewTopicDraft>();
-
-                foreach (var topicCommand in subjectCommand.TopicDrafts ?? [])
-                {
-                    topicDrafts.Add(new NewTopicDraft(
-                        topicCommand.Title,
-                        topicCommand.TitleEn,
-                        topicCommand.Description,
-                        topicCommand.DescriptionEn,
-                        topicCommand.Body,
-                        topicCommand.BodyEn,
-                        topicCommand.CalloutLabel,
-                        topicCommand.CalloutLabelEn,
-                        topicCommand.CalloutText,
-                        topicCommand.CalloutTextEn,
-                        topicCommand.Quote,
-                        topicCommand.QuoteEn
-                        ));
-                }
-                subjectDrafts.Add(new NewSubjectDraft(
-                    subjectCommand.Title,
-                    subjectCommand.TitleEn,
-                    subjectCommand.Slug,
-                    subjectCommand.Description,
-                    subjectCommand.DescriptionEn,
-                    subjectCommand.QuizId,
-                    subjectCommand.QuizDraftId,
-                    subjectCommand.IsQuiz,
-                    topicDrafts));
-            }
-
-            exhibitionDraft.UpdateExhibitionDraft(
-                command.ExhibtionName,
-                command.ExhibitionNameEn,
-                themeImageId,
-                subjectDrafts);
+            HandlerHelper.Apply(exhibitionDraft, command);
 
             await exhibitionDraftRepo.SaveAsync();
 

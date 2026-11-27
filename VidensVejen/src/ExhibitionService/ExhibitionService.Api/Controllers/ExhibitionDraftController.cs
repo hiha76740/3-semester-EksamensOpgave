@@ -6,6 +6,7 @@ using ExhibitionService.FacadeLib.Queries.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using VidensVejen.ContractsLib.Requests.ExhibitionService.Drafts;
 using VidensVejen.ContractsLib.Responses.ExhibitionService;
+using VidensVejen.ContractsLib.Requests.ExhibitionService.Exhibitions;
 using VidensVejen.SharedKernelLib.Exceptions;
 
 
@@ -15,6 +16,7 @@ namespace ExhibitionService.Api.Controllers;
 [ApiController]
 public class ExhibitionDraftController(
     ICreateExhibitionDraftHandler create,
+    ICreateExhibitionHandler publish,
     IUpdateExhibitionDraftHandler update,
     IDeleteExhibitionDraftHandler delete,
     IExhibitionDraftQueries queries
@@ -77,6 +79,55 @@ public class ExhibitionDraftController(
             return Ok(id);
         }
         catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("from-exhibition/{exhibitionId:guid}")]
+    [EndpointSummary("Create an edit draft for a published exhibition")]
+    [ProducesResponseType<Guid>(StatusCodes.Status200OK, Description = "Edit draft for exhibition created successfully")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Description = "Error while trying to create edit draft")]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Description = "Original exhibition not found")]
+    public async Task<ActionResult<Guid>> CreateRevision(
+        [Required][Description("A unique identifier for a exhibition")] Guid exhibitionId,
+        [Required][Description("Object used to create a revision for a  exhibition")] UpdateExhibitionDraftRequest request)
+    {
+        try
+        {
+            await create.CreateRevisionAsync(request.AsUpdateDraftCommand(exhibitionId));
+
+            return Ok();
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpPost("{id:guid}/publish-revision")]
+    [EndpointSummary("Publish a revision of an existing exhibition")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> PublishRevision(
+        [Required][Description("A unique identifier for an exhibition draft")] Guid id,
+        [Required][Description("Object used to publish a exhibition")] CreateExhibitionRequest request)
+    {
+        try
+        {
+            await publish.PublishRevisionAsync(id, request.AsCreateCommand());
+            return NoContent();
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (DomainException ex)
         {
             return BadRequest(ex.Message);
         }

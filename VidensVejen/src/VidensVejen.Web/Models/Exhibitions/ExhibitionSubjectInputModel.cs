@@ -16,6 +16,11 @@ public sealed class ExhibitionSubjectInputModel
     public string TitleEn { get; set; } = string.Empty;
 
     /// <summary>
+    /// Gets or sets the existing subject route.
+    /// </summary>
+    public string? Slug { get; set; }
+
+    /// <summary>
     /// Gets or sets the description in Danish.
     /// </summary>
     public string Description { get; set; } = string.Empty;

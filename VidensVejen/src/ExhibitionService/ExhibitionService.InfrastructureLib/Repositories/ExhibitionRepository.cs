@@ -27,7 +27,7 @@ public class ExhibitionRepository(ExhibitionDbContext db) : IExhibitionRepositor
     {
         return await db.Exhibitions
             .Include(e => e.Subjects)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(exhibition => exhibition.Id == id);
     }
 
     async Task IExhibitionRepository.SaveAsync()

@@ -11,11 +11,17 @@ internal static class TopicMapper
     {
         var output = new TopicResponse(
             dto.Title,
+            dto.TitleEn,
             dto.Description,
+            dto.DescriptionEn,
             dto.Body,
+            dto.BodyEn,
             dto.CalloutLabel,
+            dto.CalloutLabelEn,
             dto.CalloutText,
-            dto.Quote
+            dto.CalloutTextEn,
+            dto.Quote,
+            dto.QuoteEn
             );
 
         return output;

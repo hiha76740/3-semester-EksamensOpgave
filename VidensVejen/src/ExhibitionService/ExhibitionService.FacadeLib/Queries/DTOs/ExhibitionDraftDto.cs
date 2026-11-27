@@ -8,9 +8,11 @@ namespace ExhibitionService.FacadeLib.Queries.DTOs;
 /// <param name="NameEn"></param>
 /// <param name="SubjectDrafts"></param>
 /// <param name="ThemeImageId"></param>
+/// <param name="SourceExhibitionId"></param>
 public record ExhibitionDraftDto(
     Guid Id,
     string? Name,
     string? NameEn,
     IReadOnlyList<SubjectDraftDto> SubjectDrafts,
-    Guid? ThemeImageId);
+    Guid? ThemeImageId,
+    Guid? SourceExhibitionId);

@@ -17,7 +17,8 @@ internal static class ExhibitionDraftMapper
             dto.SubjectDrafts
             .Select(
                 sd => sd.AsResponse())
-            .ToList()
+            .ToList(),
+            dto.SourceExhibitionId
             );
 
         return output;

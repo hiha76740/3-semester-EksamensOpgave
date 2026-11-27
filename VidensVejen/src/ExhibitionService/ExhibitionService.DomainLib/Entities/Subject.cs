@@ -77,7 +77,7 @@ public class Subject
         if (string.IsNullOrWhiteSpace(slug))
             throw new DomainException("Could not set slug, no value.");
 
-        if ((quizId == null && topics == null) || topics.Count == 0)
+        if (quizId == null && topics.Count == 0)
             throw new DomainException("A subject must have at least one topic");
 
         Id = new SubjectId(Guid.NewGuid());

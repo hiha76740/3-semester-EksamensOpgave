@@ -39,12 +39,22 @@
                 EmptyText="Der er ingen publicerede udstillinger.">
     <Columns>
         <RadzenDataGridColumn TItem="ExhibitionNameResponse" Title="Navn" Property="@nameof(ExhibitionNameResponse.Name)" />
-        @if (CanDeletePublished)
+        @if (CanEdit || CanDeletePublished)
         {
             <RadzenDataGridColumn TItem="ExhibitionNameResponse" Title="Handlinger">
                 <Template Context="exhibition">
-                    <RadzenButton Text="Slet" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Outlined"
-                                  Disabled="@IsDeleting" Click="@(() => DeletePublished.InvokeAsync(exhibition))" />
+                    <RadzenStack Orientation="Orientation.Horizontal" Wrap="FlexWrap.Wrap">
+                        @if (CanEdit)
+                        {
+                            <RadzenButton Text="Ændre som kladde" Icon="edit" Variant="Variant.Outlined"
+                                          Click="@(() => EditPublished.InvokeAsync(exhibition))" />
+                        }
+                        @if (CanDeletePublished)
+                        {
+                            <RadzenButton Text="Slet" ButtonStyle="ButtonStyle.Danger" Variant="Variant.Outlined"
+                                          Disabled="@IsDeleting" Click="@(() => DeletePublished.InvokeAsync(exhibition))" />
+                        }
+                    </RadzenStack>
                 </Template>
             </RadzenDataGridColumn>
         }
@@ -58,6 +68,7 @@
     [Parameter] public bool CanEdit { get; set; }
     [Parameter] public bool CanPublish { get; set; }
     [Parameter] public bool CanDeletePublished { get; set; }
+    [Parameter] public EventCallback<ExhibitionNameResponse> EditPublished { get; set; }
     [Parameter] public bool IsDeleting { get; set; }
     [Parameter] public EventCallback<ExhibitionDraftResponse> DeleteDraft { get; set; }
     [Parameter] public EventCallback<ExhibitionNameResponse> DeletePublished { get; set; }

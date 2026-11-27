@@ -77,9 +77,46 @@ public class ExhibitionService(HttpClient httpClient) : IExhibitionService
         return response.StatusCode;
     }
 
-    async Task<Guid> IExhibitionService.CreateDraftAsync()
+    Task<Guid> IExhibitionService.CreateDraftAsync()
     {
-        using var request = new HttpRequestMessage(HttpMethod.Post, $"{DraftBaseUrl}");
+        return CreateDraftAsync(DraftBaseUrl);
+    }
+
+    async Task<ExhibitionResponse> IExhibitionService.GetPublishedAsync(Guid exhibitionId)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/{exhibitionId:D}");
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<ExhibitionResponse>()
+            ?? throw new JsonException("The published exhibition response was empty.");
+    }
+
+    Task<Guid> IExhibitionService.CreateRevisionDraftAsync(Guid exhibitionId, UpdateExhibitionDraftRequest draft)
+    {
+        return CreateDraftAsync($"{DraftBaseUrl}/from-exhibition/{exhibitionId:D}", draft);
+    }
+
+    async Task IExhibitionService.PublishRevisionAsync(Guid draftId, CreateExhibitionRequest exhibition)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"{DraftBaseUrl}/{draftId:D}/publish-revision")
+        {
+            Content = JsonContent.Create(exhibition)
+        };
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+    }
+
+    private async Task<Guid> CreateDraftAsync(string url, UpdateExhibitionDraftRequest? draft = null)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        if (draft != null)
+        {
+            request.Content = JsonContent.Create(draft);
+        }
+
         request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
         using var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();

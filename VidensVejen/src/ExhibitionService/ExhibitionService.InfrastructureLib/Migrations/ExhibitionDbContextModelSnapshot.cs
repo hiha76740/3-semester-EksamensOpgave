@@ -56,6 +56,9 @@ namespace ExhibitionService.InfrastructureLib.Migrations
                     b.Property<string>("NameEn")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("SourceExhibitionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("ThemeImageId")
                         .HasColumnType("uniqueidentifier");
 

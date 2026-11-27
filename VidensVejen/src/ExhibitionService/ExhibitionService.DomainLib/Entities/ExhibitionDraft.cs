@@ -32,6 +32,19 @@ public class ExhibitionDraft
     /// </summary>
     public IReadOnlyList<SubjectDraft> SubjectDrafts => _subjectDrafts.AsReadOnly();
 
+    /// <summary>
+    /// Gets the published exhibition being edited, when present.
+    /// </summary>
+    public ExhibitionId? SourceExhibitionId { get; private set; }
+
+    /// <summary>
+    /// Creates a draft linked to the published exhibition it will update.
+    /// </summary>
+    public static ExhibitionDraft CreateRevision(ExhibitionId sourceId)
+    {
+        return new ExhibitionDraft { SourceExhibitionId = sourceId };
+    }
+
     private readonly List<SubjectDraft> _subjectDrafts = [];
 
 

@@ -12,6 +12,7 @@ internal static class ExhibitionMapper
         var output = new ExhibitionResponse(
             dto.Id,
             dto.Name,
+            dto.NameEn,
             dto.ThemeImageId,
             dto.Subjects
             .Select(

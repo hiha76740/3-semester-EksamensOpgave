@@ -13,7 +13,9 @@ internal static class SubjectMapper
             dto.Id,
             dto.Slug,
             dto.Title,
+            dto.TitleEn,
             dto.Description,
+            dto.DescriptionEn,
             dto.QuizId,
             dto.Topics
             .Select(

@@ -70,6 +70,23 @@ public class Exhibition
     }
 
 
+    /// <summary>
+    /// Applies validated publication content to this exhibition.
+    /// </summary>
+    public void ApplyRevision(Exhibition revision)
+    {
+        if (revision.Id != Id)
+        {
+            throw new DomainException("The revision belongs to a different exhibition.");
+        }
+
+        Name = revision.Name;
+        NameEn = revision.NameEn;
+        ThemeImageId = revision.ThemeImageId;
+        _subjects.Clear();
+        _subjects.AddRange(revision.Subjects);
+    }
+
     private void AddSubject(NewSubject newSubject)
     {
         QuizId? quizId = null;

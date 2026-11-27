@@ -1,5 +1,6 @@
 @page "/exhibition/create"
 @page "/exhibition/drafts/{ExistingDraftId:guid}"
+@page "/exhibition/{PublishedExhibitionId:guid}/edit"
 
 @inject IImageService ImageService
 @inject IExhibitionService ExhibitionService
@@ -7,7 +8,7 @@
 @inject DialogService Dialog
 @inject NavigationManager NavigationManager
 
-<PageTitle>Opret udstilling</PageTitle>
+<PageTitle>@(PublishedExhibitionId.HasValue || sourceExhibitionId.HasValue ? "Redigér udstilling" : "Opret udstilling")</PageTitle>
 
 @if (accessDenied)
 {
@@ -15,9 +16,9 @@
 }
 else if (model != null)
 {
-    <ExhibitionFormComponent @key="model" Model="model" ExhibitionId="draftId.GetValueOrDefault()" CanEditQuiz="canEditQuiz" SubmitCallback="Create" SubmitButtonText="Publicér"
+    <ExhibitionFormComponent @key="model" Model="model" ExhibitionId="@(sourceExhibitionId ?? draftId.GetValueOrDefault())" CanEditQuiz="canEditQuiz" SubmitCallback="Create" SubmitButtonText="Publicér"
                              SaveDraftCallback="SaveDraftAsync" CanSaveDraft="canEditExhibition"
-                             CanPublish="canPublishExhibition" IsBusy="isBusy"
+                             CanPublish="canPublishExhibition" IsBusy="isBusy" AutoSaveQuizChanges="@draftId.HasValue"
                              Error="@error" Message="@message" />
 }
 else
@@ -30,6 +31,10 @@ else
     {
         <RadzenButton Text="Hent kladde" Click="LoadDraftAsync" IsBusy="@isBusy" />
     }
+    else if (PublishedExhibitionId.HasValue)
+    {
+        <RadzenButton Text="Hent udstilling" Click="LoadPublishedAsync" IsBusy="@isBusy" />
+    }
     else
     {
         <RadzenButton Text="Opret udstilling" Icon="add" Click="StartDraftAsync" IsBusy="@isBusy" />
@@ -39,6 +44,11 @@ else
 @code {
     [Parameter]
     public Guid? ExistingDraftId { get; set; }
+
+    [Parameter]
+    public Guid? PublishedExhibitionId { get; set; }
+
+    private (Guid? DraftId, Guid? PublishedId)? loadedRoute;
 
     [CascadingParameter]
     private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
@@ -50,6 +60,7 @@ else
     private bool canEditQuiz;
     private ExhibitionInputModel? model;
     private Guid? draftId;
+    private Guid? sourceExhibitionId;
     private IBrowserFile? uploadedThemeFile;
     private Guid? uploadedThemeId;
     private bool isBusy;
@@ -58,7 +69,8 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        if (draftId == ExistingDraftId && model != null)
+        var route = (ExistingDraftId, PublishedExhibitionId);
+        if (loadedRoute == route && model != null)
         {
             return;
         }
@@ -83,15 +95,71 @@ else
             return;
         }
 
+        loadedRoute = route;
         model = null;
+        error = null;
+        message = null;
         draftId = null;
+        sourceExhibitionId = null;
         uploadedThemeFile = null;
         uploadedThemeId = null;
         if (ExistingDraftId.HasValue)
         {
             await LoadDraftAsync();
         }
+        else if (PublishedExhibitionId.HasValue)
+        {
+            await LoadPublishedAsync();
+        }
     }
+
+    private Task LoadPublishedAsync() => RunAsync(async () =>
+    {
+        if (!canEditExhibition || PublishedExhibitionId is not Guid id)
+        {
+            return;
+        }
+
+        var exhibition = await ExhibitionService.GetPublishedAsync(id);
+        var subjects = exhibition.Subjects.Select(saved =>
+        {
+            var subject = new ExhibitionSubjectInputModel
+            {
+                Title = saved.Title,
+                TitleEn = saved.TitleEn ?? string.Empty,
+                Slug = saved.Slug,
+                Description = saved.Description,
+                DescriptionEn = saved.DescriptionEn ?? string.Empty,
+                IsQuiz = saved.QuizId.HasValue,
+                QuizId = saved.QuizId
+            };
+            subject.Topics.AddRange(saved.Topics.Select(topic => new ExhibitionTopicInputModel
+            {
+                Title = topic.Title,
+                TitleEn = topic.TitleEn ?? string.Empty,
+                Description = topic.Description,
+                DescriptionEn = topic.DescriptionEn ?? string.Empty,
+                Body = topic.Body,
+                BodyEn = topic.BodyEn ?? string.Empty,
+                CalloutLabel = topic.CalloutLabel,
+                CalloutLabelEn = topic.CalloutLabelEn ?? string.Empty,
+                CalloutText = topic.CalloutText,
+                CalloutTextEn = topic.CalloutTextEn ?? string.Empty,
+                Quote = topic.Quote ?? string.Empty,
+                QuoteEn = topic.QuoteEn ?? string.Empty
+            }));
+            return subject;
+        }).ToList();
+
+        sourceExhibitionId = exhibition.Id;
+        uploadedThemeId = exhibition.ThemeImageId;
+        model = new ExhibitionInputModel
+        {
+            ExhibitionName = exhibition.Title,
+            ExhibitionNameEn = exhibition.TitleEn ?? string.Empty,
+            Subjects = subjects
+        };
+    }, "Udstillingen kunne ikke hentes.");
 
     private async Task StartDraftAsync()
     {
@@ -122,6 +190,7 @@ else
             {
                 Title = saved.Title ?? string.Empty,
                 TitleEn = saved.TitleEn ?? string.Empty,
+                Slug = saved.Slug,
                 Description = saved.Description ?? string.Empty,
                 DescriptionEn = saved.DescriptionEn ?? string.Empty,
                 IsQuiz = saved.IsQuiz,
@@ -154,13 +223,14 @@ else
             subjects.Add(subject);
         }
 
-        while (subjects.Count < 4)
+        while (!draft.SourceExhibitionId.HasValue && subjects.Count < 4)
         {
             subjects.Add(new ExhibitionSubjectInputModel());
         }
 
         uploadedThemeId = draft.ThemeImageId;
         draftId = id;
+        sourceExhibitionId = draft.SourceExhibitionId;
         model = new ExhibitionInputModel
         {
             ExhibitionName = draft.Name ?? string.Empty,
@@ -181,22 +251,53 @@ else
         }
     }
 
-    private Task SaveDraftAsync(ExhibitionInputModel input) => RunAsync(async () =>
+    private async Task SaveDraftAsync(ExhibitionInputModel input)
     {
-        if (canEditExhibition && draftId is Guid id)
+        if (!canEditExhibition)
+        {
+            return;
+        }
+
+        Guid? savedId = null;
+        await RunAsync(async () =>
         {
             var imageId = await ResolveThemeIdAsync(input.ThemeFile);
-            await PersistDraftAsync(id, input, imageId);
+            savedId = await SaveDraftContentAsync(input, imageId);
             message = "Kladden er gemt.";
-        }
-    }, "Kladden kunne ikke gemmes.");
+        }, "Kladden kunne ikke gemmes.");
 
-    private Task PersistDraftAsync(Guid id, ExhibitionInputModel input, Guid? imageId)
+        if (PublishedExhibitionId.HasValue && savedId is Guid id)
+        {
+            loadedRoute = (id, null);
+            NavigationManager.NavigateTo($"exhibition/drafts/{id:D}");
+        }
+    }
+
+    private async Task<Guid> SaveDraftContentAsync(ExhibitionInputModel input, Guid? imageId)
     {
-        var request = new UpdateExhibitionDraftRequest(
+        var request = BuildDraftRequest(input, imageId);
+        if (draftId is Guid id)
+        {
+            await ExhibitionService.SaveDraftAsync(id, request);
+            return id;
+        }
+
+        if (sourceExhibitionId is not Guid sourceId)
+        {
+            throw new InvalidOperationException("The source exhibition is missing.");
+        }
+
+        var createdId = await ExhibitionService.CreateRevisionDraftAsync(sourceId, request);
+        draftId = createdId;
+        return createdId;
+    }
+
+    private UpdateExhibitionDraftRequest BuildDraftRequest(ExhibitionInputModel input, Guid? imageId)
+    {
+        return new UpdateExhibitionDraftRequest(
             input.ExhibitionName, input.ExhibitionNameEn, imageId,
             input.Subjects.Select(subject => new UpdateSubjectDraftRequest(
-                Guid.Empty, subject.Title, subject.TitleEn, subject.Title.ToLowerInvariant(),
+                Guid.Empty, subject.Title, subject.TitleEn, GetSubjectSlug(subject),
                 subject.Description, subject.DescriptionEn,
                 subject.Topics.Select(topic => new UpdateTopicDraftRequest(
                     topic.Title, topic.TitleEn, topic.Description, topic.DescriptionEn,
@@ -207,13 +308,11 @@ else
                 QuizId = subject.IsQuiz ? subject.QuizId : null,
                 QuizDraftId = subject.IsQuiz ? subject.QuizDraftId : null
             }).ToList());
-
-        return ExhibitionService.SaveDraftAsync(id, request);
     }
 
     public Task Create(ExhibitionInputModel input) => RunAsync(async () =>
     {
-        if (!canPublishExhibition || draftId is not Guid id)
+        if (!canPublishExhibition || (!draftId.HasValue && !sourceExhibitionId.HasValue))
         {
             return;
         }
@@ -255,7 +354,7 @@ else
 
             var quiz = QuizEditorMapper.FromDraft(draft);
             quiz.RowVersion = draft.RowVersion;
-            quiz.ExhibitionId = id;
+            quiz.ExhibitionId = sourceExhibitionId ?? draftId.GetValueOrDefault();
             var quizErrors = new List<string>();
             QuizEditorMapper.ValidatePublication(quiz, quizErrors);
             if (quizErrors.Count > 0)
@@ -267,13 +366,13 @@ else
             quizzes.Add((subject, quizDraftId, quiz));
         }
 
-        await PersistDraftAsync(id, input, imageId);
+        var id = await SaveDraftContentAsync(input, imageId);
         foreach (var (subject, quizDraftId, quiz) in quizzes)
         {
             var response = await QuizService.PublishAsync(quizDraftId, QuizEditorMapper.BuildRequest(quizDraftId, quiz));
             subject.QuizId = response.QuizId;
             subject.QuizDraftId = null;
-            await PersistDraftAsync(id, input, imageId);
+            await ExhibitionService.SaveDraftAsync(id, BuildDraftRequest(input, imageId));
         }
 
         var request = new CreateExhibitionRequest(
@@ -284,7 +383,7 @@ else
             input.Subjects.Select(s => new CreateSubjectRequest(
                 s.Title,
                 s.TitleEn,
-                s.Title.ToLowerInvariant(),
+                GetSubjectSlug(s),
                 s.Description,
                 s.DescriptionEn,
                 s.QuizId = s.IsQuiz ? s.QuizId : null,
@@ -304,8 +403,11 @@ else
             )).ToList()
         );
 
-        var status = await ExhibitionService.CreateAsync(request);
-        if (status != HttpStatusCode.Created)
+        if (sourceExhibitionId.HasValue)
+        {
+            await ExhibitionService.PublishRevisionAsync(id, request);
+        }
+        else if (await ExhibitionService.CreateAsync(request) != HttpStatusCode.Created)
         {
             error = "Udstillingen kunne ikke publiceres.";
             return;
@@ -314,6 +416,16 @@ else
         await Dialog.Alert("Udstillingen er publiceret.", "Publicér udstilling");
         NavigationManager.NavigateTo("/exhibitions");
     }, "Publiceringen kunne ikke bekræftes. Kontrollér udstillingslisten, før du prøver igen.");
+
+    private string GetSubjectSlug(ExhibitionSubjectInputModel subject)
+    {
+        if (sourceExhibitionId.HasValue && !string.IsNullOrWhiteSpace(subject.Slug))
+        {
+            return subject.Slug;
+        }
+
+        return subject.Title.ToLowerInvariant();
+    }
 
     private async Task<Guid?> ResolveThemeIdAsync(IBrowserFile? file)
     {

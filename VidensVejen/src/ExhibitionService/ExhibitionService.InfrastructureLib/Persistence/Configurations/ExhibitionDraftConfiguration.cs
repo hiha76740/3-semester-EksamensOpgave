@@ -16,6 +16,11 @@ internal sealed class ExhibitionDraftConfiguration : IEntityTypeConfiguration<Ex
             id => id.Value,
             value => new ExhibitionDraftId(value));
 
+        builder.Property(ed => ed.SourceExhibitionId)
+            .HasConversion(
+            id => id!.Value,
+            value => new ExhibitionId(value));
+
         builder.Property(ed => ed.Name)
             .HasMaxLength(200);
 

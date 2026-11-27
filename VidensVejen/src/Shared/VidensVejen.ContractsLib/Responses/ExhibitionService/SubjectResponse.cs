@@ -6,14 +6,18 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// <param name="Id"></param>
 /// <param name="Slug"></param>
 /// <param name="Title"></param>
+/// <param name="TitleEn"></param>
 /// <param name="Description"></param>
+/// <param name="DescriptionEn"></param>
 /// <param name="QuizId"></param>
 /// <param name="Topics"></param>
 public record SubjectResponse(
     Guid Id,
     string Slug,
     string Title,
+    string TitleEn,
     string Description,
+    string DescriptionEn,
     Guid? QuizId,
     IReadOnlyList<TopicResponse> Topics
     )

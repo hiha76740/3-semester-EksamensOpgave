@@ -5,4 +5,7 @@ namespace ExhibitionService.FacadeLib.Commands.DTOs;
 /// </summary>
 /// <param name="ExhibitionId"></param>
 /// <param name="RowVersion"></param>
-public record DeleteExhibitionCommand(Guid ExhibitionId, byte[] RowVersion);
+public record DeleteExhibitionCommand(
+    Guid ExhibitionId,
+    byte[] RowVersion
+    );

@@ -33,6 +33,15 @@ public interface IExhibitionService
     /// <summary>Creates an empty exhibition draft and returns its identifier.</summary>
     Task<Guid> CreateDraftAsync();
 
+    /// <summary>Gets the published content used to prefill the editor.</summary>
+    Task<ExhibitionResponse> GetPublishedAsync(Guid exhibitionId);
+
+    /// <summary>Saves a new edit draft with its original exhibition reference.</summary>
+    Task<Guid> CreateRevisionDraftAsync(Guid exhibitionId, UpdateExhibitionDraftRequest draft);
+
+    /// <summary>Publishes the edit draft over the original exhibition.</summary>
+    Task PublishRevisionAsync(Guid draftId, CreateExhibitionRequest exhibition);
+
     /// <summary>Gets an existing exhibition draft.</summary>
     Task<ExhibitionDraftResponse> GetDraftAsync(Guid draftId);
 

@@ -13,4 +13,9 @@ public interface ICreateExhibitionHandler
     /// <param name="command"></param>
     /// <returns></returns>
     Task HandleAsync(CreateExhibitionCommand command);
+
+    /// <summary>
+    /// Publishes an edit draft over its source exhibition.
+    /// </summary>
+    Task PublishRevisionAsync(Guid draftId, CreateExhibitionCommand command);
 }

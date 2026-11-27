@@ -8,6 +8,7 @@ namespace VidensVejen.ContractsLib.Responses.ExhibitionService;
 /// <param name="NameEn"></param>
 /// <param name="ThemeImageId"></param>
 /// <param name="SubjectDrafts"></param>
+/// <param name="SourceExhibitionId"></param>
 ///  <example>
 /// {
 ///     "id": "123e4567-e89b-12d3-a456-426614174000",
@@ -47,7 +48,8 @@ public record ExhibitionDraftResponse(
     string? Name,
     string? NameEn,
     Guid? ThemeImageId,
-    IReadOnlyList<SubjectDraftResponse> SubjectDrafts
+    IReadOnlyList<SubjectDraftResponse> SubjectDrafts,
+    Guid? SourceExhibitionId
     )
 {
     /// <summary>
@@ -74,5 +76,10 @@ public record ExhibitionDraftResponse(
     /// A list of subject drafts the exhibition has associated.
     /// </summary>
     public IReadOnlyList<SubjectDraftResponse> SubjectDrafts { get; init; } = SubjectDrafts;
+
+    /// <summary>
+    /// A unique identifier for the source exhibition.
+    /// </summary>
+    public Guid? SourceExhibitionId { get; init; } = SourceExhibitionId;
 }
 

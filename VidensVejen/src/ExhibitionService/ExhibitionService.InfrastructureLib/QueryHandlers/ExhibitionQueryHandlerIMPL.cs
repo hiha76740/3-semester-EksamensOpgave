@@ -48,19 +48,29 @@ public class ExhibitionQueryHandlerIMPL(ExhibitionDbContext db) : IExhibitionQue
             .Select(e => new ExhibitionDto(
                 e.Id.Value,
                 e.Name,
+                e.NameEn,
                 e.Subjects.Select(s => new SubjectDto(
                     s.Id.Value,
                     s.Slug,
                     s.Title,
+                    s.TitleEn,
                     s.Description,
+                    s.DescriptionEn,
                     s.QuizId == null ? null : s.QuizId.Value,
                     s.Topics.Select(t => new TopicDto(
                         t.Title,
+                        t.TitleEn,
                         t.Description,
+                        t.DescriptionEn,
                         t.Body,
+                        t.BodyEn,
                         t.CalloutLabel,
+                        t.CalloutLabelEn,
                         t.CalloutText,
-                        t.Quote))
+                        t.CalloutLabelEn,
+                        t.Quote,
+                        t.QuoteEn
+                        ))
                     .ToList()))
                 .ToList(),
                 e.ThemeImageId.Value))

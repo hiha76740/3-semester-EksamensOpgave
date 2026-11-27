@@ -35,7 +35,7 @@
                         var subject = Model.Subjects[index];
                         <RadzenAccordionItem @key="subject" Text="@($"Subject {number}")" @bind-Selected="expandedSubjects[number - 1]">
                             <ExhibitionSubjectComponent Model="subject" ExhibitionName="@Model.ExhibitionName" ExhibitionId="ExhibitionId" CanEditQuiz="CanEditQuiz"
-                                                        QuizChanged="@(() => SaveDraftCallback.InvokeAsync(Model))" />
+                                                        QuizChanged="SaveQuizChangesAsync" />
                         </RadzenAccordionItem>
                     }
                 </Items>
@@ -90,6 +90,19 @@
 
     [Parameter]
     public bool CanPublish { get; set; }
+
+    [Parameter]
+    public bool AutoSaveQuizChanges { get; set; }
+
+    private Task SaveQuizChangesAsync()
+    {
+        if (AutoSaveQuizChanges && CanSaveDraft)
+        {
+            return SaveDraftCallback.InvokeAsync(Model);
+        }
+
+        return Task.CompletedTask;
+    }
 
     private bool[] expandedSubjects = [];
     private string? themeError;

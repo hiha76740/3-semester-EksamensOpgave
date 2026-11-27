@@ -25,6 +25,7 @@
         <ExhibitionOverviewComponent Drafts="drafts" Published="published" ShowDrafts="showDrafts"
                                      CanEdit="canEdit" CanPublish="canPublish" CanDeletePublished="canDelete"
                                      DeleteDraft="DeleteDraftAsync" DeletePublished="DeletePublishedAsync"
+                                     EditPublished="EditPublishedAsync"
                                      IsDeleting="isDeleting" />
     }
     else
@@ -85,6 +86,23 @@
         {
             isLoading = false;
         }
+    }
+
+    private void EditPublishedAsync(ExhibitionNameResponse exhibition)
+    {
+        if (!canEdit)
+        {
+            return;
+        }
+
+        var draft = drafts.FirstOrDefault(item => item.SourceExhibitionId == exhibition.Id);
+        if (draft != null)
+        {
+            Navigation.NavigateTo($"exhibition/drafts/{draft.Id:D}");
+            return;
+        }
+
+        Navigation.NavigateTo($"exhibition/{exhibition.Id:D}/edit");
     }
 
     private Task DeleteDraftAsync(ExhibitionDraftResponse draft) =>
