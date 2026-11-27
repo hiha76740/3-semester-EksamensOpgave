@@ -71,7 +71,7 @@ public class ExhibitionQueryHandlerIMPL(ExhibitionDbContext db) : IExhibitionQue
                         t.CalloutLabel,
                         t.CalloutLabelEn,
                         t.CalloutText,
-                        t.CalloutLabelEn,
+                        t.CalloutTextEn,
                         t.Quote,
                         t.QuoteEn
                         ))
