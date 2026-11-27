@@ -1,4 +1,5 @@
 using GameService.ApplicationLib.Repositories;
+using GameService.ApplicationLib.Services;
 using GameService.DomainLib.Entities.Quizzes;
 using GameService.FacadeLib.Commands.DTOs;
 using GameService.FacadeLib.Commands.Interfaces;
@@ -11,10 +12,11 @@ namespace GameService.ApplicationLib.Handlers;
 /// 
 /// </summary>
 /// <param name="repo"></param>
+/// <param name="exhibitionService"></param>
 /// <param name="logger"></param>
 public class DeleteQuizHandler(
     IQuizRepository repo,
-    //IExhibitionService exhibitionService,
+    IExhibitionService exhibitionService,
     ILogger<DeleteQuizHandler> logger
     ) : IDeleteQuizHandler
 {
@@ -27,11 +29,10 @@ public class DeleteQuizHandler(
 
             var quizId = new QuizId(command.DraftId);
 
-            // TODO: ud kommenteret til vi finder ud af hvordan quiz er tilknyttet til en udstilling
-            //var inUse = await exhibitionService.QuizInUseAsync(quizId);
+            var inUse = await exhibitionService.QuizInUseAsync(quizId);
 
-            //if (inUse == true)
-            //    throw new InvalidOperationException("Deletion aborted, quiz is in use");
+            if (inUse == true)
+                throw new InvalidOperationException("Deletion aborted, quiz is in use");
 
             var quiz = await repo.GetQuizByIdAsync(quizId)
                 ?? throw new NotFoundException("Quiz was not found");
