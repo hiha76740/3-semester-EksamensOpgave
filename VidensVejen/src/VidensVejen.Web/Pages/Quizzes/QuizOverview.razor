@@ -1,5 +1,6 @@
 @page "/games"
 @attribute [Authorize(Policy = "Games.Access")]
+@using VidensVejen.Web.Helpers
 
 @inject IQuizService QuizService
 @inject DialogService Dialog
@@ -110,8 +111,7 @@
         error = null;
         try
         {
-            if (await Dialog.Confirm($"Vil du slette denne {type}: {title}?", "Bekræft sletning",
-                new ConfirmOptions { OkButtonText = "Slet", CancelButtonText = "Annullér" }) == true)
+            if (await DeleteConfirmation.ConfirmAsync(Dialog, $"Vil du slette denne {type}: {title}?", "Bekræft sletning"))
             {
                 await delete();
             }

@@ -37,6 +37,8 @@ public static class AuthenticationDI
                 .RequireClaim(CustomClaimTypes.Permission, "Image.Read", "Image.Delete"));
             options.AddPolicy("Users.Access", policy => policy.RequireAuthenticatedUser()
                 .RequireClaim(CustomClaimTypes.Permission, "User.Read", "User.Create", "User.Edit", "User.Delete"));
+            options.AddPolicy("Users.Profile", policy => policy.RequireAuthenticatedUser()
+                .RequireClaim(CustomClaimTypes.Permission, "User.Read", "User.Edit"));
             options.AddPolicy("Users.List", policy => policy.RequireAuthenticatedUser()
                 .RequireClaim(CustomClaimTypes.Permission, "User.Read", "User.Edit", "User.Delete"));
             options.AddPolicy("Exhibitions.Access", policy => policy.RequireAuthenticatedUser()

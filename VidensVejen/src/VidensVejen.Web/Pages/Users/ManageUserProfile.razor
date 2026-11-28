@@ -1,0 +1,9 @@
+@page "/users/{UserId:guid}/edit"
+@attribute [Authorize(Policy = "Users.Profile")]
+
+<UserProfileComponent UserId="UserId" />
+
+@code {
+    [Parameter]
+    public Guid UserId { get; set; }
+}

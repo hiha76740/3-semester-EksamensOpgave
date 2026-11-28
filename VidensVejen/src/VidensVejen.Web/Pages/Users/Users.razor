@@ -1,5 +1,6 @@
 @page "/users"
 @attribute [Authorize(Policy = "Users.Access")]
+@using VidensVejen.Web.Helpers
 
 @inject IUserService UserService
 @inject IAuthUserService AuthUsers
@@ -80,12 +81,11 @@
             }
 
             var account = await AuthUsers.GetByIdAsync(user.Id);
-            var confirmed = await Dialog.Confirm(
+            var confirmed = await DeleteConfirmation.ConfirmAsync(Dialog,
                 $"Vil du slette {user.Firstname} {user.Surname} ({account.Email})?",
-                "Slet bruger",
-                new ConfirmOptions { OkButtonText = "Slet", CancelButtonText = "Annullér" });
+                "Slet bruger");
 
-            if (confirmed != true)
+            if (!confirmed)
             {
                 return;
             }

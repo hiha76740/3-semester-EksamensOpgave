@@ -1,0 +1,9 @@
+@page "/games/drafts/{ExistingDraftId:guid}"
+@attribute [Authorize(Policy = "Games.Editor")]
+
+<QuizEditorComponent ExistingDraftId="ExistingDraftId" />
+
+@code {
+    [Parameter]
+    public Guid ExistingDraftId { get; set; }
+}

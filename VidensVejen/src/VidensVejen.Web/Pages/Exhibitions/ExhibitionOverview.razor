@@ -1,5 +1,6 @@
 @page "/exhibitions"
 @attribute [Authorize(Policy = "Exhibitions.Access")]
+@using VidensVejen.Web.Helpers
 
 @inject IExhibitionService ExhibitionService
 @inject DialogService Dialog
@@ -131,8 +132,7 @@
         error = null;
         try
         {
-            if (await Dialog.Confirm($"Vil du slette denne {type}: {title}?", "Bekræft sletning",
-                new ConfirmOptions { OkButtonText = "Slet", CancelButtonText = "Annullér" }) == true)
+            if (await DeleteConfirmation.ConfirmAsync(Dialog, $"Vil du slette denne {type}: {title}?", "Bekræft sletning"))
             {
                 await delete();
             }

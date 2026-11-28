@@ -1,5 +1,6 @@
 @page "/images"
 @attribute [Authorize(Policy = "Images.Access")]
+@using VidensVejen.Web.Helpers
 
 @inject DialogService Dialog
 @inject IAuthorizationService Authorization
@@ -68,9 +69,8 @@
         isDeleting = true;
         try
         {
-            var confirmed = await Dialog.Confirm("Vil du slette billedet permanent?", "Slet billede",
-                new ConfirmOptions { OkButtonText = "Slet", CancelButtonText = "Annullér" });
-            if (confirmed != true
+            var confirmed = await DeleteConfirmation.ConfirmAsync(Dialog, "Vil du slette billedet permanent?", "Slet billede");
+            if (!confirmed
                 || !(await Authorization.AuthorizeAsync((await AuthStateProvider.GetAuthenticationStateAsync()).User, "Image.Delete")).Succeeded)
             {
                 return;

@@ -1,0 +1,42 @@
+@inject IImageService ImageService
+@inject IExhibitionService ExhibitionService
+@inject IQuizService QuizService
+@inject DialogService Dialog
+@inject NavigationManager NavigationManager
+
+<PageTitle>@(PublishedExhibitionId.HasValue || _sourceExhibitionId.HasValue ? "Redigér udstilling" : "Opret udstilling")</PageTitle>
+
+@if (_accessDenied)
+{
+    <RadzenText Text="Du har ikke adgang til udstillingskladden." />
+}
+else if (_model != null)
+{
+    <ExhibitionFormComponent @key="_model" Model="_model" ExhibitionId="@(_sourceExhibitionId ?? _draftId.GetValueOrDefault())" CanEditQuiz="@(_canEditExhibition && _canEditQuiz)" SubmitCallback="Create" SubmitButtonText="Publicér"
+                             SaveDraftCallback="SaveDraftAsync" CanSaveDraft="_canEditExhibition"
+                             CanPublish="_canPublishExhibition" IsBusy="_isBusy" AutoSaveQuizChanges="@_draftId.HasValue"
+                             Error="@_error" Message="@_message" />
+}
+else
+{
+    @if (_error != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@_error</RadzenAlert>
+    }
+    @if (ExistingDraftId.HasValue)
+    {
+        <RadzenButton Text="Hent kladde" Click="LoadDraftAsync" IsBusy="@_isBusy" />
+    }
+    else if (PublishedExhibitionId.HasValue)
+    {
+        <RadzenButton Text="Hent udstilling" Click="LoadPublishedAsync" IsBusy="@_isBusy" />
+    }
+    else if (_error != null)
+    {
+        <RadzenButton Text="Prøv igen" Click="StartDraftAsync" />
+    }
+    else
+    {
+        <RadzenText role="status" Text="Opretter udstillingskladde …" />
+    }
+}

@@ -1,0 +1,9 @@
+@page "/games/{PublishedQuizId:guid}/edit"
+@attribute [Authorize(Policy = "Game.Edit")]
+
+<QuizEditorComponent PublishedQuizId="PublishedQuizId" />
+
+@code {
+    [Parameter]
+    public Guid PublishedQuizId { get; set; }
+}

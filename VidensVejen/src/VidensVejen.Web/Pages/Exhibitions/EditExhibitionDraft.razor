@@ -1,0 +1,9 @@
+@page "/exhibition/drafts/{ExistingDraftId:guid}"
+@attribute [Authorize(Policy = "Exhibitions.Editor")]
+
+<ExhibitionEditorComponent ExistingDraftId="ExistingDraftId" />
+
+@code {
+    [Parameter]
+    public Guid ExistingDraftId { get; set; }
+}

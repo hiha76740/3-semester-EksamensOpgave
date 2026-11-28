@@ -1,0 +1,9 @@
+@page "/exhibition/{PublishedExhibitionId:guid}/edit"
+@attribute [Authorize(Policy = "Exhibition.Edit")]
+
+<ExhibitionEditorComponent PublishedExhibitionId="PublishedExhibitionId" />
+
+@code {
+    [Parameter]
+    public Guid PublishedExhibitionId { get; set; }
+}

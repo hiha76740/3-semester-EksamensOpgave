@@ -1,0 +1,92 @@
+@inject IAuthorizationService Authorization
+
+@inject IAuthUserService AuthUsers
+@inject IUserService Users
+@inject CustomAuthenticationStateProvider AuthStateProvider
+
+<PageTitle>@Title</PageTitle>
+
+<RadzenCard class="rz-mx-auto rz-my-4" Style="max-width: 42rem;">
+    <RadzenStack Gap="1rem">
+        <RadzenText TextStyle="TextStyle.H2" Text="@Title" />
+        <AuthorizeView>
+            <Authorized>
+                @if (_canAccess == false)
+                {
+                    <RadzenText Text="Du har ikke rettighed til at se denne bruger." />
+                }
+                else
+                {
+                    @if (UserId.HasValue)
+                    {
+                        <RadzenLink Path="users" Text="Tilbage til brugere" Icon="arrow_back" />
+                    }
+                    @if (_error != null)
+                    {
+                        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@_error</RadzenAlert>
+                    }
+                    @if (_message != null)
+                    {
+                        <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">@_message</RadzenAlert>
+                    }
+
+                    @if (_isLoading)
+                    {
+                        <RadzenText role="status" Text="Henter profil …" />
+                    }
+                    else if (_profile == null || _account == null)
+                    {
+                        <RadzenButton Text="Hent profil igen" Click="LoadProfileAsync" />
+                    }
+                    else
+                    {
+                        @if (_canEdit)
+                        {
+                            <UserProfileFormComponent Model="_model" IsBusy="_isSaving" RequireCurrentPassword="@(_isOtherUser == false)"
+                                                      SaveName="SaveNameAsync" SaveEmail="SaveEmailAsync"
+                                                      SavePassword="SavePasswordAsync" />
+                        }
+                        else
+                        {
+                            <RadzenFieldset Text="Profiloplysninger">
+                                <RadzenText Text="@($"Fornavn: {_profile.Firstname}")" />
+                                <RadzenText Text="@($"Efternavn: {_profile.Surname}")" />
+                                <RadzenText Text="@($"E-mail: {_account.Email}")" />
+                            </RadzenFieldset>
+                        }
+                        @if (_isOtherUser)
+                        {
+                            <RadzenFieldset Text="Rettigheder">
+                                @if (_account.Permissions.Count == 0)
+                                {
+                                    <RadzenText Text="Brugeren har ingen rettigheder." />
+                                }
+                                @foreach (var permission in _account.Permissions.OrderBy(permission => permission.Name))
+                                {
+                                    <RadzenText Text="@permission.Name" />
+                                }
+                                @if (_canEdit && _availablePermissions != null)
+                                {
+                                    <RadzenDropDown TValue="IEnumerable<Guid>" Data="@_availablePermissions" Multiple="true"
+                                                    TextProperty="@nameof(PermissionResponse.Name)"
+                                                    ValueProperty="@nameof(PermissionResponse.Id)"
+                                                    @bind-Value="_selectedPermissionIds" Disabled="@_isSaving"
+                                                    Placeholder="Vælg rettigheder" aria-label="Vælg rettigheder" />
+                                    <RadzenButton Text="Gem rettigheder" Click="SavePermissionsAsync" Disabled="@_isSaving" />
+                                }
+                            </RadzenFieldset>
+                        }
+                        <RadzenButton Text="Genindlæs profil" Variant="Variant.Text"
+                                      Click="LoadProfileAsync" Disabled="@_isSaving" />
+                    }
+                }
+            </Authorized>
+            <NotAuthorized>
+                <RadzenLink Path="login" Text="Log ind for at se din profil" />
+            </NotAuthorized>
+            <Authorizing>
+                <RadzenText Text="Kontrollerer login …" />
+            </Authorizing>
+        </AuthorizeView>
+    </RadzenStack>
+</RadzenCard>

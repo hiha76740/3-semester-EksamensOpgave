@@ -1,0 +1,73 @@
+@inject IExhibitionService ExhibitionService
+@inject IQuizService QuizService
+@inject NavigationManager Navigation
+
+<PageTitle>@FormTitle</PageTitle>
+<RadzenLink Text="Tilbage til quizzer" Icon="arrow_back" Path="games" />
+
+@if (_exhibitionsError != null)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">@_exhibitionsError</RadzenAlert>
+}
+
+@if (_accessDenied)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">Du har ikke adgang til denne handling.</RadzenAlert>
+}
+else if (_model is { } readOnlyModel && _canEdit == false)
+{
+    <RadzenStack Gap="1rem">
+        <RadzenText TextStyle="TextStyle.H2" Text="@readOnlyModel.Title" />
+        <RadzenText Text="@readOnlyModel.Instruction" />
+        @foreach (var question in readOnlyModel.Questions)
+        {
+            <RadzenCard>
+                <RadzenText Text="@question.Text" />
+                @foreach (var answer in question.Answers)
+                {
+                    <RadzenText Text="@answer.Text" />
+                }
+            </RadzenCard>
+        }
+        @foreach (var error in _errors)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
+        }
+        <RadzenButton Text="Publicér" Click="@(() => Create(readOnlyModel))" IsBusy="@_isBusy" />
+    </RadzenStack>
+}
+else if (_model != null)
+{
+    <QuizFormComponent @key="_model" Model="_model"
+                       Exhibitions="_exhibitions"
+                       FormTitle="@FormTitle" CanSubmit="@_canPublish"
+                       SubmitText="Publicér"
+                       SaveDraftCallback="SaveDraftAsync" IsBusy="_isBusy"
+                       SubmitCallback="Create"
+                       ResetCallback="ResetForm" ResetText="@ResetText"
+                       Changed="ClearMessages"
+                       Message="@_message"
+                       Errors="_errors" />
+}
+else
+{
+    @if (_message != null)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">@_message</RadzenAlert>
+    }
+    @if (_errors.Count > 0)
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@_errors[0]</RadzenAlert>
+    }
+    @if (_canEdit && !ExistingDraftId.HasValue && !PublishedQuizId.HasValue)
+    {
+        if (_isBusy)
+        {
+            <RadzenText role="status" Text="Opretter quizkladde …" />
+        }
+        else if (_errors.Count > 0)
+        {
+            <RadzenButton Text="Prøv igen" Click="StartDraftAsync" />
+        }
+    }
+}
