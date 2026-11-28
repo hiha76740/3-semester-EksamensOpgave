@@ -2,6 +2,7 @@ using System.ComponentModel;
 using AuthService.Api.Mappers;
 using AuthService.Api.Services;
 using AuthService.FacadeLib.Commands.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VidensVejen.ContractsLib.Requests.AuthService;
 
@@ -43,6 +44,7 @@ public class AuthController(
 
 
     [HttpPost("logout")]
+    [Authorize]
     [EndpointSummary("Logout the current logged in user")]
     [EndpointDescription("Log out the current user from the system")]
     [ProducesResponseType(StatusCodes.Status204NoContent, Description = "User logged out successfully")]
@@ -65,6 +67,7 @@ public class AuthController(
 
 
     [HttpPost("refresh-token")]
+    [Authorize]
     [EndpointSummary("This endpoint will create a new refresh token")]
     [EndpointDescription("Creates a new refresh token when all required info is given")]
     [ProducesResponseType(StatusCodes.Status200OK, Description = "Refresh token was created succesfully")]

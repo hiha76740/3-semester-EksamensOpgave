@@ -1,5 +1,6 @@
 using AuthService.Api.Mappers;
 using AuthService.FacadeLib.Queries.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VidensVejen.ContractsLib.Responses.AuthService;
 
@@ -12,6 +13,7 @@ public class PermissionsController(
     ) : ControllerBase
 {
     [HttpGet]
+    [Authorize(Policy = "Users.Access")]
     [EndpointSummary("Get all permissions")]
     [EndpointDescription("Gets a list of all permissions")]
     [ProducesResponseType(StatusCodes.Status200OK, Description = "Returns a list of all permissions")]

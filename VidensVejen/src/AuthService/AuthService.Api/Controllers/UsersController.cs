@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using AuthService.Api.Mappers;
 using AuthService.FacadeLib.Commands.Interfaces;
 using AuthService.FacadeLib.Queries.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using VidensVejen.BuildingBlocksLib.Helpers;
 using VidensVejen.ContractsLib.Requests.AuthService;
@@ -23,6 +24,7 @@ public class UsersController(
     ) : ControllerBase
 {
     [HttpPost("register")]
+    [Authorize(Policy = "User.Create")]
     [EndpointSummary("This endpoint will register a user")]
     [EndpointDescription("Register a user when all required info is given")]
     [ProducesResponseType(StatusCodes.Status201Created, Description = "User was registered succesfully")]
@@ -43,6 +45,7 @@ public class UsersController(
     }
 
     [HttpGet("{id:guid}")]
+    [Authorize(Policy = "Users.List")]
     [EndpointSummary("Get a user")]
     [EndpointDescription("Gets the details of a single instance of a user")]
     [ProducesResponseType<AuthUserResponse>(StatusCodes.Status200OK, "application/json", Description = "Returns a single user")]
@@ -67,6 +70,7 @@ public class UsersController(
     }
 
     [HttpPut("{id:guid}/permissions")]
+    [Authorize(Policy = "User.Edit")]
     [EndpointSummary("Updates user permissions")]
     [EndpointDescription("Updates the permissions of a single instance of a user")]
     [ProducesResponseType<AuthUserResponse>(StatusCodes.Status200OK, "application/json", Description = "Returns the updated user")]
@@ -93,6 +97,7 @@ public class UsersController(
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Policy = "User.Delete")]
     [EndpointSummary("Deletes a user")]
     [EndpointDescription("Deletes a single instance of a user")]
     [ProducesResponseType(StatusCodes.Status204NoContent, Description = "User was deleted successfully")]
@@ -119,6 +124,7 @@ public class UsersController(
     }
 
     [HttpPut("{id:guid}/email")]
+    [Authorize]
     [EndpointSummary("Updates email")]
     [EndpointDescription("Updates the email of a single instance of a user")]
     [ProducesResponseType<UserEmailResponse>(StatusCodes.Status200OK, "application/json", Description = "Returns the updated email")]
@@ -145,6 +151,7 @@ public class UsersController(
     }
 
     [HttpPut("{id:guid}/password")]
+    [Authorize]
     [EndpointSummary("Updates password")]
     [EndpointDescription("Updates the password of a single instance of a user")]
     [ProducesResponseType(StatusCodes.Status200OK, Description = "Password was updated successfully")]
@@ -171,7 +178,7 @@ public class UsersController(
     }
 
     [HttpPut("{id:guid}/password/reset")]
-    //[Authorize(Policy = "User.Edit")]
+    [Authorize(Policy = "User.Edit")]
     [EndpointSummary("Resets a user's password")]
     [EndpointDescription("Reset the password of a single instance of a user")]
     [ProducesResponseType(StatusCodes.Status204NoContent, Description = "Password was reset successfully")]
@@ -196,6 +203,7 @@ public class UsersController(
     }
 
     [HttpGet("Me")]
+    [Authorize]
     [EndpointSummary("This endpoint will get current user information")]
     [EndpointDescription("Get current user information, like username, firstname and lastname")]
     [ProducesResponseType<AuthUserResponse>(StatusCodes.Status200OK, "application/json", Description = "Returns info of current user")]

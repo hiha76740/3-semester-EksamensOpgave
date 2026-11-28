@@ -30,7 +30,8 @@ internal sealed class AccessPermissionConfiguration : IEntityTypeConfiguration<A
             new { Id = new AccessPermissionId(Guid.Parse("577779d0-f015-4827-8535-0318210db489")), Name = "Game.Delete" },
             new { Id = new AccessPermissionId(Guid.Parse("efcc418e-1113-4d82-b67e-3f6efc06765d")), Name = "Game.Read" },
             new { Id = new AccessPermissionId(Guid.Parse("e48eb056-2c92-4642-90a9-dd685edb7222")), Name = "Image.Upload" },
-            new { Id = new AccessPermissionId(Guid.Parse("f5ad63ca-85e0-40f8-9315-f6f7cd088408")), Name = "Image.Delete" }
+            new { Id = new AccessPermissionId(Guid.Parse("f5ad63ca-85e0-40f8-9315-f6f7cd088408")), Name = "Image.Delete" },
+            new { Id = new AccessPermissionId(Guid.Parse("a6ae8565-c1ee-4fc9-bcba-050dbb28e3b7")), Name = "Image.Read" }
             );
     }
 }

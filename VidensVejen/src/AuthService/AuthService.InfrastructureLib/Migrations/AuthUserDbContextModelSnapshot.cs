@@ -120,6 +120,11 @@ namespace AuthService.InfrastructureLib.Migrations
                         {
                             Id = new Guid("f5ad63ca-85e0-40f8-9315-f6f7cd088408"),
                             Name = "Image.Delete"
+                        },
+                        new
+                        {
+                            Id = new Guid("a6ae8565-c1ee-4fc9-bcba-050dbb28e3b7"),
+                            Name = "Image.Read"
                         });
                 });
 

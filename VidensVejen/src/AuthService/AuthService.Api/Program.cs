@@ -20,8 +20,9 @@ builder.Services.AddEventPublisherDI();
 builder.Services.AddAuthenticationDI();
 builder.Services.AddInternalServicesDI();
 
-builder.Services.AddVidensVejenAuthentication(builder);
 
+builder.Services.AddVidensVejenAuthentication(builder);
+builder.Services.AddVidensVejenAuthorization();
 
 builder.Services.AddControllers();
 

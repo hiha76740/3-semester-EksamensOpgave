@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using VidensVejen.ContractsLib.Authentication;
 
 namespace VidensVejen.BuildingBlocksLib.DependencyInjection;
 
@@ -12,11 +13,13 @@ namespace VidensVejen.BuildingBlocksLib.DependencyInjection;
 public static class AuthenticationDI
 {
     /// <summary>
-    /// 
+    /// Adds VidensVejen JWT bearer authentication to the service collection.
     /// </summary>
-    /// <param name="services"></param>
-    /// <param name="builder"></param>
-    /// <returns></returns>
+    /// <remarks>Configures issuer, audience, lifetime, and signing key validation. The access token may be
+    /// supplied through the accessToken cookie.</remarks>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="builder">The web application builder used to read JWT configuration.</param>
+    /// <returns>The configured service collection.</returns>
     public static IServiceCollection AddVidensVejenAuthentication(this IServiceCollection services, WebApplicationBuilder builder)
     {
         _ = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -47,6 +50,41 @@ public static class AuthenticationDI
             }
         };
     });
+
+        return services;
+    }
+
+    /// <summary>
+    /// Adds VidensVejen authorization policies for application permissions.
+    /// </summary>
+    /// <param name="services">The service collection to which the authorization policies are added.</param>
+    /// <returns>The service collection for method chaining.</returns>
+    public static IServiceCollection AddVidensVejenAuthorization(this IServiceCollection services)
+    {
+        services.AddAuthorization(options =>
+        {
+            string[] permissions =
+            [
+                "User.Create", "User.Edit", "User.Delete", "User.Read",
+                "Exhibition.Publish", "Exhibition.Edit", "Exhibition.Delete", "Exhibition.Read",
+                "Game.Publish", "Game.Edit", "Game.Delete", "Game.Read",
+                "Image.Read", "Image.Delete"
+            ];
+
+            foreach (var permission in permissions)
+            {
+                options.AddPolicy(permission, policy =>
+                {
+                    policy.RequireAuthenticatedUser()
+                    .RequireClaim(CustomClaimTypes.Permission, permission, permission);
+                });
+            }
+
+            options.AddPolicy("Users.Access", policy => policy.RequireAuthenticatedUser()
+                .RequireClaim(CustomClaimTypes.Permission, "User.Read", "User.Create", "User.Edit", "User.Delete"));
+            options.AddPolicy("Users.List", policy => policy.RequireAuthenticatedUser()
+                .RequireClaim(CustomClaimTypes.Permission, "User.Read", "User.Edit", "User.Delete"));
+        });
 
         return services;
     }
