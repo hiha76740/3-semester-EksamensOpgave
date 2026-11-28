@@ -1,4 +1,5 @@
 @page "/games"
+@attribute [Authorize(Policy = "Games.Access")]
 
 @inject IQuizService QuizService
 @inject DialogService Dialog
@@ -60,7 +61,7 @@
             var state = await AuthenticationStateTask;
             var user = state.User;
             canEdit = HasPermission(user, "Game.Edit");
-            canPublish = HasPermission(user, "Game.Create");
+            canPublish = HasPermission(user, "Game.Publish");
             canDelete = HasPermission(user, "Game.Delete");
             showDrafts = canEdit || canPublish || HasPermission(user, "Game.Read");
             canAccess = showDrafts || canDelete;

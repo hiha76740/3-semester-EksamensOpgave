@@ -33,6 +33,9 @@ public interface IAuthUserService
     /// <summary>Gets the selected account and its current row version.</summary>
     Task<AuthUserResponse> GetByIdAsync(Guid id);
 
+    /// <summary>Replaces the assigned permissions using the account's current row version.</summary>
+    Task<AuthUserResponse> UpdatePermissionsAsync(Guid id, UpdateAuthUserPermissionsRequest request);
+
     /// <summary>Resets the selected account password as an administrator.</summary>
     Task ResetPasswordAsync(Guid id, ResetUserPasswordRequest request);
 

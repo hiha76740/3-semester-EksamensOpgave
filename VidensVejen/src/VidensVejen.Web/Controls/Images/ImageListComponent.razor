@@ -1,5 +1,3 @@
-@using VidensVejen.ContractsLib.Responses.ImageService
-
 <RadzenDataGrid TItem="ImageResponse" Data="@Images"
                 AllowPaging="true" PageSize="15" AllowSorting="true"
                 EmptyText="Der er endnu ingen billeder i mediebiblioteket.">
@@ -14,13 +12,15 @@
                               Property="@nameof(ImageResponse.Extension)" />
         <RadzenDataGridColumn TItem="ImageResponse" Title="Billed-ID"
                               Property="@nameof(ImageResponse.Id)" />
-        <RadzenDataGridColumn TItem="ImageResponse" Title="Handling" Sortable="false">
-            <Template Context="image">
-                <RadzenButton Text="Slet" Icon="delete" ButtonStyle="ButtonStyle.Danger"
-                              Variant="Variant.Outlined" Disabled="@(IsDeleting || image.RowVersion == null || image.RowVersion.Length == 0)"
-                              Click="@(() => DeleteRequested.InvokeAsync(image))" />
-            </Template>
-        </RadzenDataGridColumn>
+        <AuthorizeView Policy="Image.Delete">
+            <RadzenDataGridColumn TItem="ImageResponse" Title="Handling" Sortable="false">
+                <Template Context="image">
+                    <RadzenButton Text="Slet" Icon="delete" ButtonStyle="ButtonStyle.Danger"
+                                  Variant="Variant.Outlined" Disabled="@(IsDeleting || image.RowVersion == null || image.RowVersion.Length == 0)"
+                                  Click="@(() => DeleteRequested.InvokeAsync(image))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </AuthorizeView>
     </Columns>
 </RadzenDataGrid>
 

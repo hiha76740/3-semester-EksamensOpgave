@@ -93,6 +93,21 @@ public class AuthUserService(HttpClient httpClient) : IAuthUserService
             ?? throw new JsonException("Could not deserialize the user account.");
     }
 
+    async Task<AuthUserResponse> IAuthUserService.UpdatePermissionsAsync(Guid id, UpdateAuthUserPermissionsRequest update)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Put, $"{_baseUrl}/{id:D}/permissions")
+        {
+            Content = JsonContent.Create(update)
+        };
+        request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+        using var response = await httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        return await response.Content.ReadFromJsonAsync<AuthUserResponse>()
+            ?? throw new JsonException("Could not deserialize the updated user permissions.");
+    }
+
     Task IAuthUserService.ResetPasswordAsync(Guid id, ResetUserPasswordRequest request)
     {
         return SendAccountChangeAsync(HttpMethod.Put, $"{_baseUrl}/{id}/password/reset", request);

@@ -1,6 +1,20 @@
-﻿<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+            <Authorizing>
+                <RadzenText role="status" Text="Kontrollerer adgang …" />
+            </Authorizing>
+            <NotAuthorized Context="authentication">
+                @if (authentication.User.Identity?.IsAuthenticated == true)
+                {
+                    <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">Du har ikke adgang til denne side.</RadzenAlert>
+                }
+                else
+                {
+                    <RadzenLink Path="login" Text="Log ind for at fortsætte" />
+                }
+            </NotAuthorized>
+        </AuthorizeRouteView>
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
 </Router>

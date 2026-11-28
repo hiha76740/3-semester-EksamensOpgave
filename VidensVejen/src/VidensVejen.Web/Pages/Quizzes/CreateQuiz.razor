@@ -1,6 +1,7 @@
 @page "/games/create"
 @page "/games/drafts/{ExistingDraftId:guid}"
 @page "/games/{PublishedQuizId:guid}/edit"
+@attribute [Authorize(Policy = "Games.Editor")]
 
 
 @inject IExhibitionService ExhibitionService
@@ -127,7 +128,7 @@ else
 
         var user = (await authentication).User;
         canEdit = user.Identity?.IsAuthenticated == true && user.HasClaim(CustomClaimTypes.Permission, "Game.Edit");
-        canPublish = user.Identity?.IsAuthenticated == true && user.HasClaim(CustomClaimTypes.Permission, "Game.Create");
+        canPublish = user.Identity?.IsAuthenticated == true && user.HasClaim(CustomClaimTypes.Permission, "Game.Publish");
         accessDenied = !canEdit && !(canPublish && ExistingDraftId.HasValue);
         if (accessDenied)
         {

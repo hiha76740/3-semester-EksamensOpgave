@@ -1,3 +1,5 @@
+@inject IAuthorizationService Authorization
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IAuthUserService AuthUserService
 @inject DialogService Dialog
 
@@ -33,8 +35,16 @@
 
     protected override Task OnInitializedAsync() => LoadPermissionsAsync();
 
+    private async Task<bool> CanCreateAsync() =>
+        (await Authorization.AuthorizeAsync((await AuthStateProvider.GetAuthenticationStateAsync()).User, "User.Create")).Succeeded;
+
     private async Task LoadPermissionsAsync()
     {
+        if (!await CanCreateAsync())
+        {
+            return;
+        }
+
         isLoading = true;
         error = null;
         try
@@ -53,7 +63,7 @@
 
     private async Task CreateAsync(CreateUserInputModel input)
     {
-        if (isSaving)
+        if (isSaving || !await CanCreateAsync())
         {
             return;
         }

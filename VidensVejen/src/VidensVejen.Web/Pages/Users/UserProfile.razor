@@ -1,5 +1,6 @@
 @page "/user/profile"
 @page "/users/{UserId:guid}/edit"
+@attribute [Authorize]
 @inject IAuthorizationService Authorization
 
 @inject IAuthUserService AuthUsers
@@ -15,7 +16,7 @@
             <Authorized>
                 @if (!canAccess)
                 {
-                    <RadzenText Text="Du har ikke rettighed til at ændre denne bruger." />
+                    <RadzenText Text="Du har ikke rettighed til at se denne bruger." />
                 }
                 else
                 {
@@ -42,9 +43,42 @@
                     }
                     else
                     {
-                        <UserProfileFormComponent Model="model" IsBusy="isSaving" RequireCurrentPassword="@(!UserId.HasValue)"
-                                                  SaveName="SaveNameAsync" SaveEmail="SaveEmailAsync"
-                                                  SavePassword="SavePasswordAsync" />
+                        @if (canEdit)
+                        {
+                            <UserProfileFormComponent Model="model" IsBusy="isSaving" RequireCurrentPassword="@(!isOtherUser)"
+                                                      SaveName="SaveNameAsync" SaveEmail="SaveEmailAsync"
+                                                      SavePassword="SavePasswordAsync" />
+                        }
+                        else
+                        {
+                            <RadzenFieldset Text="Profiloplysninger">
+                                <RadzenText Text="@($"Fornavn: {profile.Firstname}")" />
+                                <RadzenText Text="@($"Efternavn: {profile.Surname}")" />
+                                <RadzenText Text="@($"E-mail: {account.Email}")" />
+                            </RadzenFieldset>
+                        }
+                        @if (isOtherUser)
+                        {
+                            <RadzenFieldset Text="Rettigheder">
+                                @if (account.Permissions.Count == 0)
+                                {
+                                    <RadzenText Text="Brugeren har ingen rettigheder." />
+                                }
+                                @foreach (var permission in account.Permissions.OrderBy(permission => permission.Name))
+                                {
+                                    <RadzenText Text="@permission.Name" />
+                                }
+                                @if (canEdit && availablePermissions != null)
+                                {
+                                    <RadzenDropDown TValue="IEnumerable<Guid>" Data="@availablePermissions" Multiple="true"
+                                                    TextProperty="@nameof(PermissionResponse.Name)"
+                                                    ValueProperty="@nameof(PermissionResponse.Id)"
+                                                    @bind-Value="selectedPermissionIds" Disabled="@isSaving"
+                                                    Placeholder="Vælg rettigheder" aria-label="Vælg rettigheder" />
+                                    <RadzenButton Text="Gem rettigheder" Click="SavePermissionsAsync" Disabled="@isSaving" />
+                                }
+                            </RadzenFieldset>
+                        }
                         <RadzenButton Text="Genindlæs profil" Variant="Variant.Text"
                                       Click="LoadProfileAsync" Disabled="@isSaving" />
                     }
@@ -64,7 +98,7 @@
     [Parameter]
     public Guid? UserId { get; set; }
 
-    private string Title => UserId.HasValue ? "Ændre bruger" : "Min profil";
+    private string Title => UserId.HasValue ? (canEdit ? "Ændre bruger" : "Brugerprofil") : "Min profil";
 
     [CascadingParameter]
     private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
@@ -78,10 +112,18 @@
     private bool isSaving;
 
     private bool canAccess;
+    private bool canEdit;
+    private bool isOtherUser;
+    private IReadOnlyList<PermissionResponse>? availablePermissions;
+    private IEnumerable<Guid> selectedPermissionIds = [];
 
     protected override async Task OnParametersSetAsync()
     {
         canAccess = false;
+        canEdit = false;
+        isOtherUser = false;
+        availablePermissions = null;
+        selectedPermissionIds = [];
         profile = null;
         account = null;
         model = new UserProfileInputModel();
@@ -92,8 +134,14 @@
         }
 
         var state = await AuthenticationStateTask;
-        canAccess = state.User.Identity?.IsAuthenticated == true
-            && (!UserId.HasValue || (await Authorization.AuthorizeAsync(state.User, "User.Edit")).Succeeded);
+        var user = state.User;
+        var isAuthenticated = user.Identity?.IsAuthenticated == true;
+        canEdit = isAuthenticated && (!UserId.HasValue || (await Authorization.AuthorizeAsync(user, "User.Edit")).Succeeded);
+        canAccess = canEdit || (isAuthenticated && UserId.HasValue
+            && (await Authorization.AuthorizeAsync(user, "User.Read")).Succeeded);
+        isOtherUser = UserId is Guid targetId
+            && Guid.TryParse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value, out var currentUserId)
+            && targetId != currentUserId;
         if (canAccess)
         {
             await LoadProfileAsync();
@@ -105,7 +153,13 @@
 
     private async Task LoadProfileAsync()
     {
+        if (!canAccess)
+        {
+            return;
+        }
+
         isLoading = true;
+        availablePermissions = null;
         error = null;
         message = null;
         try
@@ -120,10 +174,21 @@
                 Surname = currentProfile.Surname,
                 Email = currentAccount.Email
             };
+            if (isOtherUser && canEdit)
+            {
+                var options = await AuthUsers.GetPermissionsAsync();
+                availablePermissions = options.Concat(currentAccount.Permissions)
+                    .DistinctBy(permission => permission.Id)
+                    .OrderBy(permission => permission.Name)
+                    .ToArray();
+                selectedPermissionIds = currentAccount.Permissions.Select(permission => permission.Id).ToArray();
+            }
         }
         catch (Exception exception) when (IsServiceError(exception))
         {
-            error = "Profilen kunne ikke hentes.";
+            error = profile != null && account != null && isOtherUser && canEdit
+                ? "Rettighederne kunne ikke hentes. Genindlæs profilen for at prøve igen."
+                : "Profilen kunne ikke hentes.";
         }
         finally
         {
@@ -180,7 +245,7 @@
         account = currentAccount with { Email = updated.Email, RowVersion = updated.RowVersion };
         model.Email = updated.Email;
         message = "E-mailadressen er gemt.";
-        if (!UserId.HasValue)
+        if (!isOtherUser)
         {
             await AuthStateProvider.RefreshAuthenticationState();
         }
@@ -194,10 +259,10 @@
             return;
         }
 
-        if ((!UserId.HasValue && string.IsNullOrWhiteSpace(model.CurrentPassword))
+        if ((!isOtherUser && string.IsNullOrWhiteSpace(model.CurrentPassword))
             || string.IsNullOrWhiteSpace(model.NewPassword))
         {
-            error = UserId.HasValue
+            error = isOtherUser
                 ? "Indtast en ny adgangskode."
                 : "Indtast din nuværende adgangskode og en ny adgangskode.";
             return;
@@ -209,7 +274,7 @@
             return;
         }
 
-        if (UserId.HasValue)
+        if (isOtherUser)
         {
             await AuthUsers.ResetPasswordAsync(currentAccount.Id,
                 new ResetUserPasswordRequest(model.NewPassword, currentAccount.RowVersion));
@@ -229,9 +294,23 @@
         account = await LoadAccountAsync();
     });
 
+    private Task SavePermissionsAsync() => SaveAsync(async () =>
+    {
+        if (!isOtherUser || account == null || availablePermissions == null)
+        {
+            return;
+        }
+
+        var updated = await AuthUsers.UpdatePermissionsAsync(account.Id,
+            new UpdateAuthUserPermissionsRequest(selectedPermissionIds.Distinct().ToList(), account.RowVersion));
+        account = updated;
+        selectedPermissionIds = updated.Permissions.Select(permission => permission.Id).ToArray();
+        message = "Rettighederne er gemt.";
+    });
+
     private async Task SaveAsync(Func<Task> save)
     {
-        if (isSaving || isLoading)
+        if (!canEdit || isSaving || isLoading)
         {
             return;
         }

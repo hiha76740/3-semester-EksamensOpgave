@@ -1,5 +1,6 @@
 @page "/users"
-@using VidensVejen.ContractsLib.Responses.UserService
+@attribute [Authorize(Policy = "Users.Access")]
+
 @inject IUserService UserService
 @inject IAuthUserService AuthUsers
 @inject DialogService Dialog
@@ -27,35 +28,22 @@
     {
         <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">Brugeren er slettet.</RadzenAlert>
     }
-    <AuthorizeView>
-        <Authorized Context="auth">
-            @if (auth.User.HasClaim(CustomClaimTypes.Permission, "User.Read"))
+    <AuthorizeView Policy="Users.List">
+        <Authorized>
+            @if (isLoading)
             {
-                @if (isLoading)
-                {
-                    <RadzenText role="status" Text="Henter brugere …" />
-                }
-                else if (error != null)
-                {
-                    <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
-                    <RadzenButton Text="Prøv igen" Click="LoadUsersAsync" />
-                }
-                else if (users != null)
-                {
-                    <UserListComponent Users="users" DeleteRequested="DeleteUserAsync" IsDeleting="isDeleting" />
-                }
+                <RadzenText role="status" Text="Henter brugere …" />
             }
-            else
+            else if (error != null)
             {
-                <RadzenText Text="Du har ikke rettighed til at se brugerlisten." />
+                <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@error</RadzenAlert>
+                <RadzenButton Text="Prøv igen" Click="LoadUsersAsync" />
+            }
+            else if (users != null)
+            {
+                <UserListComponent Users="users" DeleteRequested="DeleteUserAsync" IsDeleting="isDeleting" />
             }
         </Authorized>
-        <NotAuthorized>
-            <RadzenLink Path="login" Text="Log ind for at se brugerlisten" />
-        </NotAuthorized>
-        <Authorizing>
-            <RadzenText role="status" Text="Kontrollerer adgang …" />
-        </Authorizing>
     </AuthorizeView>
 </RadzenStack>
 
@@ -141,7 +129,7 @@
         if (result is true)
         {
             userCreated = true;
-            if (state.User.HasClaim(CustomClaimTypes.Permission, "User.Read"))
+            if ((await Authorization.AuthorizeAsync(state.User, "Users.List")).Succeeded)
             {
                 await LoadUsersAsync();
             }
@@ -154,7 +142,7 @@
         {
             var state = await AuthenticationStateTask;
             if (state.User.Identity?.IsAuthenticated == true
-                && state.User.HasClaim(CustomClaimTypes.Permission, "User.Read"))
+                && (await Authorization.AuthorizeAsync(state.User, "Users.List")).Succeeded)
             {
                 await LoadUsersAsync();
             }

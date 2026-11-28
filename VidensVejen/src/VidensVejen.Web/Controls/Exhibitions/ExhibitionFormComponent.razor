@@ -1,12 +1,6 @@
 <RadzenCard class="rz-my-4 rz-mx-auto rz-p-4" Style="max-width: 900px;">
     <RadzenTemplateForm TItem="ExhibitionInputModel" Data="@Model" Submit="HandleSubmit">
         <RadzenStack Gap="1rem">
-            <RadzenFormField Text="Udstillingsnavn (DA)">
-                <RadzenTextBox @bind-Value="Model.ExhibitionName" />
-            </RadzenFormField>
-            <RadzenFormField Text="Udstillingsnavn (EN)">
-                <RadzenTextBox @bind-Value="Model.ExhibitionNameEn" />
-            </RadzenFormField>
             @if (Message != null)
             {
                 <RadzenAlert AlertStyle="AlertStyle.Success" AllowClose="false">@Message</RadzenAlert>
@@ -15,31 +9,64 @@
             {
                 <RadzenAlert AlertStyle="AlertStyle.Danger" AllowClose="false">@Error</RadzenAlert>
             }
-            <RadzenFieldset Text="Temabillede *">
-                <RadzenStack Gap="0.5rem">
-                    <InputFile OnChange="SelectTheme" accept=".png,.jpg,.jpeg"
-                               aria-label="Vælg temabillede" />
-                    <RadzenText Text="PNG eller JPG, maks. 5 MB." />
-                    @if (themeError != null)
-                    {
-                        <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">@themeError</RadzenAlert>
-                    }
-                </RadzenStack>
-            </RadzenFieldset>
+            @if (CanSaveDraft)
+            {
+                <RadzenFormField Text="Udstillingsnavn (DA)">
+                    <RadzenTextBox @bind-Value="Model.ExhibitionName" />
+                </RadzenFormField>
+                <RadzenFormField Text="Udstillingsnavn (EN)">
+                    <RadzenTextBox @bind-Value="Model.ExhibitionNameEn" />
+                </RadzenFormField>
+                <RadzenFieldset Text="Temabillede *">
+                    <RadzenStack Gap="0.5rem">
+                        <InputFile OnChange="SelectTheme" accept=".png,.jpg,.jpeg"
+                                   aria-label="Vælg temabillede" />
+                        <RadzenText Text="PNG eller JPG, maks. 5 MB." />
+                        @if (themeError != null)
+                        {
+                            <RadzenAlert AlertStyle="AlertStyle.Warning" AllowClose="false">@themeError</RadzenAlert>
+                        }
+                    </RadzenStack>
+                </RadzenFieldset>
 
-            <RadzenAccordion>
-                <Items>
-                    @for (var index = 0; index < Model.Subjects.Count; index++)
-                    {
-                        var number = index + 1;
-                        var subject = Model.Subjects[index];
-                        <RadzenAccordionItem @key="subject" Text="@($"Subject {number}")" @bind-Selected="expandedSubjects[number - 1]">
-                            <ExhibitionSubjectComponent Model="subject" ExhibitionName="@Model.ExhibitionName" ExhibitionId="ExhibitionId" CanEditQuiz="CanEditQuiz"
-                                                        QuizChanged="SaveQuizChangesAsync" />
-                        </RadzenAccordionItem>
-                    }
-                </Items>
-            </RadzenAccordion>
+                <RadzenAccordion>
+                    <Items>
+                        @for (var index = 0; index < Model.Subjects.Count; index++)
+                        {
+                            var number = index + 1;
+                            var subject = Model.Subjects[index];
+                            <RadzenAccordionItem @key="subject" Text="@($"Subject {number}")" @bind-Selected="expandedSubjects[number - 1]">
+                                <ExhibitionSubjectComponent Model="subject" ExhibitionName="@Model.ExhibitionName" ExhibitionId="ExhibitionId" CanEditQuiz="CanEditQuiz"
+                                                            QuizChanged="SaveQuizChangesAsync" />
+                            </RadzenAccordionItem>
+                        }
+                    </Items>
+                </RadzenAccordion>
+            }
+            else
+            {
+                <RadzenText TextStyle="TextStyle.H2" Text="@Model.ExhibitionName" />
+                <RadzenText Text="@Model.ExhibitionNameEn" />
+                @foreach (var subject in Model.Subjects)
+                {
+                    <RadzenFieldset Text="@subject.Title">
+                        <RadzenText Text="@subject.TitleEn" />
+                        <RadzenText Text="@subject.Description" />
+                        <RadzenText Text="@subject.DescriptionEn" />
+                        @if (subject.IsQuiz)
+                        {
+                            <RadzenText Text="Quiz" />
+                        }
+                        else
+                        {
+                            @foreach (var topic in subject.Topics)
+                            {
+                                <RadzenText Text="@topic.Title" />
+                            }
+                        }
+                    </RadzenFieldset>
+                }
+            }
 
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End">
                 @if (CanSaveDraft)
@@ -116,7 +143,8 @@
         }
     }
 
-    private Task HandleSubmit(ExhibitionInputModel input) => SubmitCallback.InvokeAsync(input);
+    private Task HandleSubmit(ExhibitionInputModel input) =>
+        CanPublish && !IsBusy ? SubmitCallback.InvokeAsync(input) : Task.CompletedTask;
 
     private void SelectTheme(InputFileChangeEventArgs args)
     {

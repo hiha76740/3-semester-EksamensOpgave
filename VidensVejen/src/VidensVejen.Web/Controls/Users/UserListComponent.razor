@@ -1,4 +1,3 @@
-@using VidensVejen.ContractsLib.Responses.UserService
 @inject NavigationManager Navigation
 
 <RadzenDataGrid TItem="UserResponse" Data="@Users" AllowSorting="true"
@@ -14,6 +13,19 @@
                                   Click="@(() => EditUser(user.Id))" />
                 </Template>
             </RadzenDataGridColumn>
+        </AuthorizeView>
+        <AuthorizeView Policy="User.Read">
+            <Authorized>
+                @if (!context.User.HasClaim(CustomClaimTypes.Permission, "User.Edit"))
+                {
+                    <RadzenDataGridColumn TItem="UserResponse" Title="Profil" Sortable="false">
+                        <Template Context="user">
+                            <RadzenButton Text="Se profil" Icon="visibility" Variant="Variant.Outlined"
+                                          Click="@(() => EditUser(user.Id))" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                }
+            </Authorized>
         </AuthorizeView>
         <AuthorizeView Policy="User.Delete">
             <RadzenDataGridColumn TItem="UserResponse" Title="Slet" Sortable="false">
