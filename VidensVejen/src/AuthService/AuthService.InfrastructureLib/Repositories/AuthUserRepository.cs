@@ -32,7 +32,9 @@ public class AuthUserRepository(AuthUserDbContext db) : IAuthUserRepository
 
     async Task<AuthUser?> IAuthUserRepository.GetAuthUserByIdAsync(AuthUserId id)
     {
-        return await db.AuthUsers.FirstOrDefaultAsync(u => u.Id == id);
+        return await db.AuthUsers
+            .Include(u => u.Permissions)
+            .FirstOrDefaultAsync(u => u.Id == id);
     }
 
     async Task IAuthUserRepository.RegisterAsync(AuthUser authUser)
